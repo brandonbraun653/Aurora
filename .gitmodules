@@ -1,0 +1,12 @@
+[submodule "Chimera"]
+	path = Chimera
+	url = https://github.com/brandonbraun653/Chimera.git
+[submodule "lib/CRCpp"]
+	path = lib/CRCpp
+	url = https://github.com/d-bahr/CRCpp.git
+[submodule "lib/uLog"]
+	path = lib/uLog
+	url = https://github.com/brandonbraun653/uLog.git
+[submodule "lib/sensors"]
+	path = lib/sensors
+	url = https://github.com/brandonbraun653/Sensors.git
