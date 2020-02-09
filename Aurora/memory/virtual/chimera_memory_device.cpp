@@ -12,8 +12,8 @@
 /* C++ Includes */
 #include <cstring>
 
-/* Chimera Includes */
-#include <Chimera/modules/memory/device.hpp>
+/* Aurora Includes */
+#include <Aurora/memory/virtual/device.hpp>
 
 namespace Chimera::Modules::Memory
 {

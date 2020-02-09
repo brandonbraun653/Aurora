@@ -3,7 +3,8 @@
   <ImportGroup Label="PropertySheets" />
   <PropertyGroup Label="UserMacros">
     <uLogIncDir>$(ProjectDir)../../../../../lib/uLog</uLogIncDir>
-    <ChimeraIncDir>$(ProjectDir)../../../../../Chimera</ChimeraIncDir>
+    <ChimeraIncDir>$(ProjectDir)../../../Chimera</ChimeraIncDir>
+    <AuroraIncDir>$(ProjectDir)../../../../Aurora</AuroraIncDir>
   </PropertyGroup>
   <PropertyGroup />
   <ItemDefinitionGroup />
@@ -14,6 +15,10 @@
     </BuildMacro>
     <BuildMacro Include="ChimeraIncDir">
       <Value>$(ChimeraIncDir)</Value>
+      <EnvironmentVariable>true</EnvironmentVariable>
+    </BuildMacro>
+    <BuildMacro Include="AuroraIncDir">
+      <Value>$(AuroraIncDir)</Value>
       <EnvironmentVariable>true</EnvironmentVariable>
     </BuildMacro>
   </ItemGroup>
