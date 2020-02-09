@@ -1,0 +1,110 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="VisualGDB settings">
+      <UniqueIdentifier>{75dcb621-5ea5-4be9-89d8-87aae83cc72b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="constants">
+      <UniqueIdentifier>{22ce5e46-0bae-44b4-8029-6077f50e0cf8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="logging">
+      <UniqueIdentifier>{d8737a53-0613-4dd3-ad62-5892958c6652}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="memory">
+      <UniqueIdentifier>{3133f5cf-25a2-4582-a8ae-2b3482fdd248}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="units">
+      <UniqueIdentifier>{1e4914a3-7e29-4a55-af90-174db24e8001}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="memory\heap">
+      <UniqueIdentifier>{f9c6139e-1bd1-4288-a5fa-546ae090cbd5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="memory\virtual">
+      <UniqueIdentifier>{819c0ea3-2a31-4976-b5b5-fbd8d7f573aa}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="logging\uLog">
+      <UniqueIdentifier>{ee055838-b84c-454c-a4e1-02bb81bbfbbe}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="logging\sinks">
+      <UniqueIdentifier>{15672c93-20a8-4c2b-a405-37fd7715ad8e}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="stm32.xml">
+      <Filter>VisualGDB settings</Filter>
+    </None>
+    <None Include="stm32.props">
+      <Filter>VisualGDB settings</Filter>
+    </None>
+    <None Include="AuroraStaticLibraryEmbedded-STM32F446RE-Debug.vgdbsettings">
+      <Filter>VisualGDB settings</Filter>
+    </None>
+    <None Include="AuroraStaticLibraryEmbedded-STM32F446RE-Release.vgdbsettings">
+      <Filter>VisualGDB settings</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\..\..\..\..\Aurora\Aurora\units\units.hpp">
+      <Filter>units</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\..\..\Aurora\Aurora\memory\heap\heap.hpp">
+      <Filter>memory\heap</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\..\..\Aurora\Aurora\memory\virtual\blockDevice.hpp">
+      <Filter>memory\virtual</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\..\..\Aurora\Aurora\memory\virtual\device.hpp">
+      <Filter>memory\virtual</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\..\..\Aurora\Aurora\constants\common.hpp">
+      <Filter>constants</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\..\..\Aurora\Aurora\constants\physics.hpp">
+      <Filter>constants</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\..\..\Aurora\Aurora\logging\serial_sink_config.hpp">
+      <Filter>logging\sinks</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\..\..\Aurora\Aurora\logging\serial_sink.hpp">
+      <Filter>logging\sinks</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\lib\uLog\uLog\config.hpp">
+      <Filter>logging\uLog</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\lib\uLog\uLog\types.hpp">
+      <Filter>logging\uLog</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\lib\uLog\uLog\ulog.hpp">
+      <Filter>logging\uLog</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\lib\uLog\uLog\sinks\sink_intf.hpp">
+      <Filter>logging\sinks</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\lib\uLog\uLog\sinks\sink_vgdb_semihosting.hpp">
+      <Filter>logging\sinks</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\lib\uLog\uLog\sinks\sink_cout.hpp">
+      <Filter>logging\sinks</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\..\..\..\..\Aurora\Aurora\memory\heap\heap.cpp">
+      <Filter>memory\heap</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\..\..\Aurora\Aurora\memory\virtual\chimera_memory_device.cpp">
+      <Filter>memory\virtual</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\..\..\Aurora\Aurora\logging\serial_sink.cpp">
+      <Filter>logging\sinks</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\lib\uLog\uLog\ulog.cpp">
+      <Filter>logging\uLog</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\lib\uLog\uLog\sinks\sink_vgdb_semihosting.cpp">
+      <Filter>logging\sinks</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\lib\uLog\uLog\sinks\sink_cout.cpp">
+      <Filter>logging\sinks</Filter>
+    </ClCompile>
+  </ItemGroup>
+</Project>
