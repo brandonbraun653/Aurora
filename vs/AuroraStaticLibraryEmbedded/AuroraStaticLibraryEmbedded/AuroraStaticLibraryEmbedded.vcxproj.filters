@@ -47,27 +47,6 @@
     <ClInclude Include="..\..\..\..\..\..\Aurora\Aurora\units\units.hpp">
       <Filter>units</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\..\..\Aurora\Aurora\memory\heap\heap.hpp">
-      <Filter>memory\heap</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\..\..\Aurora\Aurora\memory\virtual\blockDevice.hpp">
-      <Filter>memory\virtual</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\..\..\Aurora\Aurora\memory\virtual\device.hpp">
-      <Filter>memory\virtual</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\..\..\Aurora\Aurora\constants\common.hpp">
-      <Filter>constants</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\..\..\Aurora\Aurora\constants\physics.hpp">
-      <Filter>constants</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\..\..\Aurora\Aurora\logging\serial_sink_config.hpp">
-      <Filter>logging\sinks</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\..\..\Aurora\Aurora\logging\serial_sink.hpp">
-      <Filter>logging\sinks</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\lib\uLog\uLog\config.hpp">
       <Filter>logging\uLog</Filter>
     </ClInclude>
@@ -86,17 +65,29 @@
     <ClInclude Include="..\..\..\lib\uLog\uLog\sinks\sink_cout.hpp">
       <Filter>logging\sinks</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\Aurora\logging\serial_sink.hpp">
+      <Filter>logging\sinks</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Aurora\logging\serial_sink_config.hpp">
+      <Filter>logging\sinks</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Aurora\memory\heap\heap.hpp">
+      <Filter>memory\heap</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Aurora\memory\virtual\blockDevice.hpp">
+      <Filter>memory\virtual</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Aurora\memory\virtual\device.hpp">
+      <Filter>memory\virtual</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Aurora\constants\common.hpp">
+      <Filter>constants</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Aurora\constants\physics.hpp">
+      <Filter>constants</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\..\..\..\..\Aurora\Aurora\memory\heap\heap.cpp">
-      <Filter>memory\heap</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\..\..\Aurora\Aurora\memory\virtual\chimera_memory_device.cpp">
-      <Filter>memory\virtual</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\..\..\Aurora\Aurora\logging\serial_sink.cpp">
-      <Filter>logging\sinks</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\lib\uLog\uLog\ulog.cpp">
       <Filter>logging\uLog</Filter>
     </ClCompile>
@@ -105,6 +96,15 @@
     </ClCompile>
     <ClCompile Include="..\..\..\lib\uLog\uLog\sinks\sink_cout.cpp">
       <Filter>logging\sinks</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\Aurora\logging\serial_sink.cpp">
+      <Filter>logging\sinks</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\Aurora\memory\heap\heap.cpp">
+      <Filter>memory\heap</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\Aurora\memory\virtual\chimera_memory_device.cpp">
+      <Filter>memory\virtual</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

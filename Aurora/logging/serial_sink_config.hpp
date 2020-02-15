@@ -1,11 +1,11 @@
 /********************************************************************************
- *   File Name:
+ *  File Name:
  *    serial_sink_config.hpp
  *
- *   Description:
+ *  Description:
  *    Configuration file for defaulting the serial sink behavior
  *
- *   2019 | Brandon Braun | brandonbraun653@gmail.com
+ *  2019-2020 | Brandon Braun | brandonbraun653@gmail.com
  ********************************************************************************/
 
 #pragma once
@@ -28,7 +28,7 @@ add your own configuration in the given header file below.
 
 #else /* !CHIMERA_MODULES_SERIAL_SINK_CUSTOM_CONFIG */
 
-#include <Chimera/types/serial_types.hpp>
+#include <Chimera/serial>
 
 namespace Chimera::Modules::uLog
 {

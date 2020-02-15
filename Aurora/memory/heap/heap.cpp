@@ -17,8 +17,8 @@
 #include <string.h>
 
 /* Chimera Includes */
-#include <Chimera/threading.hpp>
-#include <Chimera/modules/memory/heap/heap.hpp>
+#include <Chimera/thread>
+#include <Aurora/memory/heap/heap.hpp>
 
 /* FreeRTOS Includes */
 #include "FreeRTOS.h"

@@ -1,30 +1,29 @@
 /********************************************************************************
- *   File Name:
- *    serial_sink.cpp
+ *  File Name:
+ *    serial_sink->cpp
  *
- *   Description:
+ *  Description:
  *    Implements a serial based sink for the uLogger interface.
  *
- *   2019 | Brandon Braun | brandonbraun653@gmail.com
+ *  2019-2020 | Brandon Braun | brandonbraun653@gmail.com
  ********************************************************************************/
 
 /* C++ Includes */
 #include <array>
 
 /* Serial Sink Includes */
-#include <Chimera/modules/ulog/serial_sink.hpp>
-#include <Chimera/modules/ulog/serial_sink_config.hpp>
+#include <Aurora/logging/serial_sink.hpp>
+#include <Aurora/logging/serial_sink_config.hpp>
 
 /* Chimera Includes */
-#include <Chimera/serial.hpp>
-#include <Chimera/types/serial_types.hpp>
+#include <Chimera/serial>
 
 /* Boost Includes */
 #include <boost/circular_buffer.hpp>
 
 #if defined( CHIMERA_MODULES_ULOG_SUPPORT ) && ( CHIMERA_MODULES_ULOG_SUPPORT == 1 )
 
-static Chimera::Serial::SerialClass sink;
+static Chimera::Serial::Serial_uPtr sink;
 static boost::circular_buffer<uint8_t> buffer( 256 );
 static std::array<uint8_t, 256> hwBuffer;
 
@@ -32,6 +31,10 @@ namespace Chimera::Modules::uLog
 {
   SerialSink::SerialSink()
   {
+    if (!sink)
+    {
+      sink = Chimera::Serial::create_unique_ptr();
+    }
   }
 
   SerialSink::~SerialSink()
@@ -63,10 +66,10 @@ namespace Chimera::Modules::uLog
 
     auto hwMode = Chimera::Hardware::PeripheralMode::INTERRUPT;
 
-    hwResult |= sink.assignHW( SerialChannel, SerialPins );
-    hwResult |= sink.configure( cfg );
-    hwResult |= sink.begin( hwMode, hwMode );
-    hwResult |= sink.enableBuffering( Chimera::Hardware::SubPeripheral::TX, &buffer, hwBuffer.data(), hwBuffer.size() );
+    hwResult |= sink->assignHW( SerialChannel, SerialPins );
+    hwResult |= sink->configure( cfg );
+    hwResult |= sink->begin( hwMode, hwMode );
+    hwResult |= sink->enableBuffering( Chimera::Hardware::SubPeripheral::TX, &buffer, hwBuffer.data(), hwBuffer.size() );
 
     /*------------------------------------------------
     Mask the error code into a simple pass/fail. I don't think the sinks
@@ -84,7 +87,7 @@ namespace Chimera::Modules::uLog
   {
     ::uLog::Result sinkResult = ::uLog::Result::RESULT_SUCCESS;
 
-    if ( sink.end() != Chimera::CommonStatusCodes::OK )
+    if ( sink->end() != Chimera::CommonStatusCodes::OK )
     {
       sinkResult = ::uLog::Result::RESULT_FAIL;
     }
@@ -96,7 +99,7 @@ namespace Chimera::Modules::uLog
   {
     ::uLog::Result sinkResult = ::uLog::Result::RESULT_SUCCESS;
 
-    if ( sink.flush( Chimera::Hardware::SubPeripheral::TXRX ) != Chimera::CommonStatusCodes::OK )
+    if ( sink->flush( Chimera::Hardware::SubPeripheral::TXRX ) != Chimera::CommonStatusCodes::OK )
     {
       sinkResult = ::uLog::Result::RESULT_FAIL;
     }
@@ -126,8 +129,8 @@ namespace Chimera::Modules::uLog
     auto hwResult = Chimera::CommonStatusCodes::OK;
     auto ulResult = ::uLog::Result::RESULT_SUCCESS;
 
-    hwResult |= sink.write( reinterpret_cast<const uint8_t *const>( message ), length, 100 );
-    hwResult |= sink.await( Chimera::Event::Trigger::WRITE_COMPLETE, 100 );
+    hwResult |= sink->write( reinterpret_cast<const uint8_t *const>( message ), length, 100 );
+    hwResult |= sink->await( Chimera::Event::Trigger::WRITE_COMPLETE, 100 );
 
     if ( hwResult != Chimera::CommonStatusCodes::OK )
     {

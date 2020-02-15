@@ -17,8 +17,7 @@
 #include <vector>
 
 /* Chimera Includes */
-#include <Chimera/chimera.hpp>
-#include <Chimera/types/common_types.hpp>
+#include <Chimera/common>
 
 namespace Chimera::Modules::Memory
 {

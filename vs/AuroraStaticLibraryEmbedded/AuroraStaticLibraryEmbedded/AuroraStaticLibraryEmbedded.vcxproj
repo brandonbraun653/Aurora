@@ -111,14 +111,14 @@
     <None Include="stm32.xml" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\..\..\..\..\Aurora\Aurora\constants\common.hpp" />
-    <ClInclude Include="..\..\..\..\..\..\Aurora\Aurora\constants\physics.hpp" />
-    <ClInclude Include="..\..\..\..\..\..\Aurora\Aurora\logging\serial_sink.hpp" />
-    <ClInclude Include="..\..\..\..\..\..\Aurora\Aurora\logging\serial_sink_config.hpp" />
-    <ClInclude Include="..\..\..\..\..\..\Aurora\Aurora\memory\heap\heap.hpp" />
-    <ClInclude Include="..\..\..\..\..\..\Aurora\Aurora\memory\virtual\blockDevice.hpp" />
-    <ClInclude Include="..\..\..\..\..\..\Aurora\Aurora\memory\virtual\device.hpp" />
     <ClInclude Include="..\..\..\..\..\..\Aurora\Aurora\units\units.hpp" />
+    <ClInclude Include="..\..\..\Aurora\constants\common.hpp" />
+    <ClInclude Include="..\..\..\Aurora\constants\physics.hpp" />
+    <ClInclude Include="..\..\..\Aurora\logging\serial_sink.hpp" />
+    <ClInclude Include="..\..\..\Aurora\logging\serial_sink_config.hpp" />
+    <ClInclude Include="..\..\..\Aurora\memory\heap\heap.hpp" />
+    <ClInclude Include="..\..\..\Aurora\memory\virtual\blockDevice.hpp" />
+    <ClInclude Include="..\..\..\Aurora\memory\virtual\device.hpp" />
     <ClInclude Include="..\..\..\lib\uLog\uLog\config.hpp" />
     <ClInclude Include="..\..\..\lib\uLog\uLog\sinks\sink_cout.hpp" />
     <ClInclude Include="..\..\..\lib\uLog\uLog\sinks\sink_intf.hpp" />
@@ -127,9 +127,9 @@
     <ClInclude Include="..\..\..\lib\uLog\uLog\ulog.hpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\..\..\..\..\Aurora\Aurora\logging\serial_sink.cpp" />
-    <ClCompile Include="..\..\..\..\..\..\Aurora\Aurora\memory\heap\heap.cpp" />
-    <ClCompile Include="..\..\..\..\..\..\Aurora\Aurora\memory\virtual\chimera_memory_device.cpp" />
+    <ClCompile Include="..\..\..\Aurora\logging\serial_sink.cpp" />
+    <ClCompile Include="..\..\..\Aurora\memory\heap\heap.cpp" />
+    <ClCompile Include="..\..\..\Aurora\memory\virtual\chimera_memory_device.cpp" />
     <ClCompile Include="..\..\..\lib\uLog\uLog\sinks\sink_cout.cpp" />
     <ClCompile Include="..\..\..\lib\uLog\uLog\sinks\sink_vgdb_semihosting.cpp" />
     <ClCompile Include="..\..\..\lib\uLog\uLog\ulog.cpp" />
