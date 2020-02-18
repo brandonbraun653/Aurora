@@ -15,7 +15,7 @@
 /* Aurora Includes */
 #include <Aurora/memory/virtual/device.hpp>
 
-namespace Chimera::Modules::Memory
+namespace Aurora::Memory
 {
   BlockRange::BlockRange( const size_t startAddress, const size_t endAddress, const size_t blockSize )
   {

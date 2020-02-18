@@ -19,23 +19,23 @@
 /* Chimera Includes */
 #include <Chimera/common>
 
-namespace Chimera::Modules::Memory
+namespace Aurora::Memory
 {
   /* clang-format off */
   class Status : public Chimera::CommonStatusCodes
   {
   public:
-    static constexpr Status_t OUT_OF_MEMORY     = status_offset_module_memory_flash + 1; /**< Pretty self-explanatory... */
-    static constexpr Status_t OVERRUN           = status_offset_module_memory_flash + 2; /**< The end of a buffer was hit pre-maturely */
-    static constexpr Status_t UNALIGNED_MEM     = status_offset_module_memory_flash + 3; /**< Memory was not aligned correctly */
-    static constexpr Status_t UNKNOWN_JEDEC     = status_offset_module_memory_flash + 4; /**< Device reported an invalid JEDEC code */
-    static constexpr Status_t HF_INIT_FAIL      = status_offset_module_memory_flash + 5; /**< High frequency interface failed to initialize */
-    static constexpr Status_t NOT_PAGE_ALIGNED  = status_offset_module_memory_flash + 6; /**< Memory is not page aligned */
-    static constexpr Status_t ERR_READ_PROTECT  = status_offset_module_memory_flash + 7;
-    static constexpr Status_t ERR_PGM_SEQUENCE  = status_offset_module_memory_flash + 8;
-    static constexpr Status_t ERR_PGM_PARALLEL  = status_offset_module_memory_flash + 9;
-    static constexpr Status_t ERR_PGM_ALIGNMENT = status_offset_module_memory_flash + 10; 
-    static constexpr Status_t ERR_WRITE_PROTECT = status_offset_module_memory_flash + 11;
+    static constexpr Chimera::Status_t OUT_OF_MEMORY     = status_offset_module_memory_flash + 1; /**< Pretty self-explanatory... */
+    static constexpr Chimera::Status_t OVERRUN           = status_offset_module_memory_flash + 2; /**< The end of a buffer was hit pre-maturely */
+    static constexpr Chimera::Status_t UNALIGNED_MEM     = status_offset_module_memory_flash + 3; /**< Memory was not aligned correctly */
+    static constexpr Chimera::Status_t UNKNOWN_JEDEC     = status_offset_module_memory_flash + 4; /**< Device reported an invalid JEDEC code */
+    static constexpr Chimera::Status_t HF_INIT_FAIL      = status_offset_module_memory_flash + 5; /**< High frequency interface failed to initialize */
+    static constexpr Chimera::Status_t NOT_PAGE_ALIGNED  = status_offset_module_memory_flash + 6; /**< Memory is not page aligned */
+    static constexpr Chimera::Status_t ERR_READ_PROTECT  = status_offset_module_memory_flash + 7;
+    static constexpr Chimera::Status_t ERR_PGM_SEQUENCE  = status_offset_module_memory_flash + 8;
+    static constexpr Chimera::Status_t ERR_PGM_PARALLEL  = status_offset_module_memory_flash + 9;
+    static constexpr Chimera::Status_t ERR_PGM_ALIGNMENT = status_offset_module_memory_flash + 10; 
+    static constexpr Chimera::Status_t ERR_WRITE_PROTECT = status_offset_module_memory_flash + 11;
   };
   /* clang-format on */
 
@@ -444,7 +444,7 @@ namespace Chimera::Modules::Memory
   };
 
 
-  class VirtualMemoryDevice : public Chimera::Modules::Memory::Device
+  class VirtualMemoryDevice : public Aurora::Memory::Device
   {
   public:
     template<std::size_t S>
@@ -458,7 +458,7 @@ namespace Chimera::Modules::Memory
       initialized = true;
     }
 
-    const Chimera::Modules::Memory::Descriptor &getSpecs()
+    const Aurora::Memory::Descriptor &getSpecs()
     {
       return deviceDescriptor;
     }
@@ -480,7 +480,7 @@ namespace Chimera::Modules::Memory
   protected:
     uint8_t *rawData = nullptr;
     size_t regionSize = 0;
-    Chimera::Modules::Memory::Descriptor deviceDescriptor;
+    Aurora::Memory::Descriptor deviceDescriptor;
     bool initialized = false;
   };
 

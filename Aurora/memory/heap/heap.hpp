@@ -16,7 +16,7 @@
 #include <cstdint>
 #include <cstdlib>
 
-namespace Chimera::Modules::Memory
+namespace Aurora::Memory
 {
   /**
    *  A heap implementation that is mostly just encapsulation of the FreeRTOS V10.0.0

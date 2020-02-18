@@ -27,7 +27,7 @@
 static constexpr size_t heapBITS_PER_BYTE = 8u;
 
 
-namespace Chimera::Modules::Memory
+namespace Aurora::Memory
 {
   Heap::Heap()
   {
