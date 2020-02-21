@@ -7,6 +7,3 @@
 [submodule "lib/uLog"]
 	path = lib/uLog
 	url = https://github.com/brandonbraun653/uLog.git
-[submodule "lib/sensors"]
-	path = lib/sensors
-	url = https://github.com/brandonbraun653/Sensors.git
