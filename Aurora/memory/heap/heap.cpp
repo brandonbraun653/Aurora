@@ -21,8 +21,11 @@
 #include <Aurora/memory/heap/heap.hpp>
 
 /* FreeRTOS Includes */
+
+#if defined( USING_FREERTOS_THREADS )
 #include "FreeRTOS.h"
 #include "task.h"
+#endif
 
 static constexpr size_t heapBITS_PER_BYTE = 8u;
 
@@ -36,9 +39,10 @@ namespace Aurora::Memory
 
     bufferIsDynamic = false;
 
-
+#if defined( USING_FREERTOS_THREADS )
     blockStructSize = ( sizeof( BlockLink_t ) + ( portBYTE_ALIGNMENT - 1 ) ) & ~( portBYTE_ALIGNMENT_MASK );
     minBlockSize    = blockStructSize << 1;
+#endif
 
     freeBytesRemaining            = 0;
     minimumEverFreeBytesRemaining = 0;
@@ -87,6 +91,7 @@ namespace Aurora::Memory
 
   void *Heap::malloc( size_t size )
   {
+#if defined( USING_FREERTOS_THREADS )
     BlockLink_t *pxBlock;
     BlockLink_t *pxPreviousBlock;
     BlockLink_t *pxNewBlockLink;
@@ -188,10 +193,14 @@ namespace Aurora::Memory
 
     configASSERT( ( ( ( size_t )pvReturn ) & ( size_t )portBYTE_ALIGNMENT_MASK ) == 0 );
     return pvReturn;
+#else
+    return new uint8_t[ size ];
+#endif 
   }
 
   void Heap::free( void *pv )
   {
+#if defined( USING_FREERTOS_THREADS )
     uint8_t *puc = ( uint8_t * )pv;
     BlockLink_t *pxLink;
 
@@ -227,6 +236,9 @@ namespace Aurora::Memory
         }
       }
     }
+#else
+    delete pv;
+#endif 
   }
 
   /*------------------------------------------------
@@ -244,6 +256,7 @@ namespace Aurora::Memory
 
   void Heap::init()
   {
+#if defined( USING_FREERTOS_THREADS )
     BlockLink_t *pxFirstFreeBlock;
     uint8_t *pucAlignedHeap;
     size_t uxAddress;
@@ -287,10 +300,12 @@ namespace Aurora::Memory
 
     /* Work out the position of the top bit in a size_t variable. */
     blockAllocatedBit = ( ( size_t )1 ) << ( ( sizeof( size_t ) * heapBITS_PER_BYTE ) - 1 );
+#endif
   }
 
   void Heap::prvInsertBlockIntoFreeList( BlockLink_t *pxBlockToInsert )
   {
+#if defined( USING_FREERTOS_THREADS )
     BlockLink_t *pxIterator;
     uint8_t *puc;
 
@@ -339,5 +354,6 @@ namespace Aurora::Memory
     {
       pxIterator->next = pxBlockToInsert;
     }
+#endif 
   }
 }    // namespace RF24::Network::Memory
