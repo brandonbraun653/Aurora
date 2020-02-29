@@ -130,7 +130,7 @@ namespace Chimera::Modules::uLog
     auto ulResult = ::uLog::Result::RESULT_SUCCESS;
 
     hwResult |= sink->write( reinterpret_cast<const uint8_t *const>( message ), length, 100 );
-    hwResult |= sink->await( Chimera::Event::Trigger::WRITE_COMPLETE, 100 );
+    hwResult |= sink->await( Chimera::Event::TRIGGER_WRITE_COMPLETE, 100 );
 
     if ( hwResult != Chimera::CommonStatusCodes::OK )
     {
