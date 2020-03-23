@@ -101,6 +101,7 @@
       <CPPLanguageStandard>CPP2A</CPPLanguageStandard>
       <AdditionalIncludeDirectories>$(ChimeraBackendIncDirs);$(ChimeraPortDir);$(ChimeraCfgDir);$(ChimeraIncDir);$(AuroraIncDir);$(uLogIncDir)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>$(ChimeraCompilerDefines);$(ChimeraBackendCompilerDefines);$(ProjectCompilerDefines);%(ClCompile.PreprocessorDefinitions);NDEBUG=1;RELEASE=1</PreprocessorDefinitions>
+      <Optimization>Os</Optimization>
     </ClCompile>
   </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
