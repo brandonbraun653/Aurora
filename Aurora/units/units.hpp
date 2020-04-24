@@ -19,6 +19,23 @@
 
 namespace Chimera::Units
 {
+  enum class Time
+  {
+    INVALID_TIME,
+    PICOSECONDS,
+    NANOSECONDS,
+    MICROSECONDS,
+    MILLISECONDS,
+    SECONDS,
+    MINUTES,
+    HOURS,
+    DAYS,
+    MONTHS,
+    YEARS,
+
+    NUM_OPTIONS
+  };
+
   template<typename T>
   struct MilliToKilo
   {

@@ -50,9 +50,6 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\..\..\..\..\Aurora\Aurora\units\units.hpp">
-      <Filter>units</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\lib\uLog\uLog\config.hpp">
       <Filter>logging\uLog</Filter>
     </ClInclude>
@@ -91,6 +88,9 @@
     </ClInclude>
     <ClInclude Include="..\..\..\Aurora\constants\physics.hpp">
       <Filter>constants</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Aurora\units\units.hpp">
+      <Filter>units</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
