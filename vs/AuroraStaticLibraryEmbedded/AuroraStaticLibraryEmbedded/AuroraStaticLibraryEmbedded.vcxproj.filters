@@ -28,6 +28,9 @@
     <Filter Include="logging\sinks">
       <UniqueIdentifier>{15672c93-20a8-4c2b-a405-37fd7715ad8e}</UniqueIdentifier>
     </Filter>
+    <Filter Include="utilities">
+      <UniqueIdentifier>{4f6697ec-12c9-482b-983f-460a389c1497}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <None Include="stm32.xml">
@@ -92,6 +95,9 @@
     <ClInclude Include="..\..\..\Aurora\units\units.hpp">
       <Filter>units</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\Aurora\utilities\utility_common.hpp">
+      <Filter>utilities</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\lib\uLog\uLog\ulog.cpp">
@@ -111,6 +117,9 @@
     </ClCompile>
     <ClCompile Include="..\..\..\Aurora\memory\virtual\chimera_memory_device.cpp">
       <Filter>memory\virtual</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\Aurora\utilities\utility_common.cpp">
+      <Filter>utilities</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

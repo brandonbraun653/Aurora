@@ -173,6 +173,7 @@
     <ClInclude Include="..\..\..\Aurora\memory\virtual\blockDevice.hpp" />
     <ClInclude Include="..\..\..\Aurora\memory\virtual\device.hpp" />
     <ClInclude Include="..\..\..\Aurora\units\units.hpp" />
+    <ClInclude Include="..\..\..\Aurora\utilities\utility_common.hpp" />
     <ClInclude Include="..\..\..\lib\uLog\uLog\config.hpp" />
     <ClInclude Include="..\..\..\lib\uLog\uLog\sinks\sink_cout.hpp" />
     <ClInclude Include="..\..\..\lib\uLog\uLog\sinks\sink_intf.hpp" />
@@ -184,6 +185,7 @@
     <ClCompile Include="..\..\..\Aurora\logging\serial_sink.cpp" />
     <ClCompile Include="..\..\..\Aurora\memory\heap\heap.cpp" />
     <ClCompile Include="..\..\..\Aurora\memory\virtual\chimera_memory_device.cpp" />
+    <ClCompile Include="..\..\..\Aurora\utilities\utility_common.cpp" />
     <ClCompile Include="..\..\..\lib\uLog\uLog\sinks\sink_cout.cpp" />
     <ClCompile Include="..\..\..\lib\uLog\uLog\sinks\sink_vgdb_semihosting.cpp" />
     <ClCompile Include="..\..\..\lib\uLog\uLog\ulog.cpp" />
