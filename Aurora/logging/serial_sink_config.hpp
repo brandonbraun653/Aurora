@@ -35,7 +35,7 @@ namespace Chimera::Modules::uLog
   /*------------------------------------------------
   Configuration options for the default serial sink
   ------------------------------------------------*/
-  static constexpr size_t SerialChannel                        = 1u;
+  static constexpr Chimera::Serial::Channel SerialChannel      = Chimera::Serial::Channel::SERIAL1;
   static constexpr Chimera::Serial::BaudRate SerialBaud        = Chimera::Serial::BaudRate::SERIAL_BAUD_115200;
   static constexpr Chimera::Serial::CharWid SerialCharWid      = Chimera::Serial::CharWid::CW_8BIT;
   static constexpr Chimera::Serial::FlowControl SerialFlowCtrl = Chimera::Serial::FlowControl::FCTRL_NONE;
