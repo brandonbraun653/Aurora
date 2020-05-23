@@ -31,10 +31,6 @@ namespace Chimera::Modules::uLog
 {
   SerialSink::SerialSink()
   {
-    if (!sink)
-    {
-      sink = Chimera::Serial::create_unique_ptr();
-    }
   }
 
   SerialSink::~SerialSink()
@@ -44,7 +40,7 @@ namespace Chimera::Modules::uLog
   ::uLog::Result SerialSink::open()
   {
     Chimera::Status_t hwResult = Chimera::CommonStatusCodes::OK;
-    ::uLog::Result sinkResult = ::uLog::Result::RESULT_SUCCESS;
+    ::uLog::Result sinkResult  = ::uLog::Result::RESULT_SUCCESS;
 
     buffer.clear();
     buffer.linearize();
@@ -53,9 +49,9 @@ namespace Chimera::Modules::uLog
 
     /*------------------------------------------------
     Initialize the hardware. Some explanation on the configuration:
-      1. Interrupt mode is the mostly likely supported asynchronous transfer method. 
+      1. Interrupt mode is the mostly likely supported asynchronous transfer method.
       2. Buffering is disabled as the sink should immediately write data
-      3. 
+      3.
     ------------------------------------------------*/
     Chimera::Serial::Config cfg;
     cfg.baud     = static_cast<size_t>( SerialBaud );
@@ -65,6 +61,11 @@ namespace Chimera::Modules::uLog
     cfg.width    = SerialCharWid;
 
     auto hwMode = Chimera::Hardware::PeripheralMode::INTERRUPT;
+
+    if ( !sink )
+    {
+      sink = Chimera::Serial::create_unique_ptr( SerialChannel );
+    }
 
     hwResult |= sink->assignHW( SerialChannel, SerialPins );
     hwResult |= sink->configure( cfg );
