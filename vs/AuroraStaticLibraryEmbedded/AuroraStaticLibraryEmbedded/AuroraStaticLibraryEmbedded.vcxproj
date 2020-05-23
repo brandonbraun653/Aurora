@@ -157,6 +157,9 @@
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
   <ItemGroup>
+    <None Include="..\..\..\Aurora\pattern" />
+    <None Include="..\..\..\Aurora\structure\observer" />
+    <None Include="..\..\..\Aurora\utility" />
     <None Include="AuroraStaticLibraryEmbedded-STM32L432KC-Debug.vgdbsettings" />
     <None Include="AuroraStaticLibraryEmbedded-STM32L432KC-Release.vgdbsettings" />
     <None Include="stm32.props" />
@@ -172,6 +175,9 @@
     <ClInclude Include="..\..\..\Aurora\memory\heap\heap.hpp" />
     <ClInclude Include="..\..\..\Aurora\memory\virtual\blockDevice.hpp" />
     <ClInclude Include="..\..\..\Aurora\memory\virtual\device.hpp" />
+    <ClInclude Include="..\..\..\Aurora\structure\obs\observable.hpp" />
+    <ClInclude Include="..\..\..\Aurora\structure\obs\observer_intf.hpp" />
+    <ClInclude Include="..\..\..\Aurora\structure\obs\types.hpp" />
     <ClInclude Include="..\..\..\Aurora\units\units.hpp" />
     <ClInclude Include="..\..\..\Aurora\utilities\utility_common.hpp" />
     <ClInclude Include="..\..\..\lib\uLog\uLog\config.hpp" />
@@ -185,6 +191,7 @@
     <ClCompile Include="..\..\..\Aurora\logging\serial_sink.cpp" />
     <ClCompile Include="..\..\..\Aurora\memory\heap\heap.cpp" />
     <ClCompile Include="..\..\..\Aurora\memory\virtual\chimera_memory_device.cpp" />
+    <ClCompile Include="..\..\..\Aurora\structure\obs\observable.cpp" />
     <ClCompile Include="..\..\..\Aurora\utilities\utility_common.cpp" />
     <ClCompile Include="..\..\..\lib\uLog\uLog\sinks\sink_cout.cpp" />
     <ClCompile Include="..\..\..\lib\uLog\uLog\sinks\sink_vgdb_semihosting.cpp" />

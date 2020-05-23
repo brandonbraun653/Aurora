@@ -31,6 +31,12 @@
     <Filter Include="utilities">
       <UniqueIdentifier>{4f6697ec-12c9-482b-983f-460a389c1497}</UniqueIdentifier>
     </Filter>
+    <Filter Include="structure">
+      <UniqueIdentifier>{98aeebfa-73bc-4f90-b307-1b033a301f57}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="structure\obs">
+      <UniqueIdentifier>{7230a93d-144e-45cb-bd98-a2f9f99ba1bc}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <None Include="stm32.xml">
@@ -50,6 +56,11 @@
     </None>
     <None Include="AuroraStaticLibraryEmbedded-STM32L432KC-Release.vgdbsettings">
       <Filter>VisualGDB settings</Filter>
+    </None>
+    <None Include="..\..\..\Aurora\pattern" />
+    <None Include="..\..\..\Aurora\utility" />
+    <None Include="..\..\..\Aurora\structure\observer">
+      <Filter>structure</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>
@@ -98,6 +109,15 @@
     <ClInclude Include="..\..\..\Aurora\utilities\utility_common.hpp">
       <Filter>utilities</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\Aurora\structure\obs\observable.hpp">
+      <Filter>structure\obs</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Aurora\structure\obs\observer_intf.hpp">
+      <Filter>structure\obs</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Aurora\structure\obs\types.hpp">
+      <Filter>structure\obs</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\lib\uLog\uLog\ulog.cpp">
@@ -120,6 +140,9 @@
     </ClCompile>
     <ClCompile Include="..\..\..\Aurora\utilities\utility_common.cpp">
       <Filter>utilities</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\Aurora\structure\obs\observable.cpp">
+      <Filter>structure\obs</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

@@ -1,0 +1,19 @@
+/********************************************************************************
+ *  File Name:
+ *    observer
+ *
+ *  Description:
+ *    Observer implementation includes
+ *
+ *  2020 | Brandon Braun | brandonbraun653@gmail.com
+ ********************************************************************************/
+
+#pragma once
+#ifndef AURORA_OBSERVER_INCLUDES
+#define AURORA_OBSERVER_INCLUDES
+
+#include <Aurora/structure/obs/observer_intf.hpp>
+#include <Aurora/structure/obs/observable.hpp>
+#include <Aurora/structure/obs/types.hpp>
+
+#endif /* !AURORA_OBSERVER_INCLUDES */
