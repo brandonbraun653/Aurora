@@ -10,3 +10,6 @@
 [submodule "lib/type_safe"]
 	path = lib/type_safe
 	url = https://github.com/foonathan/type_safe.git
+[submodule "lib/ctre"]
+	path = lib/ctre
+	url = https://github.com/hanickadot/compile-time-regular-expressions.git
