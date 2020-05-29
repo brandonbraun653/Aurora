@@ -1,0 +1,2 @@
+use-project /AURORA/MEMORY/HEAP :     heap ;
+use-project /AURORA/MEMORY/VIRTUAL :  virtual ;
