@@ -16,7 +16,9 @@ lib LIB
   : <link>static
     <use>/AURORA//PUB
     <use>/CHIMERA//PUB
+    <use>/ULOG//PUB
     <use>/PRJ//TARGET_OPTIONS
   ;
+explicit LIB ;
 
 explicit_alias TEST_COMPILE : LIB ;
