@@ -115,6 +115,8 @@ namespace Chimera::Modules::uLog
 
   ::uLog::Result SerialSink::log( const ::uLog::Level level, const void *const message, const size_t length )
   {
+    using namespace Chimera::Threading;
+
     /*------------------------------------------------
     Make sure we can actually log the data
     ------------------------------------------------*/
@@ -130,13 +132,17 @@ namespace Chimera::Modules::uLog
     auto hwResult = Chimera::CommonStatusCodes::OK;
     auto ulResult = ::uLog::Result::RESULT_SUCCESS;
 
-    hwResult |= sink->write( reinterpret_cast<const uint8_t *const>( message ), length, 100 );
-    hwResult |= sink->await( Chimera::Event::TRIGGER_WRITE_COMPLETE, 100 );
+    sink->lock();
+
+    hwResult |= sink->write( reinterpret_cast<const uint8_t *const>( message ), length, TIMEOUT_DONT_WAIT );
+    hwResult |= sink->await( Chimera::Event::TRIGGER_WRITE_COMPLETE, TIMEOUT_BLOCK );
 
     if ( hwResult != Chimera::CommonStatusCodes::OK )
     {
       ulResult = ::uLog::Result::RESULT_FAIL;
     }
+
+    sink->unlock();
 
     return ulResult;
   }

@@ -177,7 +177,7 @@
     <ClCompile>
       <PreprocessorDefinitions>$(ChimeraCompilerDefines);$(ChimeraBackendCompilerDefines);$(ProjectCompilerDefines);%(ClCompile.PreprocessorDefinitions);DEBUG=1</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>$(ChimeraBackendIncDirs);$(ChimeraPortDir);$(ChimeraCfgDir);$(ChimeraIncDir);$(AuroraIncDir);$(uLogIncDir)</AdditionalIncludeDirectories>
-      <Optimization>Og</Optimization>
+      <Optimization>O0</Optimization>
       <CLanguageStandard>C2x</CLanguageStandard>
       <CPPLanguageStandard>CPP2A</CPPLanguageStandard>
     </ClCompile>
@@ -234,6 +234,8 @@
     <ClInclude Include="..\..\..\Aurora\memory\heap\heap.hpp" />
     <ClInclude Include="..\..\..\Aurora\memory\virtual\blockDevice.hpp" />
     <ClInclude Include="..\..\..\Aurora\memory\virtual\device.hpp" />
+    <ClInclude Include="..\..\..\Aurora\mth\conversion.hpp" />
+    <ClInclude Include="..\..\..\Aurora\mth\math.hpp" />
     <ClInclude Include="..\..\..\Aurora\structure\obs\observable.hpp" />
     <ClInclude Include="..\..\..\Aurora\structure\obs\observer_intf.hpp" />
     <ClInclude Include="..\..\..\Aurora\structure\obs\types.hpp" />
@@ -250,6 +252,8 @@
     <ClCompile Include="..\..\..\Aurora\logging\serial_sink.cpp" />
     <ClCompile Include="..\..\..\Aurora\memory\heap\heap.cpp" />
     <ClCompile Include="..\..\..\Aurora\memory\virtual\chimera_memory_device.cpp" />
+    <ClCompile Include="..\..\..\Aurora\mth\conversion.cpp" />
+    <ClCompile Include="..\..\..\Aurora\mth\math.cpp" />
     <ClCompile Include="..\..\..\Aurora\structure\obs\observable.cpp" />
     <ClCompile Include="..\..\..\Aurora\utilities\utility_common.cpp" />
     <ClCompile Include="..\..\..\lib\uLog\uLog\sinks\sink_cout.cpp" />

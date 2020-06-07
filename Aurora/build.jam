@@ -13,7 +13,7 @@ local rule explicit_alias ( name : sources * : requirements * : default-build * 
 # ------------------------------------------
 # Source/Include Directories
 # ------------------------------------------
-local aurora_inc_dir = ./.. ; # Expects the user to reference headers like <Chimera/some_file.hpp>
+local aurora_inc_dir = ./.. ; # Expects the user to reference headers like <Aurora/some_file.hpp>
 
 # ------------------------------------------
 # Source Files
@@ -24,12 +24,13 @@ local aurora_inc_dir = ./.. ; # Expects the user to reference headers like <Chim
 # ====================================================
 project Aurora : usage-requirements <include>$(aurora_inc_dir) ;
 
-use-project /AURORA/CONSTANTS : constants ;
-use-project /AURORA/LOGGING :   logging ;
-use-project /AURORA/MEMORY :    memory ;
-use-project /AURORA/STRUCTURE : structure ;
-use-project /AURORA/UNITS :     units ;
-use-project /AURORA/UTIL :      utilities ;
+use-project /AURORA/CONSTANTS   : constants ;
+use-project /AURORA/LOGGING     : logging ;
+use-project /AURORA/MATH        : mth ;
+use-project /AURORA/MEMORY      : memory ;
+use-project /AURORA/STRUCTURE   : structure ;
+use-project /AURORA/UNITS       : units ;
+use-project /AURORA/UTIL        : utilities ;
 
 
 # ====================================================
@@ -54,6 +55,7 @@ explicit PUB ;
 explicit_alias TEST_COMPILE
     :   # /AURORA/CONSTANTS//LIB
         /AURORA/LOGGING//LIB
+        /AURORA/MATH//LIB
         /AURORA/MEMORY/HEAP//LIB
         /AURORA/MEMORY/VIRTUAL//LIB
         /AURORA/STRUCTURE/OBSERVER//LIB
