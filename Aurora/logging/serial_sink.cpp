@@ -23,18 +23,25 @@
 
 #if defined( CHIMERA_MODULES_ULOG_SUPPORT ) && ( CHIMERA_MODULES_ULOG_SUPPORT == 1 )
 
-static Chimera::Serial::Serial_uPtr sink;
+static Chimera::Serial::Serial_sPtr sink;
 static boost::circular_buffer<uint8_t> buffer( 256 );
 static std::array<uint8_t, 256> hwBuffer;
 
 namespace Chimera::Modules::uLog
 {
-  SerialSink::SerialSink()
+  SerialSink::SerialSink( Chimera::Serial::Channel channel, bool init ) : mInitHW( init ), mSerialChannel( channel )
+  {
+  }
+
+  SerialSink::SerialSink() : mInitHW( true ), mSerialChannel( SerialChannel )
   {
   }
 
   SerialSink::~SerialSink()
   {
+    sink = nullptr;
+    hwBuffer.fill( 0 );
+    buffer.clear();
   }
 
   ::uLog::Result SerialSink::open()
@@ -42,35 +49,40 @@ namespace Chimera::Modules::uLog
     Chimera::Status_t hwResult = Chimera::CommonStatusCodes::OK;
     ::uLog::Result sinkResult  = ::uLog::Result::RESULT_SUCCESS;
 
+    /*-------------------------------------------------
+    Initialize the buffer memory
+    -------------------------------------------------*/
     buffer.clear();
     buffer.linearize();
-
     hwBuffer.fill( 0 );
 
-    /*------------------------------------------------
-    Initialize the hardware. Some explanation on the configuration:
-      1. Interrupt mode is the mostly likely supported asynchronous transfer method.
-      2. Buffering is disabled as the sink should immediately write data
-      3.
-    ------------------------------------------------*/
-    Chimera::Serial::Config cfg;
-    cfg.baud     = static_cast<size_t>( SerialBaud );
-    cfg.flow     = SerialFlowCtrl;
-    cfg.parity   = SerialParity;
-    cfg.stopBits = SerialStopBits;
-    cfg.width    = SerialCharWid;
-
-    auto hwMode = Chimera::Hardware::PeripheralMode::INTERRUPT;
-
+    /*-------------------------------------------------
+    Grab a reference to the underlying serial driver
+    -------------------------------------------------*/
     if ( !sink )
     {
-      sink = Chimera::Serial::create_unique_ptr( SerialChannel );
+      sink = Chimera::Serial::create_shared_ptr( mSerialChannel );
     }
 
-    hwResult |= sink->assignHW( SerialChannel, SerialPins );
-    hwResult |= sink->configure( cfg );
-    hwResult |= sink->begin( hwMode, hwMode );
-    hwResult |= sink->enableBuffering( Chimera::Hardware::SubPeripheral::TX, &buffer, hwBuffer.data(), hwBuffer.size() );
+    /*------------------------------------------------
+    Initialize the hardware
+    ------------------------------------------------*/
+    if( mInitHW )
+    {
+      Chimera::Serial::Config cfg;
+      cfg.baud     = static_cast<size_t>( SerialBaud );
+      cfg.flow     = SerialFlowCtrl;
+      cfg.parity   = SerialParity;
+      cfg.stopBits = SerialStopBits;
+      cfg.width    = SerialCharWid;
+
+      auto hwMode = Chimera::Hardware::PeripheralMode::INTERRUPT;
+
+      hwResult |= sink->assignHW( mSerialChannel, SerialPins );
+      hwResult |= sink->configure( cfg );
+      hwResult |= sink->begin( hwMode, hwMode );
+      hwResult |= sink->enableBuffering( Chimera::Hardware::SubPeripheral::TX, &buffer, hwBuffer.data(), hwBuffer.size() );
+    }
 
     /*------------------------------------------------
     Mask the error code into a simple pass/fail. I don't think the sinks

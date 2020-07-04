@@ -24,6 +24,9 @@
 #include <uLog/types.hpp>
 #include <uLog/sinks/sink_intf.hpp>
 
+/* Chimera Includes */
+#include <Chimera/serial>
+
 #define CHIMERA_MODULES_ULOG_SUPPORT 1
 
 namespace Chimera::Modules::uLog
@@ -31,6 +34,15 @@ namespace Chimera::Modules::uLog
   class SerialSink : public ::uLog::SinkInterface
   {
   public:
+    /**
+     *  Constructs a new serial sink object using a specific Serial channel.
+     *  Typically used when the underlying serial driver is shared across
+     *  multiple threads and has already been initialized.
+     *
+     *  @param[in]  channel   Which channel to hook into
+     *  @param[in]  init      Whether or not to initialize the Serial hardware
+     */
+    SerialSink( Chimera::Serial::Channel channel, bool init );
     SerialSink();
     ~SerialSink();
 
@@ -43,6 +55,10 @@ namespace Chimera::Modules::uLog
     ::uLog::IOType getIOType() final override;
 
     ::uLog::Result log( const ::uLog::Level level, const void *const message, const size_t length ) final override;
+
+  private:
+    bool mInitHW;
+    Chimera::Serial::Channel mSerialChannel;
   };
 }  // namespace Chimera::Modules::uLog
 
