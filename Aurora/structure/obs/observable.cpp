@@ -29,7 +29,6 @@ namespace Aurora::Structure::Observer
 
   Observable::~Observable()
   {
-    mControlBlock->clear();
   }
 
 

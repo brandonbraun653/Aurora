@@ -29,6 +29,9 @@
     <ClInclude Include="..\..\..\Aurora\memory\heap\heap.hpp" />
     <ClInclude Include="..\..\..\Aurora\memory\virtual\blockDevice.hpp" />
     <ClInclude Include="..\..\..\Aurora\memory\virtual\device.hpp" />
+    <ClInclude Include="..\..\..\Aurora\structure\obs\observable.hpp" />
+    <ClInclude Include="..\..\..\Aurora\structure\obs\observer_intf.hpp" />
+    <ClInclude Include="..\..\..\Aurora\structure\obs\types.hpp" />
     <ClInclude Include="..\..\..\lib\uLog\uLog\config.hpp" />
     <ClInclude Include="..\..\..\lib\uLog\uLog\sinks\sink_cout.hpp" />
     <ClInclude Include="..\..\..\lib\uLog\uLog\sinks\sink_intf.hpp" />
@@ -40,9 +43,15 @@
     <ClCompile Include="..\..\..\Aurora\logging\serial_sink.cpp" />
     <ClCompile Include="..\..\..\Aurora\memory\heap\heap.cpp" />
     <ClCompile Include="..\..\..\Aurora\memory\virtual\chimera_memory_device.cpp" />
+    <ClCompile Include="..\..\..\Aurora\structure\obs\observable.cpp" />
     <ClCompile Include="..\..\..\lib\uLog\uLog\sinks\sink_cout.cpp" />
     <ClCompile Include="..\..\..\lib\uLog\uLog\sinks\sink_vgdb_semihosting.cpp" />
     <ClCompile Include="..\..\..\lib\uLog\uLog\ulog.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\..\Aurora\structure\build.jam" />
+    <None Include="..\..\..\Aurora\structure\observer" />
+    <None Include="..\..\..\Aurora\structure\obs\build.jam" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
