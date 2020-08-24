@@ -31,6 +31,7 @@ use-project /AURORA/MEMORY      : memory ;
 use-project /AURORA/STRUCTURE   : structure ;
 use-project /AURORA/UNITS       : units ;
 use-project /AURORA/UTIL        : utilities ;
+use-project /AURORA/EXTLIBS     : ../lib ;
 
 
 # ====================================================
@@ -44,6 +45,7 @@ alias PUB
   :
   :
   : <include>$(aurora_inc_dir)
+    <use>/AURORA/EXTLIBS//TYPESAFE_PUB
   ;
 explicit PUB ;
 
