@@ -13,3 +13,6 @@
 [submodule "lib/ctre"]
 	path = lib/ctre
 	url = https://github.com/hanickadot/compile-time-regular-expressions.git
+[submodule "lib/yaffs/yaffs2"]
+	path = lib/yaffs/yaffs2
+	url = git://www.aleph1.co.uk/yaffs2
