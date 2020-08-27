@@ -344,13 +344,13 @@ namespace Aurora::Memory
 
   Chimera::Status_t VirtualMemoryDevice::write( const size_t address, const uint8_t *const data, const size_t length )
   {
-    Chimera::Status_t result = Chimera::CommonStatusCodes::OK;
+    Chimera::Status_t result = Chimera::Status::OK;
     auto writeAddr           = rawData + address;
     auto endAddr             = reinterpret_cast<uintptr_t>( writeAddr ) + length;
 
     if ( !data || ( endAddr > deviceDescriptor.endAddress ) || ( address > regionSize )  )
     {
-      result = Chimera::CommonStatusCodes::INVAL_FUNC_PARAM;
+      result = Chimera::Status::INVAL_FUNC_PARAM;
     }
     else
     {
@@ -362,13 +362,13 @@ namespace Aurora::Memory
 
   Chimera::Status_t VirtualMemoryDevice::read( const size_t address, uint8_t *const data, const size_t length )
   {
-    Chimera::Status_t result = Chimera::CommonStatusCodes::OK;
+    Chimera::Status_t result = Chimera::Status::OK;
     auto writeAddr           = rawData + address;
     auto endAddr             = reinterpret_cast<uintptr_t>( writeAddr ) + length;
 
     if ( !data || ( endAddr > deviceDescriptor.endAddress ) || ( address > regionSize) )
     {
-      result = Chimera::CommonStatusCodes::INVAL_FUNC_PARAM;
+      result = Chimera::Status::INVAL_FUNC_PARAM;
     }
     else
     {
@@ -380,13 +380,13 @@ namespace Aurora::Memory
 
   Chimera::Status_t VirtualMemoryDevice::erase( const size_t address, const size_t length )
   {
-    Chimera::Status_t result = Chimera::CommonStatusCodes::OK;
+    Chimera::Status_t result = Chimera::Status::OK;
     auto writeAddr           = rawData + address;
     auto endAddr             = reinterpret_cast<uintptr_t>( writeAddr ) + length;
 
     if ( ( endAddr > deviceDescriptor.endAddress ) || ( address > regionSize ) )
     {
-      result = Chimera::CommonStatusCodes::INVAL_FUNC_PARAM;
+      result = Chimera::Status::INVAL_FUNC_PARAM;
     }
     else
     {
@@ -398,17 +398,17 @@ namespace Aurora::Memory
 
   Chimera::Status_t VirtualMemoryDevice::writeCompleteCallback( const Chimera::Function::void_func_uint32_t func )
   {
-    return Chimera::CommonStatusCodes::NOT_SUPPORTED;
+    return Chimera::Status::NOT_SUPPORTED;
   }
 
   Chimera::Status_t VirtualMemoryDevice::readCompleteCallback( const Chimera::Function::void_func_uint32_t func )
   {
-    return Chimera::CommonStatusCodes::NOT_SUPPORTED;
+    return Chimera::Status::NOT_SUPPORTED;
   }
 
   Chimera::Status_t VirtualMemoryDevice::eraseCompleteCallback( const Chimera::Function::void_func_uint32_t func )
   {
-    return Chimera::CommonStatusCodes::NOT_SUPPORTED;
+    return Chimera::Status::NOT_SUPPORTED;
   }
 
   bool VirtualMemoryDevice::isInitialized()

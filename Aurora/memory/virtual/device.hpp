@@ -22,7 +22,7 @@
 namespace Aurora::Memory
 {
   /* clang-format off */
-  class Status : public Chimera::CommonStatusCodes
+  class Status : public Chimera::Status
   {
   public:
     static constexpr Chimera::Status_t OUT_OF_MEMORY     = status_offset_module_memory_flash + 1; /**< Pretty self-explanatory... */
@@ -34,7 +34,7 @@ namespace Aurora::Memory
     static constexpr Chimera::Status_t ERR_READ_PROTECT  = status_offset_module_memory_flash + 7;
     static constexpr Chimera::Status_t ERR_PGM_SEQUENCE  = status_offset_module_memory_flash + 8;
     static constexpr Chimera::Status_t ERR_PGM_PARALLEL  = status_offset_module_memory_flash + 9;
-    static constexpr Chimera::Status_t ERR_PGM_ALIGNMENT = status_offset_module_memory_flash + 10; 
+    static constexpr Chimera::Status_t ERR_PGM_ALIGNMENT = status_offset_module_memory_flash + 10;
     static constexpr Chimera::Status_t ERR_WRITE_PROTECT = status_offset_module_memory_flash + 11;
   };
   /* clang-format on */
@@ -494,12 +494,12 @@ namespace Aurora::Memory
 
     Chimera::Status_t writeProtect( const bool state )
     {
-      return Chimera::CommonStatusCodes::NOT_SUPPORTED;
+      return Chimera::Status::NOT_SUPPORTED;
     }
 
     Chimera::Status_t readProtect( const bool state )
     {
-      return Chimera::CommonStatusCodes::NOT_SUPPORTED;
+      return Chimera::Status::NOT_SUPPORTED;
     }
   };
 

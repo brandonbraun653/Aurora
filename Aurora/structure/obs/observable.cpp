@@ -68,15 +68,15 @@ namespace Aurora::Structure::Observer
     -------------------------------------------------*/
     if ( !cb )
     {
-      return Chimera::CommonStatusCodes::INVAL_FUNC_PARAM;
+      return Chimera::Status::INVAL_FUNC_PARAM;
     }
     else if ( cb->inUse )
     {
-      return Chimera::CommonStatusCodes::FAIL;
+      return Chimera::Status::FAIL;
     }
     else if ( !mLock.try_lock_for( timeout ) )
     {
-      return Chimera::CommonStatusCodes::LOCKED;
+      return Chimera::Status::LOCKED;
     }
 
     /*-------------------------------------------------
@@ -86,7 +86,7 @@ namespace Aurora::Structure::Observer
     initialize();
 
     mLock.unlock();
-    return Chimera::CommonStatusCodes::OK;
+    return Chimera::Status::OK;
   }
 
 
@@ -97,11 +97,11 @@ namespace Aurora::Structure::Observer
     -------------------------------------------------*/
     if ( !mLock.try_lock_for( timeout ) )
     {
-      return Chimera::CommonStatusCodes::LOCKED;
+      return Chimera::Status::LOCKED;
     }
     else if ( mNextEmptySlot >= mControlBlock->elements )
     {
-      return Chimera::CommonStatusCodes::FULL;
+      return Chimera::Status::FULL;
     }
 
     /*-------------------------------------------------
@@ -112,7 +112,7 @@ namespace Aurora::Structure::Observer
     mRegisteredObservers++;
 
     mLock.unlock();
-    return Chimera::CommonStatusCodes::OK;
+    return Chimera::Status::OK;
   }
 
 
@@ -123,7 +123,7 @@ namespace Aurora::Structure::Observer
     -------------------------------------------------*/
     if ( !mLock.try_lock_for( timeout ) )
     {
-      return Chimera::CommonStatusCodes::LOCKED;
+      return Chimera::Status::LOCKED;
     }
 
     /*-------------------------------------------------
@@ -146,11 +146,11 @@ namespace Aurora::Structure::Observer
     if ( iObserver == mRegisteredObservers )
     {
       mLock.unlock();
-      return Chimera::CommonStatusCodes::NOT_FOUND;
+      return Chimera::Status::NOT_FOUND;
     }
 
     /*-------------------------------------------------
-    The observer was found. Re-sort the list such that 
+    The observer was found. Re-sort the list such that
     there are no nullptr objects fragmenting the data.
     -------------------------------------------------*/
     // Sorts in descending order such that all nullptr locations are at the end of the list
@@ -161,7 +161,7 @@ namespace Aurora::Structure::Observer
     mNextEmptySlot = mRegisteredObservers;
 
     mLock.unlock();
-    return Chimera::CommonStatusCodes::OK;
+    return Chimera::Status::OK;
   }
 
 
@@ -172,7 +172,7 @@ namespace Aurora::Structure::Observer
     -------------------------------------------------*/
     if ( !mLock.try_lock_for( timeout ) )
     {
-      return Chimera::CommonStatusCodes::LOCKED;
+      return Chimera::Status::LOCKED;
     }
 
     /*-------------------------------------------------
@@ -184,7 +184,7 @@ namespace Aurora::Structure::Observer
     }
 
     mLock.unlock();
-    return Chimera::CommonStatusCodes::OK;
+    return Chimera::Status::OK;
   }
 
 

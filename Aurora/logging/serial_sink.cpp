@@ -46,7 +46,7 @@ namespace Chimera::Modules::uLog
 
   ::uLog::Result SerialSink::open()
   {
-    Chimera::Status_t hwResult = Chimera::CommonStatusCodes::OK;
+    Chimera::Status_t hwResult = Chimera::Status::OK;
     ::uLog::Result sinkResult  = ::uLog::Result::RESULT_SUCCESS;
 
     /*-------------------------------------------------
@@ -88,7 +88,7 @@ namespace Chimera::Modules::uLog
     Mask the error code into a simple pass/fail. I don't think the sinks
     in general should support complicated return codes.
     ------------------------------------------------*/
-    if ( hwResult != Chimera::CommonStatusCodes::OK )
+    if ( hwResult != Chimera::Status::OK )
     {
       sinkResult = ::uLog::Result::RESULT_FAIL;
     }
@@ -100,7 +100,7 @@ namespace Chimera::Modules::uLog
   {
     ::uLog::Result sinkResult = ::uLog::Result::RESULT_SUCCESS;
 
-    if ( sink->end() != Chimera::CommonStatusCodes::OK )
+    if ( sink->end() != Chimera::Status::OK )
     {
       sinkResult = ::uLog::Result::RESULT_FAIL;
     }
@@ -112,7 +112,7 @@ namespace Chimera::Modules::uLog
   {
     ::uLog::Result sinkResult = ::uLog::Result::RESULT_SUCCESS;
 
-    if ( sink->flush( Chimera::Hardware::SubPeripheral::TXRX ) != Chimera::CommonStatusCodes::OK )
+    if ( sink->flush( Chimera::Hardware::SubPeripheral::TXRX ) != Chimera::Status::OK )
     {
       sinkResult = ::uLog::Result::RESULT_FAIL;
     }
@@ -141,7 +141,7 @@ namespace Chimera::Modules::uLog
     Write the data and block the current thread execution
     until the transfer is complete.
     ------------------------------------------------*/
-    auto hwResult = Chimera::CommonStatusCodes::OK;
+    auto hwResult = Chimera::Status::OK;
     auto ulResult = ::uLog::Result::RESULT_SUCCESS;
 
     sink->lock();
@@ -149,7 +149,7 @@ namespace Chimera::Modules::uLog
     hwResult |= sink->write( reinterpret_cast<const uint8_t *const>( message ), length, TIMEOUT_DONT_WAIT );
     hwResult |= sink->await( Chimera::Event::TRIGGER_WRITE_COMPLETE, TIMEOUT_BLOCK );
 
-    if ( hwResult != Chimera::CommonStatusCodes::OK )
+    if ( hwResult != Chimera::Status::OK )
     {
       ulResult = ::uLog::Result::RESULT_FAIL;
     }
