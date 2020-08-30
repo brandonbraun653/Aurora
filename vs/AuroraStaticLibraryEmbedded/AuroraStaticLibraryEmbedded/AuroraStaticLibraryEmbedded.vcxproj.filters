@@ -40,6 +40,9 @@
     <Filter Include="math">
       <UniqueIdentifier>{090659f0-fe27-45ea-9461-b53d0438bd70}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Device-specific files">
+      <UniqueIdentifier>{b4738318-66f8-4e6b-be8b-6dc7f85872c0}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <None Include="stm32.xml">
