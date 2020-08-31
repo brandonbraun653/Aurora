@@ -23,7 +23,7 @@
 
 #if defined( CHIMERA_MODULES_ULOG_SUPPORT ) && ( CHIMERA_MODULES_ULOG_SUPPORT == 1 )
 
-static Chimera::Serial::ISerial_sPtr sink;
+static Chimera::Serial::Driver_sPtr sink;
 static boost::circular_buffer<uint8_t> buffer( 256 );
 static std::array<uint8_t, 256> hwBuffer;
 
