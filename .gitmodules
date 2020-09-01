@@ -13,3 +13,6 @@
 [submodule "lib/ctre"]
 	path = lib/ctre
 	url = https://github.com/hanickadot/compile-time-regular-expressions.git
+[submodule "lib/embedded_template_library/etl"]
+	path = lib/embedded_template_library/etl
+	url = https://github.com/ETLCPP/etl.git

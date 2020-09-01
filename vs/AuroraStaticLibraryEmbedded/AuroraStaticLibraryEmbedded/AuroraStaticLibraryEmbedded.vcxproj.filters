@@ -40,8 +40,8 @@
     <Filter Include="math">
       <UniqueIdentifier>{090659f0-fe27-45ea-9461-b53d0438bd70}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Device-specific files">
-      <UniqueIdentifier>{b4738318-66f8-4e6b-be8b-6dc7f85872c0}</UniqueIdentifier>
+    <Filter Include="etl">
+      <UniqueIdentifier>{d0ce91ff-1e3c-4949-b101-37b46976ac2f}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -130,6 +130,519 @@
     <ClInclude Include="..\..\..\Aurora\mth\math.hpp">
       <Filter>math</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\lib\embedded_template_library\etl\include\etl\wstring_stream.h">
+      <Filter>etl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\lib\embedded_template_library\etl\include\etl\absolute.h">
+      <Filter>etl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\lib\embedded_template_library\etl\include\etl\algorithm.h">
+      <Filter>etl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\lib\embedded_template_library\etl\include\etl\alignment.h">
+      <Filter>etl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\lib\embedded_template_library\etl\include\etl\array.h">
+      <Filter>etl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\lib\embedded_template_library\etl\include\etl\array_view.h">
+      <Filter>etl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\lib\embedded_template_library\etl\include\etl\array_wrapper.h">
+      <Filter>etl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\lib\embedded_template_library\etl\include\etl\atomic.h">
+      <Filter>etl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\lib\embedded_template_library\etl\include\etl\basic_format_spec.h">
+      <Filter>etl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\lib\embedded_template_library\etl\include\etl\basic_string.h">
+      <Filter>etl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\lib\embedded_template_library\etl\include\etl\basic_string_stream.h">
+      <Filter>etl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\lib\embedded_template_library\etl\include\etl\binary.h">
+      <Filter>etl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\lib\embedded_template_library\etl\include\etl\bit_stream.h">
+      <Filter>etl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\lib\embedded_template_library\etl\include\etl\bitset.h">
+      <Filter>etl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\lib\embedded_template_library\etl\include\etl\bloom_filter.h">
+      <Filter>etl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\lib\embedded_template_library\etl\include\etl\bresenham_line.h">
+      <Filter>etl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\lib\embedded_template_library\etl\include\etl\callback.h">
+      <Filter>etl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\lib\embedded_template_library\etl\include\etl\callback_service.h">
+      <Filter>etl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\lib\embedded_template_library\etl\include\etl\callback_timer.h">
+      <Filter>etl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\lib\embedded_template_library\etl\include\etl\char_traits.h">
+      <Filter>etl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\lib\embedded_template_library\etl\include\etl\checksum.h">
+      <Filter>etl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\lib\embedded_template_library\etl\include\etl\combinations.h">
+      <Filter>etl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\lib\embedded_template_library\etl\include\etl\compare.h">
+      <Filter>etl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\lib\embedded_template_library\etl\include\etl\constant.h">
+      <Filter>etl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\lib\embedded_template_library\etl\include\etl\container.h">
+      <Filter>etl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\lib\embedded_template_library\etl\include\etl\crc8_ccitt.h">
+      <Filter>etl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\lib\embedded_template_library\etl\include\etl\crc8_rohc.h">
+      <Filter>etl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\lib\embedded_template_library\etl\include\etl\crc16.h">
+      <Filter>etl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\lib\embedded_template_library\etl\include\etl\crc16_aug_ccitt.h">
+      <Filter>etl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\lib\embedded_template_library\etl\include\etl\crc16_ccitt.h">
+      <Filter>etl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\lib\embedded_template_library\etl\include\etl\crc16_genibus.h">
+      <Filter>etl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\lib\embedded_template_library\etl\include\etl\crc16_kermit.h">
+      <Filter>etl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\lib\embedded_template_library\etl\include\etl\crc16_modbus.h">
+      <Filter>etl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\lib\embedded_template_library\etl\include\etl\crc16_usb.h">
+      <Filter>etl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\lib\embedded_template_library\etl\include\etl\crc16_x25.h">
+      <Filter>etl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\lib\embedded_template_library\etl\include\etl\crc16_xmodem.h">
+      <Filter>etl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\lib\embedded_template_library\etl\include\etl\crc32.h">
+      <Filter>etl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\lib\embedded_template_library\etl\include\etl\crc32_bzip2.h">
+      <Filter>etl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\lib\embedded_template_library\etl\include\etl\crc32_c.h">
+      <Filter>etl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\lib\embedded_template_library\etl\include\etl\crc32_mpeg2.h">
+      <Filter>etl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\lib\embedded_template_library\etl\include\etl\crc32_posix.h">
+      <Filter>etl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\lib\embedded_template_library\etl\include\etl\crc64_ecma.h">
+      <Filter>etl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\lib\embedded_template_library\etl\include\etl\cstring.h">
+      <Filter>etl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\lib\embedded_template_library\etl\include\etl\cumulative_moving_average.h">
+      <Filter>etl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\lib\embedded_template_library\etl\include\etl\cyclic_value.h">
+      <Filter>etl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\lib\embedded_template_library\etl\include\etl\debounce.h">
+      <Filter>etl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\lib\embedded_template_library\etl\include\etl\debug_count.h">
+      <Filter>etl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\lib\embedded_template_library\etl\include\etl\delegate.h">
+      <Filter>etl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\lib\embedded_template_library\etl\include\etl\delegate_service.h">
+      <Filter>etl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\lib\embedded_template_library\etl\include\etl\deque.h">
+      <Filter>etl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\lib\embedded_template_library\etl\include\etl\doxygen.h">
+      <Filter>etl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\lib\embedded_template_library\etl\include\etl\endianness.h">
+      <Filter>etl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\lib\embedded_template_library\etl\include\etl\enum_type.h">
+      <Filter>etl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\lib\embedded_template_library\etl\include\etl\error_handler.h">
+      <Filter>etl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\lib\embedded_template_library\etl\include\etl\exception.h">
+      <Filter>etl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\lib\embedded_template_library\etl\include\etl\factorial.h">
+      <Filter>etl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\lib\embedded_template_library\etl\include\etl\fibonacci.h">
+      <Filter>etl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\lib\embedded_template_library\etl\include\etl\fixed_iterator.h">
+      <Filter>etl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\lib\embedded_template_library\etl\include\etl\flat_map.h">
+      <Filter>etl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\lib\embedded_template_library\etl\include\etl\flat_multimap.h">
+      <Filter>etl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\lib\embedded_template_library\etl\include\etl\flat_multiset.h">
+      <Filter>etl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\lib\embedded_template_library\etl\include\etl\flat_set.h">
+      <Filter>etl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\lib\embedded_template_library\etl\include\etl\fnv_1.h">
+      <Filter>etl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\lib\embedded_template_library\etl\include\etl\format_spec.h">
+      <Filter>etl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\lib\embedded_template_library\etl\include\etl\forward_list.h">
+      <Filter>etl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\lib\embedded_template_library\etl\include\etl\frame_check_sequence.h">
+      <Filter>etl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\lib\embedded_template_library\etl\include\etl\fsm.h">
+      <Filter>etl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\lib\embedded_template_library\etl\include\etl\function.h">
+      <Filter>etl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\lib\embedded_template_library\etl\include\etl\functional.h">
+      <Filter>etl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\lib\embedded_template_library\etl\include\etl\hash.h">
+      <Filter>etl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\lib\embedded_template_library\etl\include\etl\ihash.h">
+      <Filter>etl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\lib\embedded_template_library\etl\include\etl\indirect_vector.h">
+      <Filter>etl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\lib\embedded_template_library\etl\include\etl\instance_count.h">
+      <Filter>etl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\lib\embedded_template_library\etl\include\etl\integral_limits.h">
+      <Filter>etl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\lib\embedded_template_library\etl\include\etl\intrusive_forward_list.h">
+      <Filter>etl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\lib\embedded_template_library\etl\include\etl\intrusive_links.h">
+      <Filter>etl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\lib\embedded_template_library\etl\include\etl\intrusive_list.h">
+      <Filter>etl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\lib\embedded_template_library\etl\include\etl\intrusive_queue.h">
+      <Filter>etl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\lib\embedded_template_library\etl\include\etl\intrusive_stack.h">
+      <Filter>etl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\lib\embedded_template_library\etl\include\etl\io_port.h">
+      <Filter>etl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\lib\embedded_template_library\etl\include\etl\iterator.h">
+      <Filter>etl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\lib\embedded_template_library\etl\include\etl\jenkins.h">
+      <Filter>etl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\lib\embedded_template_library\etl\include\etl\largest.h">
+      <Filter>etl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\lib\embedded_template_library\etl\include\etl\limits.h">
+      <Filter>etl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\lib\embedded_template_library\etl\include\etl\list.h">
+      <Filter>etl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\lib\embedded_template_library\etl\include\etl\log.h">
+      <Filter>etl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\lib\embedded_template_library\etl\include\etl\macros.h">
+      <Filter>etl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\lib\embedded_template_library\etl\include\etl\map.h">
+      <Filter>etl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\lib\embedded_template_library\etl\include\etl\math_constants.h">
+      <Filter>etl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\lib\embedded_template_library\etl\include\etl\memory.h">
+      <Filter>etl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\lib\embedded_template_library\etl\include\etl\memory_model.h">
+      <Filter>etl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\lib\embedded_template_library\etl\include\etl\message.h">
+      <Filter>etl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\lib\embedded_template_library\etl\include\etl\message_bus.h">
+      <Filter>etl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\lib\embedded_template_library\etl\include\etl\message_packet.h">
+      <Filter>etl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\lib\embedded_template_library\etl\include\etl\message_router.h">
+      <Filter>etl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\lib\embedded_template_library\etl\include\etl\message_timer.h">
+      <Filter>etl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\lib\embedded_template_library\etl\include\etl\message_types.h">
+      <Filter>etl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\lib\embedded_template_library\etl\include\etl\multi_array.h">
+      <Filter>etl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\lib\embedded_template_library\etl\include\etl\multimap.h">
+      <Filter>etl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\lib\embedded_template_library\etl\include\etl\multiset.h">
+      <Filter>etl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\lib\embedded_template_library\etl\include\etl\murmur3.h">
+      <Filter>etl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\lib\embedded_template_library\etl\include\etl\mutex.h">
+      <Filter>etl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\lib\embedded_template_library\etl\include\etl\negative.h">
+      <Filter>etl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\lib\embedded_template_library\etl\include\etl\null_type.h">
+      <Filter>etl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\lib\embedded_template_library\etl\include\etl\nullptr.h">
+      <Filter>etl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\lib\embedded_template_library\etl\include\etl\numeric.h">
+      <Filter>etl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\lib\embedded_template_library\etl\include\etl\observer.h">
+      <Filter>etl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\lib\embedded_template_library\etl\include\etl\optional.h">
+      <Filter>etl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\lib\embedded_template_library\etl\include\etl\packet.h">
+      <Filter>etl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\lib\embedded_template_library\etl\include\etl\parameter_pack.h">
+      <Filter>etl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\lib\embedded_template_library\etl\include\etl\parameter_type.h">
+      <Filter>etl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\lib\embedded_template_library\etl\include\etl\pearson.h">
+      <Filter>etl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\lib\embedded_template_library\etl\include\etl\permutations.h">
+      <Filter>etl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\lib\embedded_template_library\etl\include\etl\platform.h">
+      <Filter>etl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\lib\embedded_template_library\etl\include\etl\pool.h">
+      <Filter>etl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\lib\embedded_template_library\etl\include\etl\power.h">
+      <Filter>etl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\lib\embedded_template_library\etl\include\etl\priority_queue.h">
+      <Filter>etl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\lib\embedded_template_library\etl\include\etl\queue.h">
+      <Filter>etl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\lib\embedded_template_library\etl\include\etl\queue_mpmc_mutex.h">
+      <Filter>etl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\lib\embedded_template_library\etl\include\etl\queue_spsc_atomic.h">
+      <Filter>etl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\lib\embedded_template_library\etl\include\etl\queue_spsc_isr.h">
+      <Filter>etl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\lib\embedded_template_library\etl\include\etl\queue_spsc_locked.h">
+      <Filter>etl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\lib\embedded_template_library\etl\include\etl\radix.h">
+      <Filter>etl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\lib\embedded_template_library\etl\include\etl\random.h">
+      <Filter>etl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\lib\embedded_template_library\etl\include\etl\ratio.h">
+      <Filter>etl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\lib\embedded_template_library\etl\include\etl\reference_flat_map.h">
+      <Filter>etl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\lib\embedded_template_library\etl\include\etl\reference_flat_multimap.h">
+      <Filter>etl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\lib\embedded_template_library\etl\include\etl\reference_flat_multiset.h">
+      <Filter>etl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\lib\embedded_template_library\etl\include\etl\reference_flat_set.h">
+      <Filter>etl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\lib\embedded_template_library\etl\include\etl\scaled_rounding.h">
+      <Filter>etl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\lib\embedded_template_library\etl\include\etl\scheduler.h">
+      <Filter>etl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\lib\embedded_template_library\etl\include\etl\set.h">
+      <Filter>etl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\lib\embedded_template_library\etl\include\etl\smallest.h">
+      <Filter>etl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\lib\embedded_template_library\etl\include\etl\span.h">
+      <Filter>etl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\lib\embedded_template_library\etl\include\etl\spsc_queue.h">
+      <Filter>etl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\lib\embedded_template_library\etl\include\etl\sqrt.h">
+      <Filter>etl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\lib\embedded_template_library\etl\include\etl\stack.h">
+      <Filter>etl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\lib\embedded_template_library\etl\include\etl\state_chart.h">
+      <Filter>etl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\lib\embedded_template_library\etl\include\etl\static_assert.h">
+      <Filter>etl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\lib\embedded_template_library\etl\include\etl\string_stream.h">
+      <Filter>etl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\lib\embedded_template_library\etl\include\etl\string_utilities.h">
+      <Filter>etl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\lib\embedded_template_library\etl\include\etl\string_view.h">
+      <Filter>etl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\lib\embedded_template_library\etl\include\etl\task.h">
+      <Filter>etl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\lib\embedded_template_library\etl\include\etl\timer.h">
+      <Filter>etl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\lib\embedded_template_library\etl\include\etl\to_string.h">
+      <Filter>etl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\lib\embedded_template_library\etl\include\etl\to_u16string.h">
+      <Filter>etl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\lib\embedded_template_library\etl\include\etl\to_u32string.h">
+      <Filter>etl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\lib\embedded_template_library\etl\include\etl\to_wstring.h">
+      <Filter>etl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\lib\embedded_template_library\etl\include\etl\type_def.h">
+      <Filter>etl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\lib\embedded_template_library\etl\include\etl\type_lookup.h">
+      <Filter>etl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\lib\embedded_template_library\etl\include\etl\type_select.h">
+      <Filter>etl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\lib\embedded_template_library\etl\include\etl\type_traits.h">
+      <Filter>etl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\lib\embedded_template_library\etl\include\etl\u16format_spec.h">
+      <Filter>etl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\lib\embedded_template_library\etl\include\etl\u16string.h">
+      <Filter>etl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\lib\embedded_template_library\etl\include\etl\u16string_stream.h">
+      <Filter>etl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\lib\embedded_template_library\etl\include\etl\u32format_spec.h">
+      <Filter>etl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\lib\embedded_template_library\etl\include\etl\u32string.h">
+      <Filter>etl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\lib\embedded_template_library\etl\include\etl\u32string_stream.h">
+      <Filter>etl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\lib\embedded_template_library\etl\include\etl\unordered_map.h">
+      <Filter>etl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\lib\embedded_template_library\etl\include\etl\unordered_multimap.h">
+      <Filter>etl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\lib\embedded_template_library\etl\include\etl\unordered_multiset.h">
+      <Filter>etl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\lib\embedded_template_library\etl\include\etl\unordered_set.h">
+      <Filter>etl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\lib\embedded_template_library\etl\include\etl\user_type.h">
+      <Filter>etl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\lib\embedded_template_library\etl\include\etl\utility.h">
+      <Filter>etl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\lib\embedded_template_library\etl\include\etl\variant.h">
+      <Filter>etl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\lib\embedded_template_library\etl\include\etl\variant_pool.h">
+      <Filter>etl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\lib\embedded_template_library\etl\include\etl\vector.h">
+      <Filter>etl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\lib\embedded_template_library\etl\include\etl\version.h">
+      <Filter>etl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\lib\embedded_template_library\etl\include\etl\visitor.h">
+      <Filter>etl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\lib\embedded_template_library\etl\include\etl\wformat_spec.h">
+      <Filter>etl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\lib\embedded_template_library\etl\include\etl\wstring.h">
+      <Filter>etl</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\lib\uLog\uLog\ulog.cpp">
@@ -162,5 +675,10 @@
     <ClCompile Include="..\..\..\Aurora\mth\math.cpp">
       <Filter>math</Filter>
     </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="..\..\..\lib\embedded_template_library\etl\include\etl\file_error_numbers.txt">
+      <Filter>etl</Filter>
+    </Text>
   </ItemGroup>
 </Project>

@@ -23,8 +23,8 @@
 /* FreeRTOS Includes */
 
 #if defined( USING_FREERTOS_THREADS )
-#include "FreeRTOS.h"
-#include "task.h"
+#include <FreeRTOS/FreeRTOS.h>
+#include <FreeRTOS/task.h>
 #endif
 
 static constexpr size_t heapBITS_PER_BYTE = 8u;
@@ -85,7 +85,7 @@ namespace Aurora::Memory
     heapBuffer      = new uint8_t[ size ];
     heapSize        = size;
     bufferIsDynamic = ( heapBuffer != nullptr );
-    
+
     return bufferIsDynamic;
   }
 
@@ -195,7 +195,7 @@ namespace Aurora::Memory
     return pvReturn;
 #else
     return new uint8_t[ size ];
-#endif 
+#endif
   }
 
   void Heap::free( void *pv )
@@ -238,7 +238,7 @@ namespace Aurora::Memory
     }
 #else
     delete pv;
-#endif 
+#endif
   }
 
   /*------------------------------------------------
@@ -354,6 +354,6 @@ namespace Aurora::Memory
     {
       pxIterator->next = pxBlockToInsert;
     }
-#endif 
+#endif
   }
 }    // namespace RF24::Network::Memory
