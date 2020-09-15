@@ -1,6 +1,3 @@
-[submodule "Chimera"]
-	path = Chimera
-	url = https://github.com/brandonbraun653/Chimera.git
 [submodule "lib/CRCpp"]
 	path = lib/CRCpp
 	url = https://github.com/d-bahr/CRCpp.git
