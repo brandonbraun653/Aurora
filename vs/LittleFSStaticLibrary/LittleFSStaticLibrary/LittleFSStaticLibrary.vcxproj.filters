@@ -1,0 +1,33 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="..\..\..\lib\littlefs\lfs\lfs_util.c">
+      <Filter>core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\lib\littlefs\lfs\lfs.c">
+      <Filter>core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\lib\littlefs\lfs\bd\lfs_rambd.c">
+      <Filter>bd</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\..\lib\littlefs\lfs\lfs_util.h">
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\lib\littlefs\lfs\lfs.h">
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\lib\littlefs\lfs\bd\lfs_rambd.h">
+      <Filter>bd</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="core">
+      <UniqueIdentifier>{98ed10ab-e80a-45f4-a446-998907e06309}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="bd">
+      <UniqueIdentifier>{8ce9d358-7263-44ef-b848-8354095b04b4}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

@@ -13,3 +13,6 @@
 [submodule "lib/embedded_template_library/etl"]
 	path = lib/embedded_template_library/etl
 	url = https://github.com/ETLCPP/etl.git
+[submodule "lib/littlefs/lfs"]
+	path = lib/littlefs/lfs
+	url = https://github.com/ARMmbed/littlefs.git
