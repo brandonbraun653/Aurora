@@ -1,0 +1,17 @@
+/********************************************************************************
+ *  File Name:
+ *    memory
+ *
+ *  Description:
+ *    Aurora includes for memory interfacing
+ *
+ *  2020 | Brandon Braun | brandonbraun653@gmail.com
+ ********************************************************************************/
+
+#pragma once
+#ifndef AURORA_MEMORY_INCLUDES
+#define AURORA_MEMORY_INCLUDES
+
+#include <Aurora/src/memory/generic/generic_inc.hpp>
+
+#endif /* !AURORA_MEMORY_INCLUDES */
