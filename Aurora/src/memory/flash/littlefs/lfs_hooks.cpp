@@ -12,10 +12,8 @@
 #include "lfs.h"
 
 /* Aurora Includes */
-#include <Aurora/memory/flash/littlefs/lfs_hooks.hpp>
-#include <Aurora/memory/generic/generic_intf.hpp>
-#include <Aurora/memory/generic/generic_types.hpp>
-#include <Aurora/memory/generic/generic_utils.hpp>
+#include <Aurora/memory>
+#include <Aurora/src/memory/flash/littlefs/lfs_hooks.hpp>
 
 /*-------------------------------------------------------------------------------
 Public Functions
