@@ -116,6 +116,15 @@ namespace Aurora::Memory
    */
   SysAddress_t chunkEndAddress( const Properties &cfg, const Chunk view, const ChunkIndex_t idx );
 
+  /**
+   *  Gets the size of the chunk as specified in the device properties
+   *
+   *  @param[in]  cfg       The device configuration data
+   *  @param[in]  view      Which chunk to get
+   *  @return size_t
+   */
+  size_t chunkSize( const Properties &cfg, const Chunk view );
+
 }  // namespace Aurora::Memory
 
 #endif /* !AURORA_GENERIC_UTILS_HPP */

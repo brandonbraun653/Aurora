@@ -186,4 +186,26 @@ namespace Aurora::Memory
     }
   }
 
+
+  size_t chunkSize( const Properties &cfg, const Chunk view )
+  {
+    switch ( view )
+    {
+      case Chunk::PAGE:
+        return cfg.pageSize;
+        break;
+
+      case Chunk::BLOCK:
+        return cfg.blockSize;
+        break;
+
+      case Chunk::SECTOR:
+        return cfg.sectorSize;
+        break;
+
+      default:
+        return 0;
+        break;
+    }
+  }
 }  // namespace Aurora::Memory

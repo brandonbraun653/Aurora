@@ -10,7 +10,7 @@ set(LINK_LIBS
 # ====================================================
 # Driver Library (+ Variant)
 # ====================================================
-set(LIB memory_generic)
+set(LIB aurora_memory_generic)
 add_library(${LIB} STATIC
   generic_utils.cpp
 )

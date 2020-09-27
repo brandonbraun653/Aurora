@@ -10,7 +10,14 @@ add_subdirectory("Aurora/src/memory")
 # Public include location
 add_library(aurora_inc INTERFACE)
 target_include_directories(aurora_inc INTERFACE ".")
-export(TARGETS aurora_inc FILE "${PROJECT_BINARY_DIR}/Aurora/aurora-inc.cmake")
+export(TARGETS aurora_inc FILE "${PROJECT_BINARY_DIR}/Aurora/aurora_inc.cmake")
+
+
+add_library(aurora_core INTERFACE)
+target_link_libraries(aurora_core INTERFACE
+  aurora_memory_generic
+)
+export(TARGETS aurora_core FILE "${PROJECT_BINARY_DIR}/Aurora/aurora_core.cmake")
 
 
 # ====================================================
