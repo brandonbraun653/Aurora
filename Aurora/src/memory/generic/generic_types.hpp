@@ -51,21 +51,22 @@ namespace Aurora::Memory
    */
   enum class Status : uint8_t
   {
-    ERR_OK,
     ERR_BAD_ARG,
-    ERR_OUT_OF_MEMORY,
-    ERR_OVERRUN,
-    ERR_UNALIGNED_MEM,
-    ERR_UNKNOWN_JEDEC,
+    ERR_DRIVER_ERR,
     ERR_HF_INIT_FAIL,
     ERR_NOT_PAGE_ALIGNED,
-    ERR_READ_PROTECT,
-    ERR_PGM_SEQUENCE,
-    ERR_PGM_PARALLEL,
+    ERR_OK,
+    ERR_OUT_OF_MEMORY,
+    ERR_OVERRUN,
     ERR_PGM_ALIGNMENT,
-    ERR_WRITE_PROTECT,
+    ERR_PGM_PARALLEL,
+    ERR_PGM_SEQUENCE,
+    ERR_READ_PROTECT,
+    ERR_TIMEOUT,
+    ERR_UNALIGNED_MEM,
+    ERR_UNKNOWN_JEDEC,
     ERR_UNSUPPORTED,
-    ERR_DRIVER_ERR,     /**< Low level driver reported an error */
+    ERR_WRITE_PROTECT,
   };
 
   /**

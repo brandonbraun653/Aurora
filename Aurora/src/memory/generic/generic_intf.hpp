@@ -117,11 +117,30 @@ namespace Aurora::Memory
     virtual Status erase( const Chunk chunk, const size_t id ) = 0;
 
     /**
+     *  Erases the entire chip. Typically this is a single command, so it saves on
+     *  manual address calculations.
+     *
+     *  @return Status
+     */
+    virtual Status eraseChip() = 0;
+
+    /**
      *  Flushes any buffered memory to the device
      *
      *  @return Status
      */
     virtual Status flush() = 0;
+
+    /**
+     *  Blocks the current thread of execution until a memory event has
+     *  happened. Typical implementations poll status registers of the
+     *  device to see if an event has happened.
+     *
+     *  @param[in]  event         The event to wait on
+     *  @param[in]  timeout       How long the caller is willing to wait
+     *  @return Status
+     */
+    virtual Status pendEvent( const Event event, const size_t timeout ) = 0;
 
     /**
      *	Register a callback to be executed on an event. If the event regards a memory
