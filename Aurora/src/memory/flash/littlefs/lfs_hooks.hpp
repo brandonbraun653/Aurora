@@ -37,7 +37,7 @@ namespace Aurora::Memory::LFS
    *  @param[in]  cfg     LittleFS configuration structure
    *  @return bool
    */
-  bool attachDevice( IGenericDevice_sPtr& dev, lfs_config &cfg );
+  bool attachDevice( IGenericDevice_sPtr dev, lfs_config &cfg );
 }
 
 #endif  /* !LFS_HOOKS_HPP */

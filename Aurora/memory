@@ -12,6 +12,7 @@
 #ifndef AURORA_MEMORY_INCLUDES
 #define AURORA_MEMORY_INCLUDES
 
+
 #include <Aurora/src/memory/generic/generic_inc.hpp>
 
 #endif /* !AURORA_MEMORY_INCLUDES */

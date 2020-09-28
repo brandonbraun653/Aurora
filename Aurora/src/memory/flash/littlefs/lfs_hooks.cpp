@@ -25,7 +25,7 @@ int lfs_safe_read( const struct lfs_config *c, lfs_block_t block, lfs_off_t off,
   /*-------------------------------------------------
   Input protection
   -------------------------------------------------*/
-  if ( !c || c->context )
+  if ( !c || !c->context )
   {
     return LFS_ERR_INVAL;
   }
@@ -66,7 +66,7 @@ int lfs_safe_prog( const struct lfs_config *c, lfs_block_t block, lfs_off_t off,
   /*-------------------------------------------------
   Input protection
   -------------------------------------------------*/
-  if ( !c || c->context )
+  if ( !c || !c->context )
   {
     return LFS_ERR_INVAL;
   }
@@ -95,6 +95,10 @@ int lfs_safe_prog( const struct lfs_config *c, lfs_block_t block, lfs_off_t off,
     error = LFS_ERR_IO;
   }
 
+  /*-------------------------------------------------
+  Wait for the write to complete
+  -------------------------------------------------*/
+  device->pendEvent( Event::MEM_WRITE_COMPLETE, Chimera::Threading::TIMEOUT_BLOCK );
   device->unlock();
   return error;
 }
@@ -107,7 +111,7 @@ int lfs_safe_erase( const struct lfs_config *c, lfs_block_t block )
   /*-------------------------------------------------
   Input protection
   -------------------------------------------------*/
-  if ( !c || c->context )
+  if ( !c || !c->context )
   {
     return LFS_ERR_INVAL;
   }
@@ -133,6 +137,10 @@ int lfs_safe_erase( const struct lfs_config *c, lfs_block_t block )
     error = LFS_ERR_IO;
   }
 
+  /*-------------------------------------------------
+  Wait for the erase to complete
+  -------------------------------------------------*/
+  device->pendEvent( Event::MEM_ERASE_COMPLETE, Chimera::Threading::TIMEOUT_BLOCK );
   device->unlock();
   return error;
 }
@@ -145,7 +153,7 @@ int lfs_safe_sync( const struct lfs_config *c )
   /*-------------------------------------------------
   Input protection
   -------------------------------------------------*/
-  if ( !c || c->context )
+  if ( !c || !c->context )
   {
     return LFS_ERR_INVAL;
   }
@@ -177,7 +185,7 @@ int lfs_safe_sync( const struct lfs_config *c )
 
 namespace Aurora::Memory::LFS
 {
-  bool attachDevice( IGenericDevice_sPtr &dev, lfs_config &cfg )
+  bool attachDevice( IGenericDevice_sPtr dev, lfs_config &cfg )
   {
     if ( dev )
     {
