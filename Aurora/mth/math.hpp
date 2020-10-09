@@ -17,7 +17,6 @@
 
 namespace Aurora::Math
 {
-
   /**
    *  Calculates the power of two positive integers in O(log2(p))
    *
@@ -28,6 +27,26 @@ namespace Aurora::Math
    *  @return size_t
    */
   size_t intPow( const size_t x, const size_t p );
+
+  /**
+   *  Checks to see if X and Y are nearly equal to each other within
+   *  a tolerance of epsilon.
+   *
+   *  @param[in]  x           Value 1 to be compared
+   *  @param[in]  y           Value 2 to be compared
+   *  @param[in]  epsilon     A small tolerance value (1e-9 perhaps)
+   *  @return bool            True if they are equal to within epsilon
+   */
+  bool isNearlyEqual( const float x, const float y, const float epsilon );
+
+  /**
+   *  Calculates the percent error between the given values
+   *
+   *  @param[in]  actual      The measured value
+   *  @param[in]  expected    The expected value
+   *  @return float           Percent error
+   */
+  float percentError( const float actual, const float expected );
 
 }  // namespace Aurora::Math
 
