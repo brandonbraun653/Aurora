@@ -4,7 +4,7 @@
 set(LINK_LIBS
   chimera_inc       # Chimera public headers
   aurora_inc        # Aurora public headers
-  prj_device_target # Compiler options for target device
+  aurora_build_options
 )
 
 # ====================================================
