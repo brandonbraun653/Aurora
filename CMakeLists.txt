@@ -1,6 +1,7 @@
 # ====================================================
 # Subproject Imports
 # ====================================================
+add_subdirectory("Aurora/mth")
 add_subdirectory("Aurora/src/memory")
 
 # ====================================================
@@ -15,6 +16,7 @@ export(TARGETS aurora_inc FILE "${PROJECT_BINARY_DIR}/Aurora/aurora_inc.cmake")
 
 add_library(aurora_core INTERFACE)
 target_link_libraries(aurora_core INTERFACE
+  aurora_math
   aurora_memory_generic
 )
 export(TARGETS aurora_core FILE "${PROJECT_BINARY_DIR}/Aurora/aurora_core.cmake")
