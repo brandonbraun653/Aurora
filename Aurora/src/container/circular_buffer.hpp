@@ -65,8 +65,8 @@ namespace Aurora::Container
     {
       if ( !buffer || !size )
       {
-        buffer = nullptr;
-        size   = 0;
+        mBuffer = nullptr;
+        mSize   = 0;
       }
     }
 
@@ -85,8 +85,8 @@ namespace Aurora::Container
       -------------------------------------------------*/
       if( !buffer || !size )
       {
-        buffer = nullptr;
-        size   = 0;
+        mBuffer = nullptr;
+        mSize   = 0;
         return false;
       }
 
@@ -114,7 +114,7 @@ namespace Aurora::Container
      *  Checks if the buffer contains zero elements
      *  @return bool
      */
-    bool empty() const
+    bool empty()
     {
       /*-------------------------------------------------
       Require lock as the empty check isn't atomic
@@ -164,7 +164,6 @@ namespace Aurora::Container
       mMutex.lock();
       pushOverwriteFromISR( data );
       mMutex.unlock();
-      return true;
     }
 
     /**
