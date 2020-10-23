@@ -1,0 +1,17 @@
+/********************************************************************************
+ *  File Name:
+ *    container
+ *
+ *  Description:
+ *    Aurora includes for various container implementations
+ *
+ *  2020 | Brandon Braun | brandonbraun653@gmail.com
+ ********************************************************************************/
+
+#pragma once
+#ifndef AURORA_CONTAINER_INCLUDES
+#define AURORA_CONTAINER_INCLUDES
+
+#include <Aurora/src/container/circular_buffer.hpp>
+
+#endif /* !AURORA_CONTAINER_INCLUDES */
