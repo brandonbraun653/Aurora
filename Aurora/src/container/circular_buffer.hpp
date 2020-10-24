@@ -116,14 +116,23 @@ namespace Aurora::Container
      */
     bool empty()
     {
-      /*-------------------------------------------------
-      Require lock as the empty check isn't atomic
-      -------------------------------------------------*/
       mMutex.lock();
-      bool result = ( !mFull && ( mHead == mTail ) );
+      bool result = emptyFromISR();
       mMutex.unlock();
 
       return result;
+    }
+
+    /**
+     *  Checks if the buffer contains zero elements. This function
+     *  should only be called from an ISR due to the empty check
+     *  not being atomic.
+     *
+     *  @return bool
+     */
+    bool emptyFromISR()
+    {
+      return ( !mFull && ( mHead == mTail ) );
     }
 
     /**
