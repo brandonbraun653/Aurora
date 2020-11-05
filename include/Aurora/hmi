@@ -1,0 +1,18 @@
+/********************************************************************************
+ *  File Name:
+ *    hmi
+ *
+ *  Description:
+ *    Aurora includes for human-machine interfaces
+ *
+ *  2020 | Brandon Braun | brandonbraun653@gmail.com
+ ********************************************************************************/
+
+#pragma once
+#ifndef AURORA_HMI_INCLUDES
+#define AURORA_HMI_INCLUDES
+
+#include <Aurora/source/hmi/button/hmi_button_driver.hpp>
+#include <Aurora/source/hmi/rotary_encoder/hmi_rotary_encoder_driver.hpp>
+
+#endif /* !AURORA_HMI_INCLUDES */

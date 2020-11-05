@@ -12,8 +12,8 @@
 #ifndef AURORA_GENERIC_MEMORY_INCLUDES_HPP
 #define AURORA_GENERIC_MEMORY_INCLUDES_HPP
 
-#include <Aurora/src/memory/generic/generic_intf.hpp>
-#include <Aurora/src/memory/generic/generic_types.hpp>
-#include <Aurora/src/memory/generic/generic_utils.hpp>
+#include <Aurora/source/memory/generic/generic_intf.hpp>
+#include <Aurora/source/memory/generic/generic_types.hpp>
+#include <Aurora/source/memory/generic/generic_utils.hpp>
 
 #endif  /* !AURORA_GENERIC_MEMORY_INCLUDES_HPP */

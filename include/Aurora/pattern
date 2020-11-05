@@ -1,17 +1,17 @@
 /********************************************************************************
  *  File Name:
- *    utility
+ *    pattern
  *
  *  Description:
- *    Aurora UTILITY Includes
+ *    Aurora includes for various design pattern implementations
  *
  *  2020 | Brandon Braun | brandonbraun653@gmail.com
  ********************************************************************************/
 
 #pragma once
-#ifndef AURORA_UTILITY_INCLUDES
-#define AURORA_UTILITY_INCLUDES
+#ifndef AURORA_PATTERN_INCLUDES
+#define AURORA_PATTERN_INCLUDES
 
-#include <Aurora/utilities/utility_common.hpp>
+#include <Aurora/source/structure/observer>
 
-#endif /* !AURORA_UTILITY_INCLUDES */
+#endif /* !AURORA_PATTERN_INCLUDES */

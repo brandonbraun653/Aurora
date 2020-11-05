@@ -17,7 +17,7 @@
 #include <vector>
 
 /* Aurora Includes */
-#include <Aurora/src/memory/generic/generic_types.hpp>
+#include <Aurora/source/memory/generic/generic_types.hpp>
 
 /* Chimera Includes */
 #include <Chimera/thread>

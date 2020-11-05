@@ -1,25 +1,33 @@
 # ====================================================
 # Subproject Imports
 # ====================================================
-add_subdirectory("Aurora/mth")
-add_subdirectory("Aurora/src/memory")
+add_subdirectory("source/hmi")
+add_subdirectory("source/math")
+add_subdirectory("source/memory")
 
 # ====================================================
 # Various exports
 # ====================================================
-
 # Public include location
 add_library(aurora_inc INTERFACE)
-target_include_directories(aurora_inc INTERFACE ".")
+target_include_directories(aurora_inc INTERFACE "./../" "./include")
 export(TARGETS aurora_inc FILE "${PROJECT_BINARY_DIR}/Aurora/aurora_inc.cmake")
 
-
+# Core Library
 add_library(aurora_core INTERFACE)
 target_link_libraries(aurora_core INTERFACE
   aurora_math
   aurora_memory_generic
 )
 export(TARGETS aurora_core FILE "${PROJECT_BINARY_DIR}/Aurora/aurora_core.cmake")
+
+# Human-Machine Interface Library
+add_library(aurora_hmi INTERFACE)
+target_link_libraries(aurora_hmi INTERFACE
+  aurora_hmi_button
+  aurora_hmi_rotary_encoder
+)
+export(TARGETS aurora_hmi FILE "${PROJECT_BINARY_DIR}/Aurora/aurora_hmi.cmake")
 
 
 # ====================================================

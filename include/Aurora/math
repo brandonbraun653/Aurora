@@ -12,7 +12,7 @@
 #ifndef AURORA_MATH_INCLUDES
 #define AURORA_MATH_INCLUDES
 
-#include <Aurora/mth/conversion.hpp>
-#include <Aurora/mth/math.hpp>
+#include <Aurora/source/math/conversion.hpp>
+#include <Aurora/source/math/math.hpp>
 
 #endif /* !AURORA_MATH_INCLUDES */

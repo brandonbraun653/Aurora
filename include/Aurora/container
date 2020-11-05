@@ -1,17 +1,17 @@
 /********************************************************************************
  *  File Name:
- *    pattern
+ *    container
  *
  *  Description:
- *    Aurora includes for various design pattern implementations
+ *    Aurora includes for various container implementations
  *
  *  2020 | Brandon Braun | brandonbraun653@gmail.com
  ********************************************************************************/
 
 #pragma once
-#ifndef AURORA_PATTERN_INCLUDES
-#define AURORA_PATTERN_INCLUDES
+#ifndef AURORA_CONTAINER_INCLUDES
+#define AURORA_CONTAINER_INCLUDES
 
-#include <Aurora/structure/observer>
+#include <Aurora/source/container/circular_buffer.hpp>
 
-#endif /* !AURORA_PATTERN_INCLUDES */
+#endif /* !AURORA_CONTAINER_INCLUDES */

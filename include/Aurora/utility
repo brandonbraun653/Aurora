@@ -1,17 +1,17 @@
 /********************************************************************************
  *  File Name:
- *    container
+ *    utility
  *
  *  Description:
- *    Aurora includes for various container implementations
+ *    Aurora Utility Includes
  *
  *  2020 | Brandon Braun | brandonbraun653@gmail.com
  ********************************************************************************/
 
 #pragma once
-#ifndef AURORA_CONTAINER_INCLUDES
-#define AURORA_CONTAINER_INCLUDES
+#ifndef AURORA_UTIL_INCLUDES
+#define AURORA_UTIL_INCLUDES
 
-#include <Aurora/src/container/circular_buffer.hpp>
+#include <Aurora/source/util/utility_common.hpp>
 
-#endif /* !AURORA_CONTAINER_INCLUDES */
+#endif /* !AURORA_UTIL_INCLUDES */

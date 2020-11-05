@@ -16,7 +16,7 @@
 #include "lfs.h"
 
 /* Aurora Includes */
-#include <Aurora/src/memory/generic/generic_intf.hpp>
+#include <Aurora/source/memory/generic/generic_intf.hpp>
 
 /*-------------------------------------------------------------------------------
 Public Functions

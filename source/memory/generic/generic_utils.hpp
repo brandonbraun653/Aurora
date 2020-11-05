@@ -17,7 +17,7 @@
 #include <limits>
 
 /* Aurora Includes */
-#include <Aurora/src/memory/generic/generic_types.hpp>
+#include <Aurora/source/memory/generic/generic_types.hpp>
 
 namespace Aurora::Memory
 {
