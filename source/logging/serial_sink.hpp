@@ -1,25 +1,21 @@
 /********************************************************************************
- *   File Name:
+ *  File Name:
  *    serial_sink.hpp
  *
- *   Description:
+ *  Description:
  *    Defines the interface to a serial based sink for the uLogger system.
  *
- *   Links:
- *    https://github.com/brandonbraun653/uLog
- *
- *   2019 | Brandon Braun | brandonbraun653@gmail.com
+ *  2019-2020 | Brandon Braun | brandonbraun653@gmail.com
  ********************************************************************************/
 
 #pragma once
-#ifndef CHIMERA_MODULES_MICRO_LOGGER_SINK_HPP
-#define CHIMERA_MODULES_MICRO_LOGGER_SINK_HPP
+#ifndef AURORA_LOGGING_SERIAL_SINK_HPP
+#define AURORA_LOGGING_SERIAL_SINK_HPP
 
 /* C++ Includes */
 #include <cstdlib>
 
 /* uLog Includes */
-#if __has_include( <uLog/uLog.hpp>)
 #include <uLog/ulog.hpp>
 #include <uLog/types.hpp>
 #include <uLog/sinks/sink_intf.hpp>
@@ -27,11 +23,9 @@
 /* Chimera Includes */
 #include <Chimera/serial>
 
-#define CHIMERA_MODULES_ULOG_SUPPORT 1
-
-namespace Chimera::Modules::uLog
+namespace Aurora::Logging
 {
-  class SerialSink : public ::uLog::SinkInterface
+  class SerialSink : virtual public ::uLog::SinkInterface
   {
   public:
     /**
@@ -40,29 +34,29 @@ namespace Chimera::Modules::uLog
      *  multiple threads and has already been initialized.
      *
      *  @param[in]  channel   Which channel to hook into
-     *  @param[in]  init      Whether or not to initialize the Serial hardware
      */
-    SerialSink( Chimera::Serial::Channel channel, bool init );
+    explicit SerialSink( Chimera::Serial::Channel channel );
     SerialSink();
     ~SerialSink();
 
+    /**
+     *  Assigns the serial channel to use when the default
+     *  constructor was used.
+     *
+     *  @param[in]  channel   Which channel to hook into
+     *  @return void
+     */
+    void assignChannel( Chimera::Serial::Channel channel );
+
     ::uLog::Result open() final override;
-
     ::uLog::Result close() final override;
-
     ::uLog::Result flush() final override;
-
     ::uLog::IOType getIOType() final override;
-
     ::uLog::Result log( const ::uLog::Level level, const void *const message, const size_t length ) final override;
 
   private:
-    bool mInitHW;
     Chimera::Serial::Channel mSerialChannel;
   };
-}  // namespace Chimera::Modules::uLog
+}  // namespace Aurora::Logging
 
-
-#endif /* __has_include( <uLog/uLog.hpp> )*/
-
-#endif /* !CHIMERA_MODULES_MICRO_LOGGER_SINK_HPP */
+#endif /* !AURORA_LOGGING_SERIAL_SINK_HPP */

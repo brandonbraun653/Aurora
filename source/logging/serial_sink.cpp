@@ -8,54 +8,49 @@
  *  2019-2020 | Brandon Braun | brandonbraun653@gmail.com
  ********************************************************************************/
 
-/* C++ Includes */
-#include <array>
-
 /* Serial Sink Includes */
-#include <Aurora/logging/serial_sink.hpp>
-#include <Aurora/logging/serial_sink_config.hpp>
+#include <Aurora/logging>
 
 /* Chimera Includes */
+#include <Chimera/event>
 #include <Chimera/serial>
+#include <Chimera/thread>
 
-/* Boost Includes */
-#include <boost/circular_buffer.hpp>
 
-#if defined( CHIMERA_MODULES_ULOG_SUPPORT ) && ( CHIMERA_MODULES_ULOG_SUPPORT == 1 )
-
-static Chimera::Serial::Driver_sPtr sink;
-static boost::circular_buffer<uint8_t> buffer( 256 );
-static std::array<uint8_t, 256> hwBuffer;
-
-namespace Chimera::Modules::uLog
+namespace Aurora::Logging
 {
-  SerialSink::SerialSink( Chimera::Serial::Channel channel, bool init ) : mInitHW( init ), mSerialChannel( channel )
+  /*-------------------------------------------------------------------------------
+  Static Data
+  -------------------------------------------------------------------------------*/
+  static Chimera::Serial::Driver_sPtr sink;
+
+  /*-------------------------------------------------------------------------------
+  Driver Implementation
+  -------------------------------------------------------------------------------*/
+  SerialSink::SerialSink( Chimera::Serial::Channel channel ) : mSerialChannel( channel )
   {
   }
 
-  SerialSink::SerialSink() : mInitHW( true ), mSerialChannel( SerialChannel )
+
+  SerialSink::SerialSink() : mSerialChannel( Chimera::Serial::Channel::NOT_SUPPORTED )
   {
   }
+
 
   SerialSink::~SerialSink()
   {
-    sink = nullptr;
-    hwBuffer.fill( 0 );
-    buffer.clear();
+    sink.reset();
   }
+
+
+  void SerialSink::assignChannel( Chimera::Serial::Channel channel )
+  {
+    mSerialChannel = channel;
+  }
+
 
   ::uLog::Result SerialSink::open()
   {
-    Chimera::Status_t hwResult = Chimera::Status::OK;
-    ::uLog::Result sinkResult  = ::uLog::Result::RESULT_SUCCESS;
-
-    /*-------------------------------------------------
-    Initialize the buffer memory
-    -------------------------------------------------*/
-    buffer.clear();
-    buffer.linearize();
-    hwBuffer.fill( 0 );
-
     /*-------------------------------------------------
     Grab a reference to the underlying serial driver
     -------------------------------------------------*/
@@ -65,36 +60,17 @@ namespace Chimera::Modules::uLog
     }
 
     /*------------------------------------------------
-    Initialize the hardware
-    ------------------------------------------------*/
-    if( mInitHW )
-    {
-      Chimera::Serial::Config cfg;
-      cfg.baud     = static_cast<size_t>( SerialBaud );
-      cfg.flow     = SerialFlowCtrl;
-      cfg.parity   = SerialParity;
-      cfg.stopBits = SerialStopBits;
-      cfg.width    = SerialCharWid;
-
-      auto hwMode = Chimera::Hardware::PeripheralMode::INTERRUPT;
-
-      hwResult |= sink->assignHW( mSerialChannel, SerialPins );
-      hwResult |= sink->configure( cfg );
-      hwResult |= sink->begin( hwMode, hwMode );
-      hwResult |= sink->enableBuffering( Chimera::Hardware::SubPeripheral::TX, &buffer, hwBuffer.data(), hwBuffer.size() );
-    }
-
-    /*------------------------------------------------
     Mask the error code into a simple pass/fail. I don't think the sinks
     in general should support complicated return codes.
     ------------------------------------------------*/
-    if ( hwResult != Chimera::Status::OK )
+    if ( !sink )
     {
-      sinkResult = ::uLog::Result::RESULT_FAIL;
+      return ::uLog::Result::RESULT_FAIL;
     }
 
-    return sinkResult;
+    return ::uLog::Result::RESULT_SUCCESS;
   }
+
 
   ::uLog::Result SerialSink::close()
   {
@@ -108,6 +84,7 @@ namespace Chimera::Modules::uLog
     return sinkResult;
   }
 
+
   ::uLog::Result SerialSink::flush()
   {
     ::uLog::Result sinkResult = ::uLog::Result::RESULT_SUCCESS;
@@ -120,10 +97,12 @@ namespace Chimera::Modules::uLog
     return sinkResult;
   }
 
+
   ::uLog::IOType SerialSink::getIOType()
   {
     return ::uLog::IOType::SERIAL_SINK;
   }
+
 
   ::uLog::Result SerialSink::log( const ::uLog::Level level, const void *const message, const size_t length )
   {
@@ -145,19 +124,16 @@ namespace Chimera::Modules::uLog
     auto ulResult = ::uLog::Result::RESULT_SUCCESS;
 
     sink->lock();
-
-    hwResult |= sink->write( reinterpret_cast<const uint8_t *const>( message ), length, TIMEOUT_DONT_WAIT );
-    hwResult |= sink->await( Chimera::Event::TRIGGER_WRITE_COMPLETE, TIMEOUT_BLOCK );
+    hwResult |= sink->write( message, length );
+    hwResult |= sink->await( Chimera::Event::Trigger::TRIGGER_WRITE_COMPLETE, TIMEOUT_BLOCK );
+    sink->unlock();
 
     if ( hwResult != Chimera::Status::OK )
     {
       ulResult = ::uLog::Result::RESULT_FAIL;
     }
 
-    sink->unlock();
-
     return ulResult;
   }
-}  // namespace Chimera::Modules::uLog
 
-#endif /* CHIMERA_MODULES_ULOG_SUPPORT */
+}  // namespace Aurora::Logging
