@@ -22,7 +22,7 @@ namespace Aurora::HMI::Button
   /*-------------------------------------------------------------------------------
   EdgeTrigger Implementation
   -------------------------------------------------------------------------------*/
-  EdgeTrigger::EdgeTrigger() : mCallback( EdgeCallback() ), mConfig( {} ), mNumEvents( 0 )
+  EdgeTrigger::EdgeTrigger() : mCallback( EdgeCallback() ), mConfig( {} ), mNumEvents( 0 ), mMaxNumSamples( 0 )
   {
   }
 
@@ -51,7 +51,7 @@ namespace Aurora::HMI::Button
     }
     else
     {
-      mLock.lock();
+      this->lock();
       mConfig = cfg;
     }
 
@@ -99,14 +99,14 @@ namespace Aurora::HMI::Button
     result |= driver->init( mConfig.gpioConfig );
     result |= driver->attachInterrupt( cb, edgeTrigger );
 
-    mLock.unlock();
+    this->unlock();
     return ( result == Chimera::Status::OK );
   }
 
 
   void EdgeTrigger::reset()
   {
-    mLock.lock();
+    this->lock();
 
     /*-------------------------------------------------
     Reset the trackers
@@ -126,7 +126,7 @@ namespace Aurora::HMI::Button
     -------------------------------------------------*/
     Chimera::EXTI::disable( driver->getInterruptLine() );
 
-    mLock.unlock();
+    this->unlock();
   }
 
 
@@ -152,9 +152,9 @@ namespace Aurora::HMI::Button
 
   size_t EdgeTrigger::numEdgeEvents()
   {
-    mLock.lock();
+    this->lock();
     auto tmp = mNumEvents;
-    mLock.unlock();
+    this->unlock();
 
     return tmp;
   }
@@ -162,9 +162,9 @@ namespace Aurora::HMI::Button
 
   ActiveEdge EdgeTrigger::getActiveEdge()
   {
-    mLock.lock();
+    this->lock();
     auto tmp = mConfig.activeEdge;
-    mLock.unlock();
+    this->unlock();
 
     return tmp;
   }
@@ -185,15 +185,15 @@ namespace Aurora::HMI::Button
     function should be active for. Div zero protected
     by the initialization sequence.
     -------------------------------------------------*/
-    size_t numSamples = mConfig.debounceTime / mConfig.sampleRate;
+    mCurrentNumSamples = 0;
+    mMaxNumSamples     = mConfig.debounceTime / mConfig.sampleRate;
 
     /*-------------------------------------------------
     Register a periodic function with the scheduler to
     poll the GPIO state for a bit.
     -------------------------------------------------*/
     auto cb = Chimera::Function::Opaque::create<EdgeTrigger, &EdgeTrigger::gpioEdgeSamplerCallback>( *this );
-
-    Chimera::Scheduler::LoRes::periodic( cb, mConfig.sampleRate, numSamples );
+    Chimera::Scheduler::LoRes::periodic( cb, mConfig.sampleRate, mMaxNumSamples );
   }
 
 
@@ -210,6 +210,7 @@ namespace Aurora::HMI::Button
     Shift the filter because a single sample has passed
     -------------------------------------------------*/
     mDebounced = mDebounced << 1u;
+    mCurrentNumSamples++;
 
     /*-------------------------------------------------
     Assuming the state is valid, fill in the spot just
@@ -271,9 +272,10 @@ namespace Aurora::HMI::Button
       /*-------------------------------------------------
       Update trackers
       -------------------------------------------------*/
-      mLock.lock();
+      this->lock();
       mNumEvents++;
-      mLock.unlock();
+      mCurrentNumSamples = 0;
+      this->unlock();
 
       mDebounced = 0;
       Chimera::Scheduler::LoRes::cancel_this();
@@ -290,6 +292,19 @@ namespace Aurora::HMI::Button
       {
         mCallback( mConfig.activeEdge );
       }
+    }
+    else if ( mCurrentNumSamples >= mMaxNumSamples )
+    {
+      /*-------------------------------------------------
+      The polling process was unable to find a stable
+      sampling, so simply re-enable the listener in hopes
+      of catching it the next time around.
+      -------------------------------------------------*/
+      this->lock();
+      mCurrentNumSamples = 0;
+      mDebounced         = 0;
+      this->enable();
+      this->unlock();
     }
     // else button not sufficiently debounced yet
   }

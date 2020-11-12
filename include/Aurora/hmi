@@ -13,6 +13,7 @@
 #define AURORA_HMI_INCLUDES
 
 #include <Aurora/source/hmi/button/hmi_button_driver.hpp>
+#include <Aurora/source/hmi/button/hmi_button_types.hpp>
 #include <Aurora/source/hmi/rotary_encoder/hmi_rotary_encoder_driver.hpp>
 
 #endif /* !AURORA_HMI_INCLUDES */

@@ -16,46 +16,18 @@
 #define AURORA_HMI_GPIO_BUTTON_HPP
 
 /* Chimera Includes */
-#include <Chimera/function>
 #include <Chimera/gpio>
 #include <Chimera/thread>
+
+/* Aurora Includes */
+#include <Aurora/source/hmi/button/hmi_button_types.hpp>
 
 namespace Aurora::HMI::Button
 {
   /*-------------------------------------------------------------------------------
-  Enumerations
-  -------------------------------------------------------------------------------*/
-  enum class ActiveEdge : uint8_t
-  {
-    RISING_EDGE,  /**< Signal active on rising edge triggers */
-    FALLING_EDGE, /**< Signal active on falling edge triggers */
-    BOTH_EDGES,   /**< Signal active on both edges */
-
-    NUM_OPTIONS,
-    UNKNOWN
-  };
-
-  /*-------------------------------------------------------------------------------
-  Aliases
-  -------------------------------------------------------------------------------*/
-  using EdgeCallback = etl::delegate<void( ActiveEdge )>;
-
-  /*-------------------------------------------------------------------------------
-  Structures
-  -------------------------------------------------------------------------------*/
-  struct EdgeConfig
-  {
-    Chimera::GPIO::PinInit gpioConfig; /**< GPIO hardware configuration */
-    ActiveEdge activeEdge;             /**< Which edge to trigger on */
-    size_t debounceTime;               /**< Max sample time before GPIO is considered debounced (mS) */
-    size_t sampleRate;                 /**< Period at which to sample GPIO logic state (mS) */
-    size_t stableSamples;              /**< Number of samples at which to consider GPIO state stable */
-  };
-
-  /*-------------------------------------------------------------------------------
   Classes
   -------------------------------------------------------------------------------*/
-  class EdgeTrigger
+  class EdgeTrigger : public Chimera::Threading::Lockable
   {
   public:
     EdgeTrigger();
@@ -123,13 +95,28 @@ namespace Aurora::HMI::Button
 
 
   private:
-    EdgeCallback mCallback;
-    EdgeConfig mConfig;
-    size_t mNumEvents;
-    size_t mDebounced;
-    Chimera::Threading::RecursiveMutex mLock;
+    EdgeCallback mCallback;    /**< User callback when the configured edge fires */
+    EdgeConfig mConfig;        /**< Cached configuration settings */
+    size_t mNumEvents;         /**< How many edge events pending being processed */
+    size_t mDebounced;         /**< Internal filter for tracking GPIO state on each sample */
+    size_t mMaxNumSamples;     /**< How many samples are needed for detecting a debunced edge */
+    size_t mCurrentNumSamples; /**< Number of samples currently processed */
 
+    /**
+     *  Callback used for the EXTI drivers. This handles simple edge
+     *  detection behaviors
+     *
+     *  @param[in]  arg       Unused
+     *  @return void
+     */
     void gpioEdgeTriggerCallback( void *arg );
+
+    /**
+     *  Callback used for Scheduler to periodically sample the GPIO
+     *  state to see when it becomes stable.
+     *
+     *  @return void
+     */
     void gpioEdgeSamplerCallback();
   };
 }  // namespace Aurora::HMI::Button
