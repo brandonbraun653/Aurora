@@ -43,7 +43,7 @@ namespace Aurora::Container
     /**
      *  Default constructor. Requires calling the init method later.
      */
-    CircularBuffer() : mFull( false ), mBuffer( nullptr ), mSize( 0 ), mMaxSize( 0 ), mHead( 0 ), mTail( 0 )
+    CircularBuffer() : mFull( false ), mBuffer( nullptr ), mSize( 0 ), mMaxSize( 0 ), mHead( 0 ), mTail( 0 ), mMutex()
     {
     }
 
@@ -61,7 +61,7 @@ namespace Aurora::Container
      *  @param[in]  size        Number of elements that the buffer can hold (not byte size)
      */
     explicit CircularBuffer( T *const buffer, const size_t size ) :
-        mFull( false ), mBuffer( buffer ), mSize( 0 ), mMaxSize( size ), mHead( 0 ), mTail( 0 )
+        mFull( false ), mBuffer( buffer ), mSize( 0 ), mMaxSize( size ), mHead( 0 ), mTail( 0 ), mMutex()
     {
       if ( !buffer || !size )
       {
@@ -83,7 +83,7 @@ namespace Aurora::Container
       /*-------------------------------------------------
       Input protection
       -------------------------------------------------*/
-      if( !buffer || !size )
+      if ( !buffer || !size )
       {
         mBuffer = nullptr;
         mSize   = 0;
@@ -93,7 +93,8 @@ namespace Aurora::Container
       /*-------------------------------------------------
       Reset the buffer to default state
       -------------------------------------------------*/
-      mBuffer = buffer;
+      mBuffer  = buffer;
+      mMaxSize = size;
       reset();
       return true;
     }
@@ -106,6 +107,7 @@ namespace Aurora::Container
     {
       mMutex.lock();
       mHead = 0;
+      mSize = 0;
       mTail = 0;
       mMutex.unlock();
     }
@@ -168,7 +170,7 @@ namespace Aurora::Container
      *  @param[in]  data        The element to write
      *  @return void
      */
-    void pushOverwrite( const T& data )
+    void pushOverwrite( const T &data )
     {
       mMutex.lock();
       pushOverwriteFromISR( data );
@@ -183,11 +185,11 @@ namespace Aurora::Container
      *  @param[in]  data        The element to write
      *  @return void
      */
-    void pushOverwriteFromISR( const T& data)
+    void pushOverwriteFromISR( const T &data )
     {
       mBuffer[ mHead ] = data;
 
-      if( mFull )
+      if ( mFull )
       {
         mTail = ( mTail + 1 ) % mMaxSize;
       }
@@ -196,7 +198,7 @@ namespace Aurora::Container
         mSize++;
       }
 
-      mHead = ( mHead + 1 ) % mMaxSize ;
+      mHead = ( mHead + 1 ) % mMaxSize;
       mFull = ( mHead == mTail );
     }
 
@@ -207,7 +209,7 @@ namespace Aurora::Container
      *  @param[in] data         The element to write
      *  @return bool            True if the write succeeds, else False
      */
-    bool push( const T& data)
+    bool push( const T &data )
     {
       bool result = false;
 
@@ -227,13 +229,13 @@ namespace Aurora::Container
      */
     bool pushFromISR( const T &data )
     {
-      if( !mFull )
+      if ( !mFull )
       {
         mBuffer[ mHead ] = data;
 
         mSize++;
-        mHead  = ( mHead + 1 ) % mMaxSize;
-        mFull  = ( mHead == mTail );
+        mHead = ( mHead + 1 ) % mMaxSize;
+        mFull = ( mHead == mTail );
         return true;
       }
 
@@ -270,7 +272,7 @@ namespace Aurora::Container
       /*-------------------------------------------------
       Return a default contstructed object if empty
       -------------------------------------------------*/
-      if( empty() )
+      if ( empty() )
       {
         return T();
       }
@@ -288,7 +290,7 @@ namespace Aurora::Container
 
   private:
     bool mFull;
-    T* mBuffer;
+    T *mBuffer;
     size_t mSize;
     size_t mMaxSize;
     size_t mHead;
@@ -297,4 +299,4 @@ namespace Aurora::Container
   };
 }  // namespace Aurora::Container
 
-#endif  /* !AURORA_CIRCULAR_BUFFER_HPP */
+#endif /* !AURORA_CIRCULAR_BUFFER_HPP */

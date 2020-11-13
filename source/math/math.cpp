@@ -56,7 +56,8 @@ namespace Aurora::Math
     /*-------------------------------------------------
     Percent error calculation
     -------------------------------------------------*/
-    return ( std::abs( actual - expected ) / expected ) * 100.0f;
+    float result = ( std::abs( actual - expected ) / expected ) * 100.0f;
+    return result;
   }
 
 }  // namespace Aurora::Math
