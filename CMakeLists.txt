@@ -1,3 +1,5 @@
+include("${COMMON_TOOL_ROOT}/cmake/utility/embedded.cmake")
+
 # ====================================================
 # 3rd Party Libraries
 # ====================================================
@@ -27,40 +29,36 @@ target_link_libraries(aurora_inc INTERFACE etl_inc)
 export(TARGETS aurora_inc FILE "${PROJECT_BINARY_DIR}/Aurora/aurora_inc.cmake")
 
 # Core Library
-add_library(aurora_core INTERFACE)
-target_link_libraries(aurora_core INTERFACE
-  aurora_math
-  aurora_memory_generic
-)
-export(TARGETS aurora_core FILE "${PROJECT_BINARY_DIR}/Aurora/aurora_core.cmake")
+function(build_core variant)
+  add_library(aurora_core${variant} INTERFACE)
+  target_link_libraries(aurora_core${variant} INTERFACE
+    aurora_math${variant}
+    aurora_memory_generic${variant}
+  )
+  export(TARGETS aurora_core${variant} FILE "${PROJECT_BINARY_DIR}/Aurora/aurora_core${variant}.cmake")
+endfunction()
+add_target_variants(build_core)
+
 
 # Human-Machine Interface Library
-add_library(aurora_hmi INTERFACE)
-target_link_libraries(aurora_hmi INTERFACE
-  aurora_hmi_button
-  aurora_hmi_rotary_encoder
-)
-export(TARGETS aurora_hmi FILE "${PROJECT_BINARY_DIR}/Aurora/aurora_hmi.cmake")
+function(build_hmi variant)
+  add_library(aurora_hmi${variant} INTERFACE)
+  target_link_libraries(aurora_hmi${variant} INTERFACE
+    aurora_hmi_button${variant}
+    aurora_hmi_rotary_encoder${variant}
+  )
+  export(TARGETS aurora_hmi${variant} FILE "${PROJECT_BINARY_DIR}/Aurora/aurora_hmi${variant}.cmake")
+endfunction()
+add_target_variants(build_hmi)
+
 
 # Logging Library
-add_library(aurora_logging INTERFACE)
-target_link_libraries(aurora_logging INTERFACE
-  ulog_core
-  aurora_log_serial
-)
-export(TARGETS aurora_logging FILE "${PROJECT_BINARY_DIR}/Aurora/aurora_logging.cmake")
-
-
-# ====================================================
-# Custom Compiler Options:
-# By default always build release variant
-# ====================================================
-set(BUILD_OPTIONS aurora_build_options)
-add_library(${BUILD_OPTIONS} INTERFACE)
-target_link_libraries(${BUILD_OPTIONS} INTERFACE
-  prj_build_target
-  #prj_build_target_rel
-  #prj_build_target_dbg
-  prj_device_target
-)
-export(TARGETS ${BUILD_OPTIONS} FILE "${PROJECT_BINARY_DIR}/Aurora/${BUILD_OPTIONS}.cmake")
+function(build_logging variant)
+  add_library(aurora_logging${variant} INTERFACE)
+  target_link_libraries(aurora_logging${variant} INTERFACE
+    ulog_core${variant}
+    aurora_log_serial${variant}
+  )
+  export(TARGETS aurora_logging${variant} FILE "${PROJECT_BINARY_DIR}/Aurora/aurora_logging${variant}.cmake")
+endfunction()
+add_target_variants(build_logging)
