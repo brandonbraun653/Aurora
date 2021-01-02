@@ -11,6 +11,10 @@ add_library(type_safe_inc INTERFACE)
 target_include_directories(type_safe_inc INTERFACE "lib/type_safe/include")
 export(TARGETS type_safe_inc FILE "${PROJECT_BINARY_DIR}/Aurora/lib/type-safe-inc.cmake")
 
+add_library(ctre_inc INTERFACE)
+target_include_directories(ctre_inc INTERFACE "lib/ctre/single-header")
+export(TARGETS ctre_inc FILE "${PROJECT_BINARY_DIR}/Aurora/lib/ctre_inc.cmake")
+
 # ====================================================
 # Subproject Imports
 # ====================================================
