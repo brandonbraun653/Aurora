@@ -21,18 +21,18 @@ namespace Aurora::Memory
     -------------------------------------------------*/
     bool areValid = true;
 
-    /*-------------------------------------------------
-    Non-zero sizing fields
-    -------------------------------------------------*/
-    areValid &= ( cfg.pageSize != 0 ) && ( cfg.numPages != 0 );
-    areValid &= ( cfg.blockSize != 0 ) && ( cfg.numBlocks != 0 );
-    areValid &= ( cfg.sectorSize != 0 ) && ( cfg.numSectors != 0 );
+    // /*-------------------------------------------------
+    // Non-zero sizing fields
+    // -------------------------------------------------*/
+    // areValid &= ( cfg.pageSize != 0 ) && ( cfg.numPages != 0 );
+    // areValid &= ( cfg.blockSize != 0 ) && ( cfg.numBlocks != 0 );
+    // areValid &= ( cfg.sectorSize != 0 ) && ( cfg.numSectors != 0 );
 
-    /*-------------------------------------------------
-    Sizing follows logical structure
-    -------------------------------------------------*/
-    areValid &= ( cfg.pageSize < cfg.blockSize ) && ( cfg.pageSize < cfg.sectorSize );
-    areValid &= ( cfg.blockSize < cfg.sectorSize );
+    // /*-------------------------------------------------
+    // Sizing follows logical structure
+    // -------------------------------------------------*/
+    // areValid &= ( cfg.pageSize < cfg.blockSize ) && ( cfg.pageSize < cfg.sectorSize );
+    // areValid &= ( cfg.blockSize < cfg.sectorSize );
 
     return areValid;
   }

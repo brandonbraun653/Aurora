@@ -32,19 +32,24 @@ target_include_directories(aurora_inc INTERFACE "./../" "./include")
 target_link_libraries(aurora_inc INTERFACE etl_inc)
 export(TARGETS aurora_inc FILE "${PROJECT_BINARY_DIR}/Aurora/aurora_inc.cmake")
 
+# ====================================================
 # Core Library
+# ====================================================
 function(build_core variant)
   add_library(aurora_core${variant} INTERFACE)
   target_link_libraries(aurora_core${variant} INTERFACE
     aurora_math${variant}
     aurora_memory_generic${variant}
+    aurora_memory_nor_flash${variant}
   )
   export(TARGETS aurora_core${variant} FILE "${PROJECT_BINARY_DIR}/Aurora/aurora_core${variant}.cmake")
 endfunction()
 add_target_variants(build_core)
 
 
+# ====================================================
 # Human-Machine Interface Library
+# ====================================================
 function(build_hmi variant)
   add_library(aurora_hmi${variant} INTERFACE)
   target_link_libraries(aurora_hmi${variant} INTERFACE
@@ -56,7 +61,9 @@ endfunction()
 add_target_variants(build_hmi)
 
 
+# ====================================================
 # Logging Library
+# ====================================================
 function(build_logging variant)
   add_library(aurora_logging${variant} INTERFACE)
   target_link_libraries(aurora_logging${variant} INTERFACE

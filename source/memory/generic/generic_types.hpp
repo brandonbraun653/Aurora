@@ -99,28 +99,15 @@ namespace Aurora::Memory
    */
   struct Properties
   {
-    size_t pageSize; /**< Page size of the device in bytes */
-    size_t numPages; /**< Total number of pages */
-
-    size_t blockSize; /**< Block size of the device in bytes */
-    size_t numBlocks; /**< Total number of blocks */
-
-    size_t sectorSize; /**< Sector size of the device in bytes */
-    size_t numSectors; /**< Total number of sectors */
-
-    size_t startAddress; /**< Starting address of the device region in memory */
-    size_t endAddress;   /**< Ending address of the device region in memory */
-
-    uint16_t jedec; /**< Device manufacturer's JEDEC code */
-
-    Chunk writeChunk; /**< Min chunk size for writing */
-    Chunk readChunk;  /**< Min chunk size for reading */
-    Chunk eraseChunk; /**< Min chunk size for erasing */
-
-    void clear()
-    {
-      memset( this, 0, sizeof( Properties ) );
-    }
+    Chunk writeChunk;      /**< Desired unit size for writing */
+    Chunk readChunk;       /**< Desired unit size for reading */
+    Chunk eraseChunk;      /**< Desired unit size for erasing */
+    uint8_t jedec;         /**< Device manufacturer's JEDEC code */
+    uint16_t pageSize;     /**< Page size of the device in bytes */
+    uint16_t blockSize;    /**< Block size of the device in bytes */
+    uint16_t sectorSize;   /**< Sector size of the device in bytes */
+    uint32_t startAddress; /**< Starting address of the device region in memory */
+    uint32_t endAddress;   /**< Ending address of the device region in memory */
   };
 
 }  // namespace Aurora::Memory

@@ -14,4 +14,10 @@
 
 #include <Aurora/source/memory/generic/generic_inc.hpp>
 
+/*-------------------------------------------------
+NOR Flash Driver
+-------------------------------------------------*/
+#include <Aurora/source/memory/flash/nor/nor_generic_driver.hpp>
+#include <Aurora/source/memory/flash/nor/nor_generic_types.hpp>
+
 #endif /* !AURORA_MEMORY_INCLUDES */
