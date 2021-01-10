@@ -88,6 +88,7 @@ namespace Aurora::Flash::NOR
     Aurora::Memory::Status erase( const size_t chunk ) final override;
     Aurora::Memory::Status erase() final override;
     Aurora::Memory::Status flush() final override;
+    Aurora::Memory::Status pendEvent( const Aurora::Memory::Event event, const size_t timeout ) final override;
 
     /*-------------------------------------------------
     NOR Driver Interface
@@ -101,15 +102,9 @@ namespace Aurora::Flash::NOR
      */
     bool configure( const Chip_t device, const Chimera::SPI::Channel channel );
 
-    /**
-     *  Reads the status register bytes
-     *
-     *  @return uint16_t
-     */
-    uint16_t readStatusRegister();
-
   private:
-    Chip_t mChip;                                      /**< Memory chip in use */
+    Chip_t mChip;                                    /**< Memory chip in use */
+    Chimera::SPI::Channel mSPIChannel;               /**< SPI driver channel */
     Chimera::SPI::Driver_sPtr mSPI;                  /**< SPI driver instance */
     std::array<uint8_t, CFI::MAX_CMD_LEN> cmdBuffer; /**< Buffer for holding a command sequence */
 

@@ -28,9 +28,9 @@ namespace Aurora::Flash::NOR
   bool unitChunk2Address( const size_t unitSize, const size_t unitId, const size_t maxAddress, size_t *address )
   {
     size_t physicalAddress = unitSize * unitId;
-    bool isValid = physicalAddress < maxAddress;
+    bool isValid           = physicalAddress < maxAddress;
 
-    if( isValid && address )
+    if ( isValid && address )
     {
       *address = physicalAddress;
     }
@@ -74,7 +74,7 @@ namespace Aurora::Flash::NOR
     Input Protection
     -------------------------------------------------*/
     auto props = getProperties( device );
-    if( !props )
+    if ( !props )
     {
       return false;
     }
@@ -92,7 +92,7 @@ namespace Aurora::Flash::NOR
     Input Protection
     -------------------------------------------------*/
     auto props = getProperties( device );
-    if( !props )
+    if ( !props )
     {
       return false;
     }
@@ -110,7 +110,7 @@ namespace Aurora::Flash::NOR
     Input Protection
     -------------------------------------------------*/
     auto props = getProperties( device );
-    if( !props )
+    if ( !props )
     {
       return false;
     }
@@ -162,7 +162,7 @@ namespace Aurora::Flash::NOR
     {
       return Aurora::Memory::Status::ERR_BAD_ARG;
     }
-    else if( props = getProperties( mChip ); !props )
+    else if ( props = getProperties( mChip ); !props )
     {
       return Aurora::Memory::Status::ERR_UNSUPPORTED;
     }
@@ -171,9 +171,9 @@ namespace Aurora::Flash::NOR
     Figure out the chunk size in use
     -------------------------------------------------*/
     size_t address = 0;
-    bool validity = false;
+    bool validity  = false;
 
-    switch( props->writeChunk )
+    switch ( props->writeChunk )
     {
       case Chunk::PAGE:
         validity = page2Address( mChip, chunk, &address );
@@ -192,7 +192,7 @@ namespace Aurora::Flash::NOR
         break;
     }
 
-    if( !validity )
+    if ( !validity )
     {
       return Status::ERR_BAD_ARG;
     }
@@ -258,7 +258,7 @@ namespace Aurora::Flash::NOR
     {
       return Aurora::Memory::Status::ERR_BAD_ARG;
     }
-    else if( props = getProperties( mChip ); !props )
+    else if ( props = getProperties( mChip ); !props )
     {
       return Aurora::Memory::Status::ERR_UNSUPPORTED;
     }
@@ -267,9 +267,9 @@ namespace Aurora::Flash::NOR
     Figure out the chunk size in use
     -------------------------------------------------*/
     size_t address = 0;
-    bool validity = false;
+    bool validity  = false;
 
-    switch( props->readChunk )
+    switch ( props->readChunk )
     {
       case Chunk::PAGE:
         validity = page2Address( mChip, chunk, &address );
@@ -288,7 +288,7 @@ namespace Aurora::Flash::NOR
         break;
     }
 
-    if( !validity )
+    if ( !validity )
     {
       return Status::ERR_BAD_ARG;
     }
@@ -343,7 +343,7 @@ namespace Aurora::Flash::NOR
     Input Protection
     -------------------------------------------------*/
     const Properties *props = nullptr;
-    if( props = getProperties( mChip ); !props )
+    if ( props = getProperties( mChip ); !props )
     {
       return Aurora::Memory::Status::ERR_UNSUPPORTED;
     }
@@ -351,25 +351,25 @@ namespace Aurora::Flash::NOR
     /*-------------------------------------------------
     Figure out the chunk size in use
     -------------------------------------------------*/
-    size_t address = 0;
+    size_t address   = 0;
     size_t eraseSize = 0;
-    bool validity = false;
+    bool validity    = false;
 
-    switch( props->eraseChunk )
+    switch ( props->eraseChunk )
     {
       case Chunk::PAGE:
         eraseSize = props->pageSize;
-        validity = page2Address( mChip, chunk, &address );
+        validity  = page2Address( mChip, chunk, &address );
         break;
 
       case Chunk::BLOCK:
         eraseSize = props->blockSize;
-        validity = block2Address( mChip, chunk, &address );
+        validity  = block2Address( mChip, chunk, &address );
         break;
 
       case Chunk::SECTOR:
         eraseSize = props->sectorSize;
-        validity = sector2Address( mChip, chunk, &address );
+        validity  = sector2Address( mChip, chunk, &address );
         break;
 
       default:
@@ -377,7 +377,7 @@ namespace Aurora::Flash::NOR
         break;
     }
 
-    if( !validity )
+    if ( !validity )
     {
       return Status::ERR_BAD_ARG;
     }
@@ -401,7 +401,7 @@ namespace Aurora::Flash::NOR
         cmdBuffer[ 0 ] = CFI::BLOCK_ERASE_64K;
         break;
 
-      default: // Weird erase size
+      default:  // Weird erase size
         Chimera::insert_debug_breakpoint();
         return Aurora::Memory::Status::ERR_UNSUPPORTED;
         break;
@@ -493,52 +493,35 @@ namespace Aurora::Flash::NOR
   }
 
 
-  uint16_t Driver::readStatusRegister()
+  Aurora::Memory::Status Driver::pendEvent( const Aurora::Memory::Event event, const size_t timeout )
   {
     /*-------------------------------------------------
-    Acquire access to this driver
+    Input Protection
     -------------------------------------------------*/
-    this->lock();
+    const Aurora::Memory::Properties *props = nullptr;
+    if ( props = getProperties( mChip ); !props )
+    {
+      return Aurora::Memory::Status::ERR_UNSUPPORTED;
+    }
+    else if( !props->eventPoll )
+    {
+      return Aurora::Memory::Status::ERR_DRIVER_ERR;
+    }
 
     /*-------------------------------------------------
-    Initialize the command sequence
+    Invoke the driver's poll func
     -------------------------------------------------*/
-    cmdBuffer.fill( 0 );
-    uint16_t result = 0;
-
-    /*-------------------------------------------------
-    Perform the SPI transaction
-    -------------------------------------------------*/
-    mSPI->lock();
-
-    // Read out byte 1
-    cmdBuffer[ 0 ] = CFI::READ_SR_BYTE1;
-    mSPI->setChipSelect( Chimera::GPIO::State::LOW );
-    mSPI->readWriteBytes( cmdBuffer.data(), cmdBuffer.data(), CFI::READ_SR_BYTE1_OPS_LEN );
-    mSPI->await( Chimera::Event::Trigger::TRIGGER_TRANSFER_COMPLETE, Chimera::Threading::TIMEOUT_BLOCK );
-    mSPI->setChipSelect( Chimera::GPIO::State::HIGH );
-
-    result |= cmdBuffer[ 1 ];
-
-    // Read out byte 2
-    cmdBuffer[ 0 ] = CFI::READ_SR_BYTE2;
-    cmdBuffer[ 1 ] = 0;
-    mSPI->setChipSelect( Chimera::GPIO::State::LOW );
-    mSPI->readWriteBytes( cmdBuffer.data(), cmdBuffer.data(), CFI::READ_SR_BYTE2_OPS_LEN );
-    mSPI->await( Chimera::Event::Trigger::TRIGGER_TRANSFER_COMPLETE, Chimera::Threading::TIMEOUT_BLOCK );
-    mSPI->setChipSelect( Chimera::GPIO::State::HIGH );
-
-    result |= ( cmdBuffer[ 1 ] << 8 );
-
-    mSPI->unlock();
-
-    /*-------------------------------------------------
-    Release access to this driver
-    -------------------------------------------------*/
-    this->unlock();
-    return result;
+    return props->eventPoll( static_cast<uint8_t>( mSPIChannel ), static_cast<uint8_t>( mChip ), event, timeout );
   }
 
+  bool Driver::configure( const Chip_t device, const Chimera::SPI::Channel channel )
+  {
+    mChip       = device;
+    mSPIChannel = channel;
+    mSPI        = Chimera::SPI::getDriver( channel );
+
+    return static_cast<bool>( mSPI );
+  }
 
   /*-------------------------------------------------------------------------------
   Driver: Private Interface

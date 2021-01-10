@@ -4,7 +4,6 @@
 set(LINK_LIBS
   chimera_inc       # Chimera public headers
   aurora_inc        # Aurora public headers
-  aurora_build_options
 )
 
 # ====================================================

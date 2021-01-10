@@ -99,6 +99,17 @@ namespace Aurora::Memory
      *  @return Status
      */
     virtual Status flush() = 0;
+
+    /**
+     *  Blocks the current thread of execution until a memory event has
+     *  happened. Typical implementations poll status registers of the
+     *  device to see if an event has happened.
+     *
+     *  @param[in]  event         The event to wait on
+     *  @param[in]  timeout       How long the caller is willing to wait
+     *  @return Status
+     */
+    virtual Status pendEvent( const Event event, const size_t timeout ) = 0;
   };
 
 }  // namespace Aurora::Memory

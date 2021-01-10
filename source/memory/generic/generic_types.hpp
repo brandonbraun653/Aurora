@@ -27,21 +27,6 @@ namespace Aurora::Memory
   -------------------------------------------------------------------------------*/
   class IGenericDevice;
 
-  /*-------------------------------------------------------------------------------
-  Aliases
-  -------------------------------------------------------------------------------*/
-  using IGenericDevice_sPtr = std::shared_ptr<IGenericDevice>;
-
-  using ByteOffset_t = size_t;
-  using SysAddress_t = size_t;
-  using ChunkIndex_t = size_t;
-
-  /*-------------------------------------------------------------------------------
-  Constants
-  -------------------------------------------------------------------------------*/
-  static constexpr ByteOffset_t BAD_OFFSET    = 0xDEADBEEF;
-  static constexpr SysAddress_t BAD_ADDRESS   = std::numeric_limits<SysAddress_t>::max();
-  static constexpr ChunkIndex_t BAD_CHUNK_IDX = std::numeric_limits<ChunkIndex_t>::max();
 
   /*-------------------------------------------------------------------------------
   Enumerations
@@ -90,6 +75,37 @@ namespace Aurora::Memory
     MEM_ERROR
   };
 
+
+  /*-------------------------------------------------------------------------------
+  Aliases
+  -------------------------------------------------------------------------------*/
+  using IGenericDevice_sPtr = std::shared_ptr<IGenericDevice>;
+
+  using ByteOffset_t = size_t;
+  using SysAddress_t = size_t;
+  using ChunkIndex_t = size_t;
+
+  /**
+   *  Manufacturer specific polling for an Read/Write/Erase event flag. There isn't
+   *  really a standard for checking the status of an operation (that the author is
+   *  aware of).
+   *
+   *  @param[in]  channel     Peripheral channel in use for the device (SPI, I2C, MMC, etc)
+   *  @param[in]  device      Specific device identifier. This can influence the read protocol.
+   *  @param[in]  event       Which event to look for
+   *  @param[in]  timeout     How long in milliseconds to wait for the event to occur
+   *  @return Status
+   */
+  using EventPollFunc = Status ( * )( const uint8_t channel, const uint8_t device, const Event event, const size_t timeout );
+
+  /*-------------------------------------------------------------------------------
+  Constants
+  -------------------------------------------------------------------------------*/
+  static constexpr ByteOffset_t BAD_OFFSET    = 0xDEADBEEF;
+  static constexpr SysAddress_t BAD_ADDRESS   = std::numeric_limits<SysAddress_t>::max();
+  static constexpr ChunkIndex_t BAD_CHUNK_IDX = std::numeric_limits<ChunkIndex_t>::max();
+
+
   /*-------------------------------------------------------------------------------
   Structures
   -------------------------------------------------------------------------------*/
@@ -99,17 +115,18 @@ namespace Aurora::Memory
    */
   struct Properties
   {
-    Chunk writeChunk;      /**< Desired unit size for writing */
-    Chunk readChunk;       /**< Desired unit size for reading */
-    Chunk eraseChunk;      /**< Desired unit size for erasing */
-    uint8_t jedec;         /**< Device manufacturer's JEDEC code */
-    uint16_t pageSize;     /**< Page size of the device in bytes */
-    uint16_t blockSize;    /**< Block size of the device in bytes */
-    uint16_t sectorSize;   /**< Sector size of the device in bytes */
-    uint32_t startAddress; /**< Starting address of the device region in memory */
-    uint32_t endAddress;   /**< Ending address of the device region in memory */
+    Chunk writeChunk;        /**< Desired unit size for writing */
+    Chunk readChunk;         /**< Desired unit size for reading */
+    Chunk eraseChunk;        /**< Desired unit size for erasing */
+    uint8_t jedec;           /**< Device manufacturer's JEDEC code */
+    uint16_t pageSize;       /**< Page size of the device in bytes */
+    uint16_t blockSize;      /**< Block size of the device in bytes */
+    uint16_t sectorSize;     /**< Sector size of the device in bytes */
+    uint32_t startAddress;   /**< Starting address of the device region in memory */
+    uint32_t endAddress;     /**< Ending address of the device region in memory */
+    EventPollFunc eventPoll; /**< Driver specific status polling interface */
   };
 
 }  // namespace Aurora::Memory
 
-#endif  /* !AURORA_GENERIC_MEMORY_TYPES_HPP */
+#endif /* !AURORA_GENERIC_MEMORY_TYPES_HPP */

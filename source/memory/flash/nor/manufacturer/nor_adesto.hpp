@@ -62,6 +62,16 @@ namespace Aurora::Flash::NOR::Adesto
     VERSION1 = 0x01,
     // Add more as needed
   };
+
+  /*-------------------------------------------------------------------------------
+  Public Functions
+  -------------------------------------------------------------------------------*/
+  /**
+   *  Adesto specific polling for an Read/Write/Erase event flag
+   *  @see EventPollFunc
+   */
+  Aurora::Memory::Status pollEvent( const uint8_t channel, const uint8_t device, const Aurora::Memory::Event event, const size_t timeout );
+
 }  // namespace Aurora::Flash::NOR::Adesto
 
 #endif /* !NOR_FLASH_ADESTO_HPP */
