@@ -22,7 +22,7 @@ namespace Aurora::Logging
   /*-------------------------------------------------------------------------------
   Static Data
   -------------------------------------------------------------------------------*/
-  static Chimera::Serial::Driver_sPtr sink;
+  static Chimera::Serial::Driver_rPtr sink;
 
   /*-------------------------------------------------------------------------------
   Driver Implementation
@@ -39,7 +39,6 @@ namespace Aurora::Logging
 
   SerialSink::~SerialSink()
   {
-    sink.reset();
   }
 
 

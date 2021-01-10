@@ -108,7 +108,7 @@ namespace Aurora::Flash::NOR
 
     Chip_t mChip;                                    /**< Memory chip in use */
     Chimera::SPI::Channel mSPIChannel;               /**< SPI driver channel */
-    Chimera::SPI::Driver_sPtr mSPI;                  /**< SPI driver instance */
+    Chimera::SPI::Driver_rPtr mSPI;                  /**< SPI driver instance */
     std::array<uint8_t, CFI::MAX_CMD_LEN> cmdBuffer; /**< Buffer for holding a command sequence */
 
     /*-------------------------------------------------

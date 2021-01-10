@@ -272,7 +272,7 @@ namespace Aurora::HMI::RotaryEncoder
     -------------------------------------------------*/
     Chimera::GPIO::State pinA;
     Chimera::GPIO::State pinB;
-    Chimera::GPIO::Driver_sPtr driver;
+    Chimera::GPIO::Driver_rPtr driver;
 
     /*-------------------------------------------------
     Read the current state of input A
