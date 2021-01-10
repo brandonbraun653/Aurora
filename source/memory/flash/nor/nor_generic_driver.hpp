@@ -72,7 +72,7 @@ namespace Aurora::Flash::NOR
   /**
    *  A generic CFI memory driver to talk with NOR flash
    */
-  class Driver : public virtual Aurora::Memory::IGenericDevice, public Chimera::Threading::Lockable
+  class Driver : public virtual Aurora::Memory::IGenericDevice, public Chimera::Threading::LockableCRTP<Driver>
   {
   public:
     Driver();
@@ -103,6 +103,9 @@ namespace Aurora::Flash::NOR
     bool configure( const Chip_t device, const Chimera::SPI::Channel channel );
 
   private:
+    friend Chimera::Threading::LockableCRTP<Driver>;
+    Chimera::Threading::RecursiveTimedMutex mClsMutex;
+
     Chip_t mChip;                                    /**< Memory chip in use */
     Chimera::SPI::Channel mSPIChannel;               /**< SPI driver channel */
     Chimera::SPI::Driver_sPtr mSPI;                  /**< SPI driver instance */

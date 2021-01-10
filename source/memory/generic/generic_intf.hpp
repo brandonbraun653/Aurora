@@ -38,7 +38,7 @@ namespace Aurora::Memory
    *     the appropriate event handler when an operation is complete or an
    *     asynchronous event occurs.
    */
-  class IGenericDevice : public virtual Chimera::Threading::LockableInterface
+  class IGenericDevice
   {
   public:
     virtual ~IGenericDevice() = default;

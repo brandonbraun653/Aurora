@@ -38,7 +38,7 @@ int lfs_safe_read( const struct lfs_config *c, lfs_block_t block, lfs_off_t off,
   /*-------------------------------------------------
   Input protection
   -------------------------------------------------*/
-  if ( !c || !c->context )
+  if ( !c )
   {
     return LFS_ERR_INVAL;
   }
@@ -66,7 +66,7 @@ int lfs_safe_prog( const struct lfs_config *c, lfs_block_t block, lfs_off_t off,
   /*-------------------------------------------------
   Input protection
   -------------------------------------------------*/
-  if ( !c || !c->context )
+  if ( !c )
   {
     return LFS_ERR_INVAL;
   }
@@ -98,7 +98,7 @@ int lfs_safe_erase( const struct lfs_config *c, lfs_block_t block )
   /*-------------------------------------------------
   Input protection
   -------------------------------------------------*/
-  if ( !c || !c->context )
+  if ( !c )
   {
     return LFS_ERR_INVAL;
   }
@@ -130,7 +130,7 @@ int lfs_safe_sync( const struct lfs_config *c )
   /*-------------------------------------------------
   Input protection
   -------------------------------------------------*/
-  if ( !c || !c->context )
+  if ( !c )
   {
     return LFS_ERR_INVAL;
   }

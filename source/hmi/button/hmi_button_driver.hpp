@@ -27,7 +27,7 @@ namespace Aurora::HMI::Button
   /*-------------------------------------------------------------------------------
   Classes
   -------------------------------------------------------------------------------*/
-  class EdgeTrigger : public Chimera::Threading::Lockable
+  class EdgeTrigger : public Chimera::Threading::LockableCRTP<EdgeTrigger>
   {
   public:
     EdgeTrigger();
@@ -95,6 +95,9 @@ namespace Aurora::HMI::Button
 
 
   private:
+    friend Chimera::Threading::LockableCRTP<EdgeTrigger>;
+    Chimera::Threading::RecursiveTimedMutex mClsMutex;
+
     EdgeCallback mCallback;    /**< User callback when the configured edge fires */
     EdgeConfig mConfig;        /**< Cached configuration settings */
     size_t mNumEvents;         /**< How many edge events pending being processed */
