@@ -26,50 +26,72 @@ add_subdirectory("source/memory")
 # ====================================================
 # Library Exports
 # ====================================================
-# Public include location
-add_library(aurora_inc INTERFACE)
-target_include_directories(aurora_inc INTERFACE "./../" "./include")
-target_link_libraries(aurora_inc INTERFACE etl_inc)
-export(TARGETS aurora_inc FILE "${PROJECT_BINARY_DIR}/Aurora/aurora_inc.cmake")
+set(AuroraExportDir "${PROJECT_BINARY_DIR}/Aurora")
+
+# ====================================================
+# Interface Library
+# ====================================================
+gen_intf_lib(
+  TARGET
+    aurora_intf_inc
+  INTF_INCLUDES
+    "./../"
+    "./include"
+  INTF_LIBRARIES
+    etl_inc
+  EXPORT_DIR
+    ${AuroraExportDir}
+)
 
 # ====================================================
 # Core Library
 # ====================================================
-function(build_core variant)
-  add_library(aurora_core${variant} INTERFACE)
-  target_link_libraries(aurora_core${variant} INTERFACE
-    aurora_math${variant}
-    aurora_memory_generic${variant}
-    aurora_memory_nor_flash${variant}
-  )
-  export(TARGETS aurora_core${variant} FILE "${PROJECT_BINARY_DIR}/Aurora/aurora_core${variant}.cmake")
-endfunction()
-add_target_variants(build_core)
+gen_intf_lib_variants(
+  TARGET
+    aurora_core
+  LIBRARIES
+    aurora_math
+  EXPORT_DIR
+    ${AuroraExportDir}
+)
+
+# ====================================================
+# Memory Library
+# ====================================================
+gen_intf_lib_variants(
+  TARGET
+    aurora_memory
+  LIBRARIES
+    aurora_memory_generic
+    aurora_memory_nor_flash
+  EXPORT_DIR
+    ${AuroraExportDir}
+)
 
 
 # ====================================================
 # Human-Machine Interface Library
 # ====================================================
-function(build_hmi variant)
-  add_library(aurora_hmi${variant} INTERFACE)
-  target_link_libraries(aurora_hmi${variant} INTERFACE
-    aurora_hmi_button${variant}
-    aurora_hmi_rotary_encoder${variant}
-  )
-  export(TARGETS aurora_hmi${variant} FILE "${PROJECT_BINARY_DIR}/Aurora/aurora_hmi${variant}.cmake")
-endfunction()
-add_target_variants(build_hmi)
+gen_intf_lib_variants(
+  TARGET
+    aurora_hmi
+  LIBRARIES
+    aurora_hmi_button
+    aurora_hmi_rotary_encoder
+  EXPORT_DIR
+    ${AuroraExportDir}
+)
 
 
 # ====================================================
 # Logging Library
 # ====================================================
-function(build_logging variant)
-  add_library(aurora_logging${variant} INTERFACE)
-  target_link_libraries(aurora_logging${variant} INTERFACE
-    ulog_core${variant}
-    aurora_log_serial${variant}
-  )
-  export(TARGETS aurora_logging${variant} FILE "${PROJECT_BINARY_DIR}/Aurora/aurora_logging${variant}.cmake")
-endfunction()
-add_target_variants(build_logging)
+gen_intf_lib_variants(
+  TARGET
+    aurora_logging
+  LIBRARIES
+    ulog_core
+    aurora_log_serial
+  EXPORT_DIR
+    ${AuroraExportDir}
+)
