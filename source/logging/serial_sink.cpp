@@ -5,7 +5,7 @@
  *  Description:
  *    Implements a serial based sink for the uLogger interface.
  *
- *  2019-2020 | Brandon Braun | brandonbraun653@gmail.com
+ *  2019-2021 | Brandon Braun | brandonbraun653@gmail.com
  ********************************************************************************/
 
 /* Serial Sink Includes */
@@ -27,7 +27,7 @@ namespace Aurora::Logging
   /*-------------------------------------------------------------------------------
   Driver Implementation
   -------------------------------------------------------------------------------*/
-  SerialSink::SerialSink( Chimera::Serial::Channel channel ) : mSerialChannel( channel )
+  SerialSink::SerialSink( Chimera::Serial::Channel channel ) : mSerialChannel( channel ), SinkInterface()
   {
   }
 

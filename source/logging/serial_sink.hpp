@@ -25,7 +25,7 @@
 
 namespace Aurora::Logging
 {
-  class SerialSink : virtual public ::uLog::SinkInterface
+  class SerialSink : public ::uLog::SinkInterface
   {
   public:
     /**
