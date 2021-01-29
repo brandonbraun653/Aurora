@@ -61,7 +61,9 @@ namespace Aurora::Flash::NOR::Adesto
     -------------------------------------------------*/
     uint16_t result = 0;
     std::array<uint8_t, 5> cmdBuffer;
+    std::array<uint8_t, 5> rxBuffer;
     cmdBuffer.fill( 0 );
+    rxBuffer.fill( 0 );
 
     /*-------------------------------------------------
     Ensure the SPI driver/channel exists
@@ -80,21 +82,21 @@ namespace Aurora::Flash::NOR::Adesto
     // Read out byte 1
     cmdBuffer[ 0 ] = READ_SR_BYTE1;
     spi->setChipSelect( Chimera::GPIO::State::LOW );
-    spi->readWriteBytes( cmdBuffer.data(), cmdBuffer.data(), READ_SR_BYTE1_OPS_LEN );
+    spi->readWriteBytes( cmdBuffer.data(), rxBuffer.data(), READ_SR_BYTE1_OPS_LEN );
     spi->await( Chimera::Event::Trigger::TRIGGER_TRANSFER_COMPLETE, Chimera::Threading::TIMEOUT_BLOCK );
     spi->setChipSelect( Chimera::GPIO::State::HIGH );
 
-    result |= cmdBuffer[ 1 ];
+    result |= rxBuffer[ 1 ];
 
     // Read out byte 2
     cmdBuffer[ 0 ] = READ_SR_BYTE2;
     cmdBuffer[ 1 ] = 0;
     spi->setChipSelect( Chimera::GPIO::State::LOW );
-    spi->readWriteBytes( cmdBuffer.data(), cmdBuffer.data(), READ_SR_BYTE2_OPS_LEN );
+    spi->readWriteBytes( cmdBuffer.data(), rxBuffer.data(), READ_SR_BYTE2_OPS_LEN );
     spi->await( Chimera::Event::Trigger::TRIGGER_TRANSFER_COMPLETE, Chimera::Threading::TIMEOUT_BLOCK );
     spi->setChipSelect( Chimera::GPIO::State::HIGH );
 
-    result |= ( cmdBuffer[ 1 ] << 8 );
+    result |= ( rxBuffer[ 1 ] << 8 );
 
     spi->unlock();
 
