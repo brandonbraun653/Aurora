@@ -153,7 +153,7 @@ int lfs_safe_sync( const struct lfs_config *c )
 
 namespace Aurora::Memory::LFS
 {
-  bool attachDevice( const Aurora::Flash::NOR::Chip_t dev, const Chimera::SPI::Channel channel, lfs_config &cfg )
+  bool attachDevice( const Aurora::Flash::NOR::Chip_t dev, const Chimera::SPI::Channel channel, const lfs_config &cfg )
   {
     return sNORFlash.configure( dev, channel );
   }
