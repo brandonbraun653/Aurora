@@ -1,16 +1,16 @@
 /********************************************************************************
-*   File Name:
-*     heap.hpp
+*  File Name:
+*    heap.hpp
 *
-*   Description:
-*     Implements a dynamic memory allocation heap from a buffer
+*  Description:
+*    Implements a dynamic memory allocation heap from a buffer
 *
-*   2019 | Brandon Braun | brandonbraun653@gmail.com
+*  2019-2021 | Brandon Braun | brandonbraun653@gmail.com
 ********************************************************************************/
 
 #pragma once
-#ifndef RF24_NODE_NETWORK_MEMORY_HEAP_HPP
-#define RF24_NODE_NETWORK_MEMORY_HEAP_HPP
+#ifndef AURORA_MEMORY_HEAP_HPP
+#define AURORA_MEMORY_HEAP_HPP
 
 /* C++ Includes */
 #include <cstdint>
@@ -21,7 +21,7 @@ namespace Aurora::Memory
   /**
    *  A heap implementation that is mostly just encapsulation of the FreeRTOS V10.0.0
    *  heap4.c allocation algorithm. The only addition is to allow the user to specify
-   *  their own buffer (static or dynamic) to be used as the source memory for the heap. 
+   *  their own buffer (static or dynamic) to be used as the source memory for the heap.
    */
   class Heap
   {
@@ -30,11 +30,17 @@ namespace Aurora::Memory
     ~Heap();
 
     /**
+     *  Resets the entire heap memory to zero if the memory is statically allocated
+     *  @return void
+     */
+    void staticReset();
+
+    /**
      *  Attaches a pre-existing buffer as the source memory for the heap.
-     *  
+     *
      *  @warning  The lifetime of this buffer must not expire while an instance
      *            of this class exists in memory.
-     *            
+     *
      *  @param[in]  buffer    The memory pool to use as a heap
      *  @param[in]  size      How many bytes are in the buffer
      *  @return bool
@@ -44,7 +50,7 @@ namespace Aurora::Memory
     /**
      *  Dynamically allocates a memory pool from the global heap to create
      *  a smaller, managed heap.
-     *  
+     *
      *  @param[in]  size      How many bytes should be allocated
      *  @return bool
      */
@@ -52,7 +58,7 @@ namespace Aurora::Memory
 
     /**
      *  Standard malloc implementation
-     *  
+     *
      *  @param[in]  size      The number of bytes to be allocated
      *  @return void *
      */
@@ -60,7 +66,7 @@ namespace Aurora::Memory
 
     /**
      *  Standard free implementation
-     *  
+     *
      *  @param[in]  pv        The memory to be freed
      *  @return void
      */
@@ -75,7 +81,7 @@ namespace Aurora::Memory
     ------------------------------------------------*/
     struct BlockLink_t
     {
-      BlockLink_t *next; 
+      BlockLink_t *next;
       size_t size;
     };
 
@@ -99,4 +105,4 @@ namespace Aurora::Memory
   };
 }    // namespace RF24::Network::Memory
 
-#endif  /* !RF24_NODE_NETWORK_MEMORY_HEAP_HPP */
+#endif  /* !AURORA_MEMORY_HEAP_HPP */

@@ -1,14 +1,15 @@
 /********************************************************************************
- *   File Name:
- *     heap.cpp
+ *  File Name:
+ *    heap.cpp
  *
- *   Description:
- *     Implements the managed heap allocator
+ *  Description:
+ *    Implements the managed heap allocator
  *
- *   Notes:
- *     This is a shameless wrapper around the FreeRTOS V10.0 heap4.c memory allocator
+ *  Notes:
+ *    This is a shameless wrapper around the FreeRTOS V10.0 heap4.c memory
+ *    allocator
  *
- *   2019 | Brandon Braun | brandonbraun653@gmail.com
+ *  2019-2021 | Brandon Braun | brandonbraun653@gmail.com
  ********************************************************************************/
 
 /* C++ Includes */
@@ -18,7 +19,7 @@
 
 /* Chimera Includes */
 #include <Chimera/thread>
-#include <Aurora/memory/heap/heap.hpp>
+#include <Aurora/source/memory/heap/heap.hpp>
 
 /* FreeRTOS Includes */
 
@@ -32,6 +33,9 @@ static constexpr size_t heapBITS_PER_BYTE = 8u;
 
 namespace Aurora::Memory
 {
+  /*-------------------------------------------------------------------------------
+  Heap Implementation
+  -------------------------------------------------------------------------------*/
   Heap::Heap()
   {
     heapBuffer = nullptr;
@@ -63,9 +67,19 @@ namespace Aurora::Memory
     }
   }
 
-  /*------------------------------------------------
-  Public Functions
-  ------------------------------------------------*/
+  /*-------------------------------------------------------------------------------
+  Heap: Public Functions
+  -------------------------------------------------------------------------------*/
+  void Heap::staticReset()
+  {
+    if( bufferIsDynamic || !heapBuffer )
+    {
+      return;
+    }
+
+    memset( heapBuffer, 0, heapSize );
+  }
+
   bool Heap::attachStaticBuffer( void *buffer, const size_t size )
   {
     if (!buffer || !size)
@@ -241,9 +255,9 @@ namespace Aurora::Memory
 #endif
   }
 
-  /*------------------------------------------------
-  Private Functions
-  ------------------------------------------------*/
+  /*-------------------------------------------------------------------------------
+  Heap: Private Functions
+  -------------------------------------------------------------------------------*/
   size_t Heap::xPortGetFreeHeapSize( void )
   {
     return freeBytesRemaining;
