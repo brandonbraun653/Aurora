@@ -157,4 +157,23 @@ namespace Aurora::Memory::LFS
   {
     return sNORFlash.configure( dev, channel );
   }
+
+
+  bool fullChipErase( const size_t timeout )
+  {
+    using namespace Aurora::Memory;
+
+    /*-------------------------------------------------
+    Issue the erase command
+    -------------------------------------------------*/
+    if( sNORFlash.erase() != Status::ERR_OK )
+    {
+      return false;
+    }
+
+    /*-------------------------------------------------
+    Wait for the erase to complete
+    -------------------------------------------------*/
+    return sNORFlash.pendEvent( Event::MEM_ERASE_COMPLETE, timeout ) == Status::ERR_OK;
+  }
 }  // namespace Aurora::Memory::LFS

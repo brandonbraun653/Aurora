@@ -33,11 +33,19 @@ namespace Aurora::Memory::LFS
    *  LittleFS configuration structure. This allows the read/write/erase hooks
    *  to act on the proper device at runtime.
    *
-   *  @param[in]  dev     The device to attach
-   *  @param[in]  cfg     LittleFS configuration structure
+   *  @param[in]  dev       The device to attach
+   *  @param[in]  cfg       LittleFS configuration structure
    *  @return bool
    */
   bool attachDevice( const Aurora::Flash::NOR::Chip_t dev, const Chimera::SPI::Channel channel, const lfs_config &cfg );
+
+  /**
+   *  Erases the device completely
+   *
+   *  @param[in] timeout    How long to wait for the chip to erase
+   *  @return bool
+   */
+  bool fullChipErase( const size_t timeout );
 }
 
 #endif  /* !LFS_HOOKS_HPP */
