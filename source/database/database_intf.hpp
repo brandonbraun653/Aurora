@@ -87,16 +87,6 @@ namespace Aurora::Database
     bool write( const Key &key, const void *const data );
 
     /**
-     *  Inserts a new entry into the database. This is a more complex variant that
-     *  allows finer control over the memory properties.
-     *
-     *  @param[in]  key       Key that is being created
-     *  @param[in]  entry     Details of the entry
-     *  @return Chimera::Status
-     */
-    Chimera::Status_t insert( const Key &key, const UserEntry &entry );
-
-    /**
      *  Inserts a new entry into the database using the default store
      *
      *  @param[in]  key       Key that is being created

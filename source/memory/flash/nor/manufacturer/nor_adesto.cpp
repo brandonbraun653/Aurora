@@ -15,6 +15,9 @@
 #include <Aurora/memory>
 #include <Aurora/source/memory/flash/nor/manufacturer/nor_adesto.hpp>
 
+/* Chimera Includes */
+#include <Chimera/thread>
+
 namespace Aurora::Flash::NOR::Adesto
 {
   /*-------------------------------------------------------------------------------
@@ -26,16 +29,20 @@ namespace Aurora::Flash::NOR::Adesto
    */
   const Aurora::Memory::Properties ChipProperties[ static_cast<size_t>( Chip::ADESTO_END - Chip::ADESTO_START ) ] = {
     // AT25SF081
-    { .writeChunk   = Aurora::Memory::Chunk::PAGE,
-      .readChunk    = Aurora::Memory::Chunk::PAGE,
-      .eraseChunk   = Aurora::Memory::Chunk::SECTOR,
-      .jedec        = JEDEC_CODE,
-      .pageSize     = 256,
-      .blockSize    = 4 * 1024,
-      .sectorSize   = 32 * 1024,
-      .startAddress = 0,
-      .endAddress   = 8 * 1024 * 1024,
-      .eventPoll    = pollEvent },
+    { .writeChunk      = Aurora::Memory::Chunk::PAGE,
+      .readChunk       = Aurora::Memory::Chunk::PAGE,
+      .eraseChunk      = Aurora::Memory::Chunk::SECTOR,
+      .jedec           = JEDEC_CODE,
+      .pageSize        = 256,
+      .blockSize       = 4 * 1024,
+      .sectorSize      = 32 * 1024,
+      .startAddress    = 0,
+      .endAddress      = 8 * 1024 * 1024,
+      .startUpDelay    = 20 * Chimera::Threading::TIMEOUT_1MS,
+      .pagePgmDelay    = 5 * Chimera::Threading::TIMEOUT_1MS,
+      .blockEraseDelay = 1300 * Chimera::Threading::TIMEOUT_1MS,
+      .chipEraseDelay  = 30 * Chimera::Threading::TIMEOUT_1S,
+      .eventPoll       = pollEvent },
   };
 
   /*-------------------------------------------------------------------------------

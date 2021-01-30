@@ -115,15 +115,27 @@ namespace Aurora::Memory
    */
   struct Properties
   {
-    Chunk writeChunk;        /**< Desired unit size for writing */
-    Chunk readChunk;         /**< Desired unit size for reading */
-    Chunk eraseChunk;        /**< Desired unit size for erasing */
-    uint8_t jedec;           /**< Device manufacturer's JEDEC code */
-    uint16_t pageSize;       /**< Page size of the device in bytes */
-    uint16_t blockSize;      /**< Block size of the device in bytes */
-    uint16_t sectorSize;     /**< Sector size of the device in bytes */
-    uint32_t startAddress;   /**< Starting address of the device region in memory */
-    uint32_t endAddress;     /**< Ending address of the device region in memory */
+    /*-------------------------------------------------
+    Data Fields
+    -------------------------------------------------*/
+    Chunk writeChunk;      /**< Desired unit size for writing */
+    Chunk readChunk;       /**< Desired unit size for reading */
+    Chunk eraseChunk;      /**< Desired unit size for erasing */
+    uint8_t jedec;         /**< Device manufacturer's JEDEC code */
+    uint16_t pageSize;     /**< Page size of the device in bytes */
+    uint16_t blockSize;    /**< Block size of the device in bytes */
+    uint16_t sectorSize;   /**< Sector size of the device in bytes */
+    uint32_t startAddress; /**< Starting address of the device region in memory */
+    uint32_t endAddress;   /**< Ending address of the device region in memory */
+
+    size_t startUpDelay;    /**< How long the device needs to stabilize on power up*/
+    size_t pagePgmDelay;    /**< Worst case page program delay */
+    size_t blockEraseDelay; /**< Worst case block erase delay (sized for eraseChunk) */
+    size_t chipEraseDelay;  /**< Worst case to erase whole chip */
+
+    /*-------------------------------------------------
+    Function Interface
+    -------------------------------------------------*/
     EventPollFunc eventPoll; /**< Driver specific status polling interface */
   };
 

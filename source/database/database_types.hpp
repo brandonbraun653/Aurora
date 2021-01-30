@@ -49,7 +49,10 @@ namespace Aurora::Database
   {
     CB_UNHANDLED,
     CB_CRC_ERROR,
+    CB_INVALID_KEY,
+    CB_MAX_ENTRY_ERROR,
     CB_MEM_ALLOC_ERROR,
+    CB_PERMISSION,
 
     CB_NUM_OPTIONS
   };
@@ -81,14 +84,14 @@ namespace Aurora::Database
     NVM_DEVICE_END   = NVM2,
   };
 
-  enum class MemAccess : uint8_t
+  enum MemAccess : uint8_t
   {
-    INVALID    = 0,
-    READ       = ( 1u << 0 ),                  /**< Read access */
-    WRITE      = ( 1u << 1 ),                  /**< Write access */
-    WRITE_BACK = ( 1u << 2 ),                  /**< Data can be written back to NVM */
-    RW         = ( READ | WRITE ),             /**< Read/write access */
-    RWWB       = ( READ | WRITE | WRITE_BACK ) /**< Full NVM access */
+    MEM_INVALID    = 0,
+    MEM_READ       = ( 1u << 0 ),                              /**< Read access */
+    MEM_WRITE      = ( 1u << 1 ),                              /**< Write access */
+    MEM_WRITE_BACK = ( 1u << 2 ),                              /**< Data can be written back to NVM */
+    MEM_RW         = ( MEM_READ | MEM_WRITE ),                 /**< Read/write access */
+    MEM_RWWB       = ( MEM_READ | MEM_WRITE | MEM_WRITE_BACK ) /**< Full NVM access */
   };
 
   /*-------------------------------------------------------------------------------
@@ -112,7 +115,7 @@ namespace Aurora::Database
       device     = Storage::INVALID;
       fileOffset = 0;
       dataSize   = 0;
-      access     = MemAccess::INVALID;
+      access     = MemAccess::MEM_INVALID;
       filename.clear();
     }
   };
@@ -132,7 +135,7 @@ namespace Aurora::Database
     void clear()
     {
       ramDevice = Storage::INVALID;
-      access    = MemAccess::INVALID;
+      access    = MemAccess::MEM_INVALID;
       data      = nullptr;
       dataSize  = 0;
       nvm.clear();
@@ -154,10 +157,21 @@ namespace Aurora::Database
    */
   struct Entry
   {
-    Key key;        /**< Key associated with the entry */
-    Storage device; /**< Where this data is located */
-    RawData entry;  /**< Records size and location of data */
-    uint32_t crc32; /**< CRC of the entry field */
+    Key key;          /**< Key associated with the entry */
+    MemAccess access; /**< Access permissions */
+    Storage device;   /**< Where this data is located */
+    RawData entry;    /**< Records size and location of data */
+    uint32_t crc32;   /**< CRC of the entry field */
+
+    void clear()
+    {
+      key        = 0;
+      access     = MemAccess::MEM_INVALID;
+      device     = Storage::INVALID;
+      entry.data = nullptr;
+      entry.size = 0;
+      crc32      = 0;
+    }
   };
 
 }  // namespace Aurora::Database
