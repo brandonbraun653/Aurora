@@ -49,16 +49,17 @@ namespace Aurora::Database
   /*-------------------------------------------------------------------------------
   RAM Database Implementation
   -------------------------------------------------------------------------------*/
-  RAMDB::RAMDB()
+  RAM::RAM()
   {
   }
 
 
-  RAMDB::~RAMDB()
+  RAM::~RAM()
   {
   }
 
-  void RAMDB::reset()
+
+  void RAM::reset()
   {
     this->lock();
     mEntryList.clear();
@@ -67,8 +68,11 @@ namespace Aurora::Database
   }
 
 
-  bool RAMDB::read( const Key &key, void *const data )
+  bool RAM::read( const Key &key, void *const data )
   {
+    bool result  = false;
+    uint32_t crc = 0;
+
     this->lock();
 
     /*-------------------------------------------------
@@ -77,20 +81,18 @@ namespace Aurora::Database
     EntryList::iterator it = findKey( key );
     if ( it == mEntryList.end() || !it->entry.data || !it->entry.size )
     {
-      this->unlock();
       mDelegateRegistry.call<CB_INVALID_KEY>();
-      return false;
+      goto exit;
     }
 
     /*-------------------------------------------------
     Does the CRC match?
     -------------------------------------------------*/
-    uint32_t crc = getEntryCRC32( it->entry );
+    crc = getEntryCRC32( it->entry );
     if ( crc != it->crc32 )
     {
-      this->unlock();
       mDelegateRegistry.call<CB_CRC_ERROR>();
-      return false;
+      goto exit;
     }
 
     /*-------------------------------------------------
@@ -101,12 +103,18 @@ namespace Aurora::Database
       memcpy( data, it->entry.data, it->entry.size );
     }
 
+    result = true;
+
+    /*-------------------------------------------------
+    Common exit routine
+    -------------------------------------------------*/
+  exit:
     this->unlock();
-    return true;
+    return result;
   }
 
 
-  bool RAMDB::write( const Key &key, const void *const data )
+  bool RAM::write( const Key &key, const void *const data )
   {
     /*-------------------------------------------------
     Input protection
@@ -116,6 +124,7 @@ namespace Aurora::Database
       return false;
     }
 
+    bool result = false;
     this->lock();
 
     /*-------------------------------------------------
@@ -124,9 +133,8 @@ namespace Aurora::Database
     EntryList::iterator it = findKey( key );
     if ( it == mEntryList.end() || !it->entry.data || !it->entry.size )
     {
-      this->unlock();
       mDelegateRegistry.call<CB_INVALID_KEY>();
-      return false;
+      goto exit;
     }
 
     /*-------------------------------------------------
@@ -134,9 +142,8 @@ namespace Aurora::Database
     -------------------------------------------------*/
     if ( !( it->access & MemAccess::MEM_WRITE ) )
     {
-      this->unlock();
       mDelegateRegistry.call<CB_PERMISSION>();
-      return false;
+      goto exit;
     }
 
     /*-------------------------------------------------
@@ -144,13 +151,18 @@ namespace Aurora::Database
     -------------------------------------------------*/
     memcpy( it->entry.data, data, it->entry.size );
     it->crc32 = getEntryCRC32( it->entry );
+    result    = true;
 
+    /*-------------------------------------------------
+    Common exit routine
+    -------------------------------------------------*/
+  exit:
     this->unlock();
-    return true;
+    return result;
   }
 
 
-  Chimera::Status_t RAMDB::insert( const Key &key, const void *const data, const size_t size, const MemAccess access )
+  Chimera::Status_t RAM::insert( const Key &key, const void *const data, const size_t size, const MemAccess access )
   {
     /*-------------------------------------------------
     Input Protection
@@ -160,16 +172,17 @@ namespace Aurora::Database
       return Chimera::Status::INVAL_FUNC_PARAM;
     }
 
+    auto result = Chimera::Status::OK;
     this->lock();
 
     /*-------------------------------------------------
     Is there room for a new entry?
     -------------------------------------------------*/
-    if( !mEntryList.available() )
+    if ( !mEntryList.available() )
     {
-      this->unlock();
       mDelegateRegistry.call<CB_MAX_ENTRY_ERROR>();
-      return Chimera::Status::FULL;
+      result = Chimera::Status::FULL;
+      goto exit;
     }
 
     /*-------------------------------------------------
@@ -177,9 +190,9 @@ namespace Aurora::Database
     -------------------------------------------------*/
     if ( findKey( key ) != mEntryList.end() )
     {
-      this->unlock();
       mDelegateRegistry.call<CB_INVALID_KEY>();
-      return Chimera::Status::FAIL;
+      result = Chimera::Status::FAIL;
+      goto exit;
     }
 
     /*-------------------------------------------------
@@ -196,11 +209,11 @@ namespace Aurora::Database
 
     if ( tmp.entry.data == nullptr )
     {
-      this->unlock();
       mDelegateRegistry.call<CB_MEM_ALLOC_ERROR>();
-      return Chimera::Status::MEMORY;
+      result = Chimera::Status::MEMORY;
+      goto exit;
     }
-    else if( data )
+    else if ( data )
     {
       memcpy( tmp.entry.data, data, size );
       tmp.crc32 = getEntryCRC32( tmp.entry );
@@ -211,12 +224,17 @@ namespace Aurora::Database
     -------------------------------------------------*/
     mEntryList.push_back( std::move( tmp ) );
     mEntryList.sort( EntryKeySortCompare );
+
+    /*-------------------------------------------------
+    Common exit routine
+    -------------------------------------------------*/
+  exit:
     this->unlock();
-    return Chimera::Status::OK;
+    return result;
   }
 
 
-  Chimera::Status_t RAMDB::remove( const Key &key )
+  Chimera::Status_t RAM::remove( const Key &key )
   {
     this->lock();
     auto result = Chimera::Status::NOT_FOUND;
@@ -237,7 +255,7 @@ namespace Aurora::Database
   }
 
 
-  Chimera::Status_t RAMDB::registerCallback( const CallbackId id, etl::delegate<void( size_t )> func )
+  Chimera::Status_t RAM::registerCallback( const CallbackId id, etl::delegate<void( size_t )> func )
   {
     /*-------------------------------------------------
     Input protection
@@ -259,15 +277,16 @@ namespace Aurora::Database
     {
       mDelegateRegistry.register_delegate( id, func );
     }
+
     this->unlock();
     return Chimera::Status::OK;
   }
 
 
   /*-------------------------------------------------------------------------------
-  RAMDB: Private Functions
+  RAM: Private Functions
   -------------------------------------------------------------------------------*/
-  EntryList::iterator RAMDB::findKey( const Key &key )
+  EntryList::iterator RAM::findKey( const Key &key )
   {
     return std::find_if( mEntryList.begin(), mEntryList.end(),
                          [ &key ]( const EntryList::value_type &entry ) { return entry.key == key; } );

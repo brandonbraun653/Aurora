@@ -26,7 +26,7 @@ namespace Aurora::HMI::RotaryEncoder
   /*-------------------------------------------------------------------------------
   Classes
   -------------------------------------------------------------------------------*/
-  class Encoder : public Chimera::Threading::LockableCRTP<Encoder>
+  class Encoder : public Chimera::Threading::Lockable<Encoder>
   {
   public:
     Encoder();
@@ -119,8 +119,8 @@ namespace Aurora::HMI::RotaryEncoder
     HMI::Button::ActiveEdge getPushActiveEdge();
 
   private:
-    friend Chimera::Threading::LockableCRTP<Encoder>;
-    Chimera::Threading::RecursiveTimedMutex mClsMutex;
+    friend Chimera::Threading::Lockable<Encoder>;
+
 
     /*-------------------------------------------------
     Center Push Button Resources

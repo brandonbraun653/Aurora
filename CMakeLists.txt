@@ -19,6 +19,7 @@ export(TARGETS ctre_inc FILE "${PROJECT_BINARY_DIR}/Aurora/lib/ctre_inc.cmake")
 # Subproject Imports
 # ====================================================
 add_subdirectory("source/database")
+add_subdirectory("source/datastore")
 add_subdirectory("source/hmi")
 add_subdirectory("source/logging")
 add_subdirectory("source/math")

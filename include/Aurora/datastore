@@ -1,0 +1,20 @@
+/********************************************************************************
+ *  File Name:
+ *    datastore
+ *
+ *  Description:
+ *    Aurora includes for datastore implementations
+ *
+ *  2021 | Brandon Braun | brandonbraun653@gmail.com
+ ********************************************************************************/
+
+#pragma once
+#ifndef AURORA_DATASTORE_INCLUDES
+#define AURORA_DATASTORE_INCLUDES
+
+#include <Aurora/source/datastore/datastore_driver.hpp>
+#include <Aurora/source/datastore/datastore_intf.hpp>
+#include <Aurora/source/datastore/datastore_macro.hpp>
+#include <Aurora/source/datastore/datastore_types.hpp>
+
+#endif /* !AURORA_DATASTORE_INCLUDES */

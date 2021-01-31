@@ -24,7 +24,7 @@ namespace Aurora::Database
 {
 
   static constexpr size_t MAX_FILE_NAME_LENGTH = 32;  /**< Maximum characters, including null termination */
-  static constexpr size_t MAX_RAMDB_ENTRIES    = 32;  /**< Number of entries allowed in RAM database */
+  static constexpr size_t MAX_RAM_ENTRIES    = 32;  /**< Number of entries allowed in RAM database */
 
 }  // namespace Aurora::Database
 

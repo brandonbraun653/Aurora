@@ -30,11 +30,11 @@ namespace Aurora::Database
   /*-------------------------------------------------------------------------------
   Classes
   -------------------------------------------------------------------------------*/
-  class RAMDB : Chimera::Threading::LockableCRTP<RAMDB>
+  class RAM : public Chimera::Threading::Lockable<RAM>
   {
   public:
-    RAMDB();
-    ~RAMDB();
+    RAM();
+    ~RAM();
 
     /**
      *  Assigns the memory used in the RAM database. Both the entry store and heap
@@ -71,7 +71,7 @@ namespace Aurora::Database
      *
      *  @param[in]  key       Key to look up
      *  @param[out] data      Output buffer to write data into
-     *  @return bool          Validty of the read. If false, CRC failed or key doesn't exist.
+     *  @return bool          Validity of the read. If false, CRC failed or key doesn't exist.
      */
     bool read( const Key &key, void *const data );
 
@@ -118,11 +118,7 @@ namespace Aurora::Database
     Chimera::Status_t registerCallback( const CallbackId id, etl::delegate<void( size_t )> func );
 
   private:
-    /*-------------------------------------------------
-    Thread Safety
-    -------------------------------------------------*/
-    friend Chimera::Threading::LockableCRTP<RAMDB>;
-    Chimera::Threading::RecursiveTimedMutex mClsMutex;
+    friend Chimera::Threading::Lockable<RAM>;
 
     /*-------------------------------------------------
     Core database memory
