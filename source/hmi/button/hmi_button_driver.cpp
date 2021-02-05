@@ -12,6 +12,7 @@
 #include <Aurora/hmi>
 
 /* Chimera Includes */
+#include <Chimera/assert>
 #include <Chimera/exti>
 #include <Chimera/function>
 #include <Chimera/gpio>
@@ -22,7 +23,8 @@ namespace Aurora::HMI::Button
   /*-------------------------------------------------------------------------------
   EdgeTrigger Implementation
   -------------------------------------------------------------------------------*/
-  EdgeTrigger::EdgeTrigger() : mCallback( EdgeCallback() ), mConfig( {} ), mNumEvents( 0 ), mMaxNumSamples( 0 )
+  EdgeTrigger::EdgeTrigger() :
+      mCallback( EdgeCallback() ), mConfig( {} ), mNumEvents( 0 ), mMaxNumSamples( 0 ), mEnabled( false )
   {
   }
 
@@ -98,6 +100,7 @@ namespace Aurora::HMI::Button
 
     result |= driver->init( mConfig.gpioConfig );
     result |= driver->attachInterrupt( cb, edgeTrigger );
+    result |= driver->getState( mLastStableState );
 
     this->unlock();
     return ( result == Chimera::Status::OK );
@@ -125,6 +128,7 @@ namespace Aurora::HMI::Button
     Disable the GPIO's EXTI hooks
     -------------------------------------------------*/
     Chimera::EXTI::disable( driver->getInterruptLine() );
+    mEnabled = false;
 
     this->unlock();
   }
@@ -132,15 +136,15 @@ namespace Aurora::HMI::Button
 
   void EdgeTrigger::enable()
   {
-    auto driver = Chimera::GPIO::getDriver( mConfig.gpioConfig.port, mConfig.gpioConfig.pin );
-    Chimera::EXTI::enable( driver->getInterruptLine() );
+    mEnabled = true;
+    enableISR();
   }
 
 
   void EdgeTrigger::disable()
   {
-    auto driver = Chimera::GPIO::getDriver( mConfig.gpioConfig.port, mConfig.gpioConfig.pin );
-    Chimera::EXTI::disable( driver->getInterruptLine() );
+    disableISR();
+    mEnabled = false;
   }
 
 
@@ -173,12 +177,34 @@ namespace Aurora::HMI::Button
   /*-------------------------------------------------
   Private Methods
   -------------------------------------------------*/
+  void EdgeTrigger::enableISR()
+  {
+    auto driver = Chimera::GPIO::getDriver( mConfig.gpioConfig.port, mConfig.gpioConfig.pin );
+    Chimera::EXTI::enable( driver->getInterruptLine() );
+  }
+
+
+  void EdgeTrigger::disableISR()
+  {
+    auto driver = Chimera::GPIO::getDriver( mConfig.gpioConfig.port, mConfig.gpioConfig.pin );
+    Chimera::EXTI::disable( driver->getInterruptLine() );
+  }
+
+
   void EdgeTrigger::gpioEdgeTriggerCallback( void *arg )
   {
     /*-------------------------------------------------
+    Don't do anything if not explicitly enabled
+    -------------------------------------------------*/
+    if ( !mEnabled )
+    {
+      return;
+    }
+
+    /*-------------------------------------------------
     Disable the interrupt as quickly as possible
     -------------------------------------------------*/
-    this->disable();
+    this->disableISR();
 
     /*-------------------------------------------------
     Figure out the number of samples the polling
@@ -187,6 +213,15 @@ namespace Aurora::HMI::Button
     -------------------------------------------------*/
     mCurrentNumSamples = 0;
     mMaxNumSamples     = mConfig.debounceTime / mConfig.sampleRate;
+
+    /*-------------------------------------------------
+    Build the debounced mask
+    -------------------------------------------------*/
+    mDebounceMsk = 0;
+    for ( size_t x = 0; x < mConfig.stableSamples; x++ )
+    {
+      mDebounceMsk |= ( 1u << x );
+    }
 
     /*-------------------------------------------------
     Register a periodic function with the scheduler to
@@ -199,114 +234,100 @@ namespace Aurora::HMI::Button
 
   void EdgeTrigger::gpioEdgeSamplerCallback()
   {
+    using namespace Chimera::GPIO;
+
+    /*-------------------------------------------------
+    Don't do anything if not explicitly enabled
+    -------------------------------------------------*/
+    if ( !mEnabled )
+    {
+      return;
+    }
+
     /*-------------------------------------------------
     Read the current state of the GPIO pin
     -------------------------------------------------*/
-    Chimera::GPIO::State currentState;
+    State currentState;
     auto driver = Chimera::GPIO::getDriver( mConfig.gpioConfig.port, mConfig.gpioConfig.pin );
     driver->getState( currentState );
 
     /*-------------------------------------------------
-    Shift the filter because a single sample has passed
+    Handle too many failed samples. Force another ISR
+    event to re-register this sampler function.
     -------------------------------------------------*/
-    mDebounced = mDebounced << 1u;
-    mCurrentNumSamples++;
-
-    /*-------------------------------------------------
-    Assuming the state is valid, fill in the spot just
-    created by the shift. Forcefully set the zero as
-    shift hardware technically could be circular and we
-    might run out of bits.
-    -------------------------------------------------*/
-    if ( mConfig.activeEdge == ActiveEdge::BOTH_EDGES )
+    if ( mCurrentNumSamples >= mMaxNumSamples )
     {
-      mDebounced |= 1u;
+      Chimera::Scheduler::LoRes::cancel_this();
+      this->enableISR();
+      return;
     }
     else
     {
-      switch ( mConfig.activeEdge )
-      {
-        case ActiveEdge::RISING_EDGE:
-          if ( currentState == Chimera::GPIO::State::HIGH )
-          {
-            mDebounced |= 1u;
-          }
-          else
-          {
-            mDebounced &= ~1u;
-          }
-          break;
-
-        case ActiveEdge::FALLING_EDGE:
-          if ( currentState == Chimera::GPIO::State::LOW )
-          {
-            mDebounced |= 1u;
-          }
-          else
-          {
-            mDebounced &= ~1u;
-          }
-          break;
-
-        default:
-          mDebounced &= ~1u;
-          break;
-      };
+      mCurrentNumSamples++;
     }
 
     /*-------------------------------------------------
-    Build the debounced mask
+    Update the filter to reflect how many samples the
+    GPIO has held a state that differs from the last
+    known stable logic level.
     -------------------------------------------------*/
-    size_t debounceMask = 0;
-    for ( size_t x = 0; x < mConfig.stableSamples; x++ )
+    if ( currentState == mLastStableState )
     {
-      debounceMask |= ( 1u << x );
-    }
-
-    /*-------------------------------------------------
-    Have enough samples been stable to consider this a
-    sufficiently debounced button?
-    -------------------------------------------------*/
-    if ( ( mDebounced & debounceMask ) == debounceMask )
-    {
-      /*-------------------------------------------------
-      Update trackers
-      -------------------------------------------------*/
-      this->lock();
-      mNumEvents++;
-      mCurrentNumSamples = 0;
-      this->unlock();
-
       mDebounced = 0;
-      Chimera::Scheduler::LoRes::cancel_this();
+      return;
+    }
+    else
+    {
+      /*-------------------------------------------------
+      Insert a single stable sample
+      -------------------------------------------------*/
+      mDebounced = ( mDebounced << 1u ) | 1u;
+      mCurrentNumSamples++;
 
       /*-------------------------------------------------
-      Re-enable the trigger to listen for more presses
+      Require sequential samples to be the same before
+      continuing on to accept a new state change.
       -------------------------------------------------*/
-      this->enable();
-
-      /*-------------------------------------------------
-      Invoke user callback if exists
-      -------------------------------------------------*/
-      if ( mCallback )
+      if ( ( mDebounced & mDebounceMsk ) != mDebounceMsk )
       {
-        mCallback( mConfig.activeEdge );
+        return;
       }
     }
-    else if ( mCurrentNumSamples >= mMaxNumSamples )
+
+    /*-------------------------------------------------
+    A stable edge transition has been observed
+    -------------------------------------------------*/
+    ActiveEdge edgeType = ActiveEdge::UNKNOWN;
+    if( ( currentState == State::HIGH ) && ( mLastStableState == State::LOW ) )
     {
-      /*-------------------------------------------------
-      The polling process was unable to find a stable
-      sampling, so simply re-enable the listener in hopes
-      of catching it the next time around.
-      -------------------------------------------------*/
-      this->lock();
-      mCurrentNumSamples = 0;
-      mDebounced         = 0;
-      this->enable();
-      this->unlock();
+      edgeType         = ActiveEdge::RISING_EDGE;
+      mLastStableState = currentState;
     }
-    // else button not sufficiently debounced yet
+    else if ( ( currentState == State::LOW ) && ( mLastStableState == State::HIGH ) )
+    {
+      edgeType         = ActiveEdge::FALLING_EDGE;
+      mLastStableState = currentState;
+    }
+    else  // Should never hit this
+    {
+      RT_HARD_ASSERT( false );
+    }
+
+    /*-------------------------------------------------
+    Invoke the callback if registered
+    -------------------------------------------------*/
+    if( mCallback )
+    {
+      mCallback( edgeType );
+    }
+
+    /*-------------------------------------------------
+    Reset the sampler such that another ISR event has
+    to re-trigger things.
+    -------------------------------------------------*/
+    Chimera::Scheduler::LoRes::cancel_this();
+    this->disableISR();
+    this->enableISR();
   }
 
 }  // namespace Aurora::HMI::Button

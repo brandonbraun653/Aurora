@@ -97,13 +97,27 @@ namespace Aurora::HMI::Button
   private:
     friend Chimera::Threading::Lockable<EdgeTrigger>;
 
+    bool mEnabled;                         /**< Whether or not the user has enabled the listener */
+    EdgeCallback mCallback;                /**< User callback when the configured edge fires */
+    EdgeConfig mConfig;                    /**< Cached configuration settings */
+    size_t mNumEvents;                     /**< How many edge events pending being processed */
+    size_t mDebounced;                     /**< Internal filter for tracking GPIO state on each sample */
+    size_t mDebounceMsk;                   /**< Pre-calculated acceptance filter for stable GPIO samples */
+    size_t mMaxNumSamples;                 /**< How many samples are needed for detecting a debounced edge */
+    size_t mCurrentNumSamples;             /**< Number of samples currently processed */
+    Chimera::GPIO::State mLastStableState; /**< Last stable sampled GPIO state */
 
-    EdgeCallback mCallback;    /**< User callback when the configured edge fires */
-    EdgeConfig mConfig;        /**< Cached configuration settings */
-    size_t mNumEvents;         /**< How many edge events pending being processed */
-    size_t mDebounced;         /**< Internal filter for tracking GPIO state on each sample */
-    size_t mMaxNumSamples;     /**< How many samples are needed for detecting a debunced edge */
-    size_t mCurrentNumSamples; /**< Number of samples currently processed */
+    /**
+     *  Enables the EXTI ISR signal for the configured GPIO pin
+     *  @return void
+     */
+    void enableISR();
+
+    /**
+     *  Disables the EXTI ISR signal for the configured GPIO pin
+     *  @return void
+     */
+    void disableISR();
 
     /**
      *  Callback used for the EXTI drivers. This handles simple edge

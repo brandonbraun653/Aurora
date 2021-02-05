@@ -41,6 +41,7 @@ gen_intf_lib(
     "./include"
   INTF_LIBRARIES
     etl_inc
+    ulog_inc
   EXPORT_DIR
     ${AuroraExportDir}
 )
