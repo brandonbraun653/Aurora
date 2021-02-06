@@ -5,7 +5,7 @@
  *  Description:
  *    Human machine interface driver for a GPIO based rotary encoder
  *
- *  2020 | Brandon Braun | brandonbraun653@gmail.com
+ *  2020-2021 | Brandon Braun | brandonbraun653@gmail.com
  *******************************************************************************/
 
 /* Aurora Includes */
@@ -18,7 +18,7 @@
 #include <Chimera/scheduler>
 
 
-namespace Aurora::HMI::RotaryEncoder
+namespace Aurora::HMI::Encoder
 {
   /*-------------------------------------------------------------------------------
   Encoder Implementation
@@ -27,6 +27,7 @@ namespace Aurora::HMI::RotaryEncoder
   {
   }
 
+
   Encoder::~Encoder()
   {
   }
@@ -34,17 +35,19 @@ namespace Aurora::HMI::RotaryEncoder
   /*-------------------------------------------------
   Public Methods
   -------------------------------------------------*/
-  bool Encoder::initialize( const REConfig &cfg )
+  bool Encoder::initialize( const Config &cfg )
   {
+    using namespace Chimera::EXTI;
+
     /*-------------------------------------------------
     Input protection
     -------------------------------------------------*/
     /* clang-format off */
-    if ( !cfg.pinACfg.validity ||
-         !cfg.pinBCfg.validity ||
-         !cfg.stableSamples ||
-         !cfg.sampleRate ||
-         !( cfg.sampleRate < cfg.debounceTime ) )
+    if ( !cfg.encACfg.validity ||
+         !cfg.encBCfg.validity ||
+         !cfg.btnNumSamples ||
+         !cfg.btnSampleRate ||
+         !( cfg.btnSampleRate < cfg.btnDebounceTime ) )
     { /* clang-format on */
       return false;
     }
@@ -66,48 +69,46 @@ namespace Aurora::HMI::RotaryEncoder
 
     /*-------------------------------------------------
     Configure the GPIO for encoder pin A. Only this pin
-    needs the EXTI configured. See encoder processing
-    to know why.
+    needs the EXTI configured due to processing algo.
     -------------------------------------------------*/
     auto result = Chimera::Status::OK;
     auto cb     = Chimera::Function::vGeneric::create<Encoder, &Encoder::processRotateEventCallback>( *this );
-    auto driver = Chimera::GPIO::getDriver( mConfig.pinACfg.port, mConfig.pinACfg.pin );
+    auto driver = Chimera::GPIO::getDriver( mConfig.encACfg.port, mConfig.encACfg.pin );
 
 
-    Chimera::EXTI::EdgeTrigger edgeTrigger;
-
-    switch ( mConfig.pinAActiveEdge )
+    EdgeTrigger edgeTrigger;
+    switch ( mConfig.encActiveEdge )
     {
       case HMI::Button::ActiveEdge::BOTH_EDGES:
-        edgeTrigger = Chimera::EXTI::EdgeTrigger::BOTH_EDGE;
+        edgeTrigger = EdgeTrigger::BOTH_EDGE;
         break;
 
       case HMI::Button::ActiveEdge::RISING_EDGE:
-        edgeTrigger = Chimera::EXTI::EdgeTrigger::RISING_EDGE;
+        edgeTrigger = EdgeTrigger::RISING_EDGE;
         break;
 
       case HMI::Button::ActiveEdge::FALLING_EDGE:
-        edgeTrigger = Chimera::EXTI::EdgeTrigger::FALLING_EDGE;
+        edgeTrigger = EdgeTrigger::FALLING_EDGE;
         break;
 
       default:
-        edgeTrigger = Chimera::EXTI::EdgeTrigger::UNKNOWN;
+        edgeTrigger = EdgeTrigger::UNKNOWN;
         break;
     };
 
-    result |= driver->init( mConfig.pinACfg );
+    result |= driver->init( mConfig.encACfg );
     result |= driver->attachInterrupt( cb, edgeTrigger );
 
     /*-------------------------------------------------
     Configure GPIO for encoder pin B
     -------------------------------------------------*/
-    driver = Chimera::GPIO::getDriver( mConfig.pinBCfg.port, mConfig.pinBCfg.pin );
-    result |= driver->init( mConfig.pinBCfg );
+    driver = Chimera::GPIO::getDriver( mConfig.encBCfg.port, mConfig.encBCfg.pin );
+    result |= driver->init( mConfig.encBCfg );
 
     /*-------------------------------------------------
     Initialize last known encoder states
     -------------------------------------------------*/
-    if ( mConfig.idleHigh )
+    if ( mConfig.encIdleHigh )
     {
       a0 = Chimera::GPIO::State::HIGH;
       b0 = Chimera::GPIO::State::HIGH;
@@ -121,15 +122,15 @@ namespace Aurora::HMI::RotaryEncoder
     /*-------------------------------------------------
     Configure GPIO for center press button (if exists)
     -------------------------------------------------*/
-    if ( mConfig.pinPushCfg.validity )
+    if ( mConfig.btnCfg.validity )
     {
       Aurora::HMI::Button::EdgeConfig bCfg;
 
-      bCfg.activeEdge    = mConfig.pinPushActiveEdge;
-      bCfg.debounceTime  = mConfig.debounceTime;
-      bCfg.gpioConfig    = mConfig.pinPushCfg;
-      bCfg.sampleRate    = mConfig.sampleRate;
-      bCfg.stableSamples = mConfig.stableSamples;
+      bCfg.activeEdge    = mConfig.btnActiveEdge;
+      bCfg.debounceTime  = mConfig.btnDebounceTime;
+      bCfg.gpioConfig    = mConfig.btnCfg;
+      bCfg.sampleRate    = mConfig.btnSampleRate;
+      bCfg.stableSamples = mConfig.btnNumSamples;
 
       mCenterButton.initialize( bCfg );
       mCenterButton.enable();
@@ -147,12 +148,12 @@ namespace Aurora::HMI::RotaryEncoder
     /*-------------------------------------------------
     Reset the trackers
     -------------------------------------------------*/
-    mNumRotateEvents = 0;
+    mState.clear();
 
     /*-------------------------------------------------
     Configure GPIO pin A to have minimal system impact
     -------------------------------------------------*/
-    auto driver = Chimera::GPIO::getDriver( mConfig.pinACfg.port, mConfig.pinACfg.pin );
+    auto driver = Chimera::GPIO::getDriver( mConfig.encACfg.port, mConfig.encACfg.pin );
     driver->setMode( Chimera::GPIO::Drive::HIZ, Chimera::GPIO::Pull::NO_PULL );
     driver->detachInterrupt();
     Chimera::EXTI::disable( driver->getInterruptLine() );
@@ -160,13 +161,13 @@ namespace Aurora::HMI::RotaryEncoder
     /*-------------------------------------------------
     Configure GPIO pin B to have minimal system impact
     -------------------------------------------------*/
-    driver = Chimera::GPIO::getDriver( mConfig.pinBCfg.port, mConfig.pinBCfg.pin );
+    driver = Chimera::GPIO::getDriver( mConfig.encBCfg.port, mConfig.encBCfg.pin );
     driver->setMode( Chimera::GPIO::Drive::HIZ, Chimera::GPIO::Pull::NO_PULL );
 
     /*-------------------------------------------------
     Configure GPIO center push button for minimal impact.
     -------------------------------------------------*/
-    if ( mConfig.pinPushCfg.validity )
+    if ( mConfig.btnCfg.validity )
     {
       mCenterButton.reset();
     }
@@ -180,13 +181,13 @@ namespace Aurora::HMI::RotaryEncoder
     /*-------------------------------------------------
     Enable the encoder listener
     -------------------------------------------------*/
-    auto driver = Chimera::GPIO::getDriver( mConfig.pinACfg.port, mConfig.pinACfg.pin );
+    auto driver = Chimera::GPIO::getDriver( mConfig.encACfg.port, mConfig.encACfg.pin );
     Chimera::EXTI::enable( driver->getInterruptLine() );
 
     /*-------------------------------------------------
     Enable the center push button
     -------------------------------------------------*/
-    if ( mConfig.pinPushCfg.validity )
+    if ( mConfig.btnCfg.validity )
     {
       mCenterButton.enable();
     }
@@ -198,13 +199,13 @@ namespace Aurora::HMI::RotaryEncoder
     /*-------------------------------------------------
     Disable the encoder listener
     -------------------------------------------------*/
-    auto driver = Chimera::GPIO::getDriver( mConfig.pinACfg.port, mConfig.pinACfg.pin );
+    auto driver = Chimera::GPIO::getDriver( mConfig.encACfg.port, mConfig.encACfg.pin );
     Chimera::EXTI::disable( driver->getInterruptLine() );
 
     /*-------------------------------------------------
     Disable the center push button
     -------------------------------------------------*/
-    if ( mConfig.pinPushCfg.validity )
+    if ( mConfig.btnCfg.validity )
     {
       mCenterButton.disable();
     }
@@ -219,39 +220,34 @@ namespace Aurora::HMI::RotaryEncoder
 
   void Encoder::onCenterPush( HMI::Button::EdgeCallback callback )
   {
-    if ( mConfig.pinPushCfg.validity )
+    if ( mConfig.btnCfg.validity )
     {
       mCenterButton.onActiveEdge( callback );
     }
   }
 
 
-  int Encoder::numRotateEvents()
+  State Encoder::getState()
   {
+    /*-------------------------------------------------
+    Copy out the data
+    -------------------------------------------------*/
     this->lock();
-    int tmp = mNumRotateEvents;
+    State tmp = mState;
     this->unlock();
+
+    /*-------------------------------------------------
+    Clear the accumulated info
+    -------------------------------------------------*/
+    mState.clearAccumulated();
 
     return tmp;
   }
 
 
-  size_t Encoder::numPushEvents()
-  {
-    if ( mConfig.pinPushCfg.validity )
-    {
-      return mCenterButton.numEdgeEvents();
-    }
-    else
-    {
-      return 0;
-    }
-  }
-
-
   HMI::Button::ActiveEdge Encoder::getPushActiveEdge()
   {
-    if ( mConfig.pinPushCfg.validity )
+    if ( mConfig.btnCfg.validity )
     {
       return mCenterButton.getActiveEdge();
     }
@@ -277,48 +273,54 @@ namespace Aurora::HMI::RotaryEncoder
     /*-------------------------------------------------
     Read the current state of input A
     -------------------------------------------------*/
-    driver = Chimera::GPIO::getDriver( mConfig.pinACfg.port, mConfig.pinACfg.pin );
+    driver = Chimera::GPIO::getDriver( mConfig.encACfg.port, mConfig.encACfg.pin );
     driver->getState( pinA );
 
     /*-------------------------------------------------
     Read the current state of input B
     -------------------------------------------------*/
-    driver = Chimera::GPIO::getDriver( mConfig.pinBCfg.port, mConfig.pinBCfg.pin );
+    driver = Chimera::GPIO::getDriver( mConfig.encBCfg.port, mConfig.encBCfg.pin );
     driver->getState( pinB );
 
     /*-------------------------------------------------
-    Convert states into pulses
+    Convert states into pulses. Uses the knowledge that
+    pinB is always stable while pinA is edge triggering
+    to sample the system and provide a cleaned up
+    version of the encoder signal.
     -------------------------------------------------*/
-    int rotation = 0;
-
     if ( pinA != a0 )
     {
+      /*-------------------------------------------------
+      pinA has edge triggered, effectively sampling pinB
+      -------------------------------------------------*/
       a0 = pinA;
 
       if ( pinB != b0 )
       {
+        /*-------------------------------------------------
+        pinB has changed from the last time, this means a
+        rotation of some kind has occurred.
+        -------------------------------------------------*/
         b0 = pinB;
 
-        if ( pinA == pinB )
-        {
-          rotation = -1;
-        }
-        else
-        {
-          rotation = 1;
-        }
+        /*-------------------------------------------------
+        The rotation direction is defined by the relative
+        states of pinA and pinB.
+        -------------------------------------------------*/
+        int rotation = ( pinA == pinB ) ? -1 : 1;
 
-        mNumRotateEvents += rotation;
+        mState.absolutePosition += rotation;
+        mState.diffPosition += rotation;
 
         /*-------------------------------------------------
         Invoke the user callback if it exists
         -------------------------------------------------*/
         if ( mRotateCallback )
         {
-          mRotateCallback( rotation );
+          mRotateCallback( mState );
         }
       }
     }
   }
 
-}  // namespace Aurora::HMI::RotaryEncoder
+}  // namespace Aurora::HMI::Encoder

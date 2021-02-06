@@ -21,7 +21,7 @@
 #include <Aurora/source/hmi/button/hmi_button_types.hpp>
 #include <Aurora/source/hmi/rotary_encoder/hmi_rotatry_encoder_types.hpp>
 
-namespace Aurora::HMI::RotaryEncoder
+namespace Aurora::HMI::Encoder
 {
   /*-------------------------------------------------------------------------------
   Classes
@@ -38,7 +38,7 @@ namespace Aurora::HMI::RotaryEncoder
      *  @param[in]  cfg     The configuration to be applied
      *  @return bool
      */
-    bool initialize( const REConfig &cfg );
+    bool initialize( const Config &cfg );
 
     /**
      *  Resets the driver to the same state as if 'initialize' was just called.
@@ -91,24 +91,14 @@ namespace Aurora::HMI::RotaryEncoder
     void onCenterPush( HMI::Button::EdgeCallback callback );
 
     /**
-     *  How many rotation events have occurred since the last time this function
-     *  was called. Upon calling, will clear the recorded number of events.
+     *  Get the encoder state that has accumulated since the last
+     *  time this function was called.
      *
-     *  @note Rotations can be positive or negative, so this will return the
-     *  cumulative effect of a rotation sequence. For example, if the user
-     *  rotates -5 clicks, then +3 clicks, the returned result will be -2.
+     *  @note Parameters tagged with "diff" are cleared after each call
      *
-     *  @return int
+     *  @return State
      */
-    int numRotateEvents();
-
-    /**
-     *  How many edge events have occurred since the last time this function
-     *  was called. Upon calling, will clear the recorded number of events.
-     *
-     *  @return size_t
-     */
-    size_t numPushEvents();
+    State getState();
 
     /**
      *  Gets the currently configured active edge state for the center push
@@ -121,7 +111,6 @@ namespace Aurora::HMI::RotaryEncoder
   private:
     friend Chimera::Threading::Lockable<Encoder>;
 
-
     /*-------------------------------------------------
     Center Push Button Resources
     -------------------------------------------------*/
@@ -130,12 +119,11 @@ namespace Aurora::HMI::RotaryEncoder
     /*-------------------------------------------------
     Encoder Attributes
     -------------------------------------------------*/
-    REConfig mConfig;                 /**< Cached configuration settings */
+    Config mConfig;                   /**< Cached configuration settings */
     RotationCallback mRotateCallback; /**< User callback when a rotation event happens */
-    int mNumRotateEvents;             /**< Number of rotation events */
-
-    Chimera::GPIO::State a0;
-    Chimera::GPIO::State b0;
+    State mState;                     /**< Current encoder state */
+    Chimera::GPIO::State a0;          /**< Last known good state of the A input */
+    Chimera::GPIO::State b0;          /**< Last known good state of the B input */
 
     /**
      *  Internal callback for pulling out rotational information from a series
@@ -147,6 +135,6 @@ namespace Aurora::HMI::RotaryEncoder
     void processRotateEventCallback( void *arg );
   };
 
-}  // namespace Aurora::HMI::RotaryEncoder
+}  // namespace Aurora::HMI::Encoder
 
 #endif /* !AURORA_HMI_ROTARY_ENCODER_HPP */
