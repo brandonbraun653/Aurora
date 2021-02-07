@@ -1,34 +1,26 @@
-# ====================================================
-# Common
-# ====================================================
-set(LINK_LIBS
-  chimera_intf_inc       # Chimera public headers
-  aurora_intf_inc        # Aurora public headers
-  lfs_inc           # Little FS public headers
+include("${COMMON_TOOL_ROOT}/cmake/utility/embedded.cmake")
+
+gen_intf_lib(
+  TARGET
+    lfs_intf_inc
+  INTF_INCLUDES
+    "./lfs"
+    "./lfs/bd"
+  EXPORT_DIR
+    "${PROJECT_BINARY_DIR}/Aurora/LittleFS"
 )
 
-# ====================================================
-# Public Include Target
-# ====================================================
-set(LIB lfs_inc)
-add_library(${LIB} INTERFACE)
-target_include_directories(${LIB} INTERFACE "./lfs")
-export(TARGETS ${LIB} FILE "${PROJECT_BINARY_DIR}/LittleFS/lfs-inc.cmake")
-
-
-# ====================================================
-# Driver Library
-# ====================================================
-function(build_library variant)
-  set(LIB lfs_core${variant})
-  add_library(${LIB} STATIC
+gen_static_lib_variants(
+  TARGET
+    aurora_filesystem_lfs_core
+  SOURCES
     lfs/lfs_util.c
     lfs/lfs.c
     lfs/bd/lfs_rambd.c
-  )
-  target_link_libraries(${LIB} PUBLIC lfs_inc)
-  target_link_libraries(${LIB} PRIVATE ${LINK_LIBS} prj_build_target${variant} prj_device_target)
-  export(TARGETS ${LIB} FILE "${PROJECT_BINARY_DIR}/LittleFS/${LIB}.cmake")
-endfunction()
-
-add_target_variants(build_library)
+  PRV_LIBRARIES
+    aurora_intf_inc
+    chimera_intf_inc
+    lfs_intf_inc
+  EXPORT_DIR
+    "${PROJECT_BINARY_DIR}/Aurora/LittleFS"
+)

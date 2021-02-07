@@ -20,6 +20,7 @@ export(TARGETS ctre_inc FILE "${PROJECT_BINARY_DIR}/Aurora/lib/ctre_inc.cmake")
 # ====================================================
 add_subdirectory("source/database")
 add_subdirectory("source/datastore")
+add_subdirectory("source/filesystem")
 add_subdirectory("source/hmi")
 add_subdirectory("source/logging")
 add_subdirectory("source/math")
@@ -41,6 +42,7 @@ gen_intf_lib(
     "./include"
   INTF_LIBRARIES
     etl_inc
+    lfs_intf_inc
     ulog_inc
   EXPORT_DIR
     ${AuroraExportDir}
@@ -72,6 +74,18 @@ gen_intf_lib_variants(
     ${AuroraExportDir}
 )
 
+# ====================================================
+# FileSystem Library
+# ====================================================
+gen_intf_lib_variants(
+  TARGET
+    aurora_filesystem_lfs
+  LIBRARIES
+    aurora_filesystem_lfs_core
+    aurora_filesystem_lfs_driver
+  EXPORT_DIR
+    ${AuroraExportDir}
+)
 
 # ====================================================
 # Human-Machine Interface Library

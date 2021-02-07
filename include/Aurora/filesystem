@@ -1,0 +1,22 @@
+/********************************************************************************
+ *  File Name:
+ *    filesystem
+ *
+ *  Description:
+ *    Aurora includes for various file system implementations
+ *
+ *  2021 | Brandon Braun | brandonbraun653@gmail.com
+ ********************************************************************************/
+
+#pragma once
+#ifndef AURORA_FILESYSTEM_INCLUDES
+#define AURORA_FILESYSTEM_INCLUDES
+
+#include <Aurora/source/filesystem/file_intf.hpp>
+#include <Aurora/source/filesystem/file_types.hpp>
+#include <Aurora/source/filesystem/file_driver.hpp>
+
+// Do not include the "config" headers here. They are
+// not meant to be publicly shared.
+
+#endif /* !AURORA_FILESYSTEM_INCLUDES */
