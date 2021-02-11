@@ -27,7 +27,7 @@ namespace Aurora::HMI::Button
   /*-------------------------------------------------------------------------------
   Classes
   -------------------------------------------------------------------------------*/
-  class EdgeTrigger : public Chimera::Threading::Lockable<EdgeTrigger>
+  class EdgeTrigger : public Chimera::Thread::Lockable<EdgeTrigger>
   {
   public:
     EdgeTrigger();
@@ -95,7 +95,7 @@ namespace Aurora::HMI::Button
 
 
   private:
-    friend Chimera::Threading::Lockable<EdgeTrigger>;
+    friend Chimera::Thread::Lockable<EdgeTrigger>;
 
     bool mEnabled;                         /**< Whether or not the user has enabled the listener */
     EdgeCallback mCallback;                /**< User callback when the configured edge fires */

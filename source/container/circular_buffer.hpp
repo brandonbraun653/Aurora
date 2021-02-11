@@ -295,7 +295,7 @@ namespace Aurora::Container
     size_t mMaxSize;
     size_t mHead;
     size_t mTail;
-    Chimera::Threading::RecursiveMutex mMutex;
+    Chimera::Thread::RecursiveMutex mMutex;
   };
 }  // namespace Aurora::Container
 

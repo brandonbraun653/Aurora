@@ -38,10 +38,10 @@ namespace Aurora::Flash::NOR::Adesto
       .sectorSize      = 32 * 1024,
       .startAddress    = 0,
       .endAddress      = 8 * 1024 * 1024,
-      .startUpDelay    = 20 * Chimera::Threading::TIMEOUT_1MS,
-      .pagePgmDelay    = 5 * Chimera::Threading::TIMEOUT_1MS,
-      .blockEraseDelay = 1300 * Chimera::Threading::TIMEOUT_1MS,
-      .chipEraseDelay  = 30 * Chimera::Threading::TIMEOUT_1S,
+      .startUpDelay    = 20 * Chimera::Thread::TIMEOUT_1MS,
+      .pagePgmDelay    = 5 * Chimera::Thread::TIMEOUT_1MS,
+      .blockEraseDelay = 1300 * Chimera::Thread::TIMEOUT_1MS,
+      .chipEraseDelay  = 30 * Chimera::Thread::TIMEOUT_1S,
       .eventPoll       = pollEvent },
   };
 
@@ -90,7 +90,7 @@ namespace Aurora::Flash::NOR::Adesto
     cmdBuffer[ 0 ] = READ_SR_BYTE1;
     spi->setChipSelect( Chimera::GPIO::State::LOW );
     spi->readWriteBytes( cmdBuffer.data(), rxBuffer.data(), READ_SR_BYTE1_OPS_LEN );
-    spi->await( Chimera::Event::Trigger::TRIGGER_TRANSFER_COMPLETE, Chimera::Threading::TIMEOUT_BLOCK );
+    spi->await( Chimera::Event::Trigger::TRIGGER_TRANSFER_COMPLETE, Chimera::Thread::TIMEOUT_BLOCK );
     spi->setChipSelect( Chimera::GPIO::State::HIGH );
 
     result |= rxBuffer[ 1 ];
@@ -100,7 +100,7 @@ namespace Aurora::Flash::NOR::Adesto
     cmdBuffer[ 1 ] = 0;
     spi->setChipSelect( Chimera::GPIO::State::LOW );
     spi->readWriteBytes( cmdBuffer.data(), rxBuffer.data(), READ_SR_BYTE2_OPS_LEN );
-    spi->await( Chimera::Event::Trigger::TRIGGER_TRANSFER_COMPLETE, Chimera::Threading::TIMEOUT_BLOCK );
+    spi->await( Chimera::Event::Trigger::TRIGGER_TRANSFER_COMPLETE, Chimera::Thread::TIMEOUT_BLOCK );
     spi->setChipSelect( Chimera::GPIO::State::HIGH );
 
     result |= ( rxBuffer[ 1 ] << 8 );
@@ -132,7 +132,7 @@ namespace Aurora::Flash::NOR::Adesto
       case Aurora::Memory::Event::MEM_READ_COMPLETE:
       case Aurora::Memory::Event::MEM_WRITE_COMPLETE:
         eventBitMask = SR_RDY_BUSY;
-        pollDelay    = Chimera::Threading::TIMEOUT_5MS;
+        pollDelay    = Chimera::Thread::TIMEOUT_5MS;
         break;
 
       default:

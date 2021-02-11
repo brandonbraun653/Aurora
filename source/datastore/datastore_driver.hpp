@@ -28,7 +28,7 @@ namespace Aurora::Datastore
   /*-------------------------------------------------------------------------------
   Classes
   -------------------------------------------------------------------------------*/
-  class Manager : public Chimera::Threading::Lockable<Manager>, public Chimera::Callback::DelegateService<Manager, CallbackId>
+  class Manager : public Chimera::Thread::Lockable<Manager>, public Chimera::Callback::DelegateService<Manager, CallbackId>
   {
   public:
     Manager();
@@ -86,7 +86,7 @@ namespace Aurora::Datastore
     bool requestUpdate( const Database::Key key );
 
   private:
-    friend Chimera::Threading::Lockable<Manager>;
+    friend Chimera::Thread::Lockable<Manager>;
     friend Chimera::Callback::DelegateService<Manager, CallbackId>;
 
     ObservableMap *mObservableMap;

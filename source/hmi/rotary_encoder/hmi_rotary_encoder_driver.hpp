@@ -26,7 +26,7 @@ namespace Aurora::HMI::Encoder
   /*-------------------------------------------------------------------------------
   Classes
   -------------------------------------------------------------------------------*/
-  class Encoder : public Chimera::Threading::Lockable<Encoder>
+  class Encoder : public Chimera::Thread::Lockable<Encoder>
   {
   public:
     Encoder();
@@ -109,7 +109,7 @@ namespace Aurora::HMI::Encoder
     HMI::Button::ActiveEdge getPushActiveEdge();
 
   private:
-    friend Chimera::Threading::Lockable<Encoder>;
+    friend Chimera::Thread::Lockable<Encoder>;
 
     /*-------------------------------------------------
     Center Push Button Resources

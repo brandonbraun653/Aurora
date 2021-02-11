@@ -105,7 +105,7 @@ namespace Aurora::Logging
 
   ::uLog::Result SerialSink::log( const ::uLog::Level level, const void *const message, const size_t length )
   {
-    using namespace Chimera::Threading;
+    using namespace Chimera::Thread;
 
     /*------------------------------------------------
     Make sure we can actually log the data

@@ -227,11 +227,11 @@ namespace Aurora::Flash::NOR
 
     // Tell the hardware which address to write into
     mSPI->writeBytes( cmdBuffer.data(), CFI::PAGE_PROGRAM_OPS_LEN );
-    mSPI->await( Chimera::Event::Trigger::TRIGGER_TRANSFER_COMPLETE, Chimera::Threading::TIMEOUT_BLOCK );
+    mSPI->await( Chimera::Event::Trigger::TRIGGER_TRANSFER_COMPLETE, Chimera::Thread::TIMEOUT_BLOCK );
 
     // Dump the data
     mSPI->writeBytes( data, length );
-    mSPI->await( Chimera::Event::Trigger::TRIGGER_TRANSFER_COMPLETE, Chimera::Threading::TIMEOUT_BLOCK );
+    mSPI->await( Chimera::Event::Trigger::TRIGGER_TRANSFER_COMPLETE, Chimera::Thread::TIMEOUT_BLOCK );
 
     // Release the SPI and disable the memory chip
     mSPI->setChipSelect( Chimera::GPIO::State::HIGH );
@@ -318,11 +318,11 @@ namespace Aurora::Flash::NOR
 
     // Tell the hardware which address to read from
     mSPI->writeBytes( cmdBuffer.data(), CFI::READ_ARRAY_HS_OPS_LEN );
-    mSPI->await( Chimera::Event::Trigger::TRIGGER_TRANSFER_COMPLETE, Chimera::Threading::TIMEOUT_BLOCK );
+    mSPI->await( Chimera::Event::Trigger::TRIGGER_TRANSFER_COMPLETE, Chimera::Thread::TIMEOUT_BLOCK );
 
     // Pull out all the data
     mSPI->readBytes( data, length );
-    mSPI->await( Chimera::Event::Trigger::TRIGGER_TRANSFER_COMPLETE, Chimera::Threading::TIMEOUT_BLOCK );
+    mSPI->await( Chimera::Event::Trigger::TRIGGER_TRANSFER_COMPLETE, Chimera::Thread::TIMEOUT_BLOCK );
 
     mSPI->setChipSelect( Chimera::GPIO::State::HIGH );
     mSPI->unlock();
@@ -434,7 +434,7 @@ namespace Aurora::Flash::NOR
     mSPI->lock();
     spiResult |= mSPI->setChipSelect( Chimera::GPIO::State::LOW );
     spiResult |= mSPI->readWriteBytes( cmdBuffer.data(), cmdBuffer.data(), eraseOpsLen );
-    spiResult |= mSPI->await( Chimera::Event::Trigger::TRIGGER_TRANSFER_COMPLETE, Chimera::Threading::TIMEOUT_BLOCK );
+    spiResult |= mSPI->await( Chimera::Event::Trigger::TRIGGER_TRANSFER_COMPLETE, Chimera::Thread::TIMEOUT_BLOCK );
     spiResult |= mSPI->setChipSelect( Chimera::GPIO::State::HIGH );
     mSPI->unlock();
 
@@ -469,7 +469,7 @@ namespace Aurora::Flash::NOR
     mSPI->lock();
     spiResult |= mSPI->setChipSelect( Chimera::GPIO::State::LOW );
     spiResult |= mSPI->writeBytes( &CFI::CHIP_ERASE, CFI::CHIP_ERASE_OPS_LEN );
-    spiResult |= mSPI->await( Chimera::Event::Trigger::TRIGGER_TRANSFER_COMPLETE, Chimera::Threading::TIMEOUT_BLOCK );
+    spiResult |= mSPI->await( Chimera::Event::Trigger::TRIGGER_TRANSFER_COMPLETE, Chimera::Thread::TIMEOUT_BLOCK );
     spiResult |= mSPI->setChipSelect( Chimera::GPIO::State::HIGH );
     mSPI->unlock();
 
@@ -531,7 +531,7 @@ namespace Aurora::Flash::NOR
     mSPI->lock();
     mSPI->setChipSelect( Chimera::GPIO::State::LOW );
     mSPI->writeBytes( &CFI::WRITE_ENABLE, CFI::WRITE_ENABLE_OPS_LEN );
-    mSPI->await( Chimera::Event::Trigger::TRIGGER_TRANSFER_COMPLETE, Chimera::Threading::TIMEOUT_BLOCK );
+    mSPI->await( Chimera::Event::Trigger::TRIGGER_TRANSFER_COMPLETE, Chimera::Thread::TIMEOUT_BLOCK );
     mSPI->setChipSelect( Chimera::GPIO::State::HIGH );
     mSPI->unlock();
   }

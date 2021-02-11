@@ -30,7 +30,7 @@ namespace Aurora::Database
   /*-------------------------------------------------------------------------------
   Classes
   -------------------------------------------------------------------------------*/
-  class RAM : public Chimera::Threading::Lockable<RAM>
+  class RAM : public Chimera::Thread::Lockable<RAM>
   {
   public:
     RAM();
@@ -118,7 +118,7 @@ namespace Aurora::Database
     Chimera::Status_t registerCallback( const CallbackId id, etl::delegate<void( size_t )> func );
 
   private:
-    friend Chimera::Threading::Lockable<RAM>;
+    friend Chimera::Thread::Lockable<RAM>;
 
     /*-------------------------------------------------
     Core database memory
