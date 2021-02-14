@@ -255,6 +255,22 @@ namespace Aurora::Database
   }
 
 
+  size_t RAM::size( const Key &key )
+  {
+    this->lock();
+
+    size_t size = 0;
+    EntryList::iterator it = findKey( key );
+    if ( it != mEntryList.end() )
+    {
+      size = it->entry.size;
+    }
+
+    this->unlock();
+    return size;
+  }
+
+
   Chimera::Status_t RAM::registerCallback( const CallbackId id, etl::delegate<void( size_t )> func )
   {
     /*-------------------------------------------------

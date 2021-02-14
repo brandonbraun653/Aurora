@@ -35,6 +35,12 @@ namespace Aurora::FileSystem
     DRIVER_UNKNOWN
   };
 
+  enum IODirection : size_t
+  {
+    IO_READ,  /**< Reads data */
+    IO_WRITE, /**< Overwrites all data */
+  };
+
 
   /*-------------------------------------------------------------------------------
   Structures

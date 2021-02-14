@@ -159,6 +159,10 @@ namespace Aurora::Datastore
   class BaseObservable : public etl::observable<etl::observer<DataType>, NumObservers>, virtual public IObservableAttr
   {
   public:
+    BaseObservable() : mDB( nullptr ), mLastUpdate( 0 ), mKey( AccessKey ), mRate( Rate ), mTimeout( Timeout )
+    {
+    }
+
     /*-------------------------------------------------------------------------------
     Public Functions
     -------------------------------------------------------------------------------*/
@@ -170,13 +174,13 @@ namespace Aurora::Datastore
 
     size_t timeout() const final override
     {
-      return Timeout;
+      return mTimeout;
     }
 
 
     size_t updateRate() const final override
     {
-      return Rate;
+      return mRate;
     }
 
 
@@ -188,7 +192,7 @@ namespace Aurora::Datastore
 
     size_t key() const final override
     {
-      return AccessKey;
+      return mKey;
     }
 
 
@@ -238,6 +242,9 @@ namespace Aurora::Datastore
 
   private:
     Aurora::Database::RAM *mDB;
+    const Database::Key mKey;
+    const size_t mRate;
+    const size_t mTimeout;
   };
 }  // namespace Aurora::Datastore
 

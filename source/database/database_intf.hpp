@@ -102,10 +102,18 @@ namespace Aurora::Database
      *
      *  @warning Beware of fragmentation if create/free is performed often enough
      *
-     *  @param[in] key        Key to be removed
+     *  @param[in]  key       Key to be removed
      *  @return Chimera::Status_t
      */
     Chimera::Status_t remove( const Key &key );
+
+    /**
+     *  Gets the size allocated for a particular key
+     *
+     *  @param[in]  key       Key to look up
+     *  @return size_t        Zero if not found
+     */
+    size_t size( const Key &key );
 
     /**
      *  Register a callback to be invoked upon some event that occurs during

@@ -70,49 +70,49 @@ namespace Aurora::FileSystem
 
   int fclose( FileHandle stream )
   {
-    RT_HARD_ASSERT( impl && impl->fclose );
+    RT_HARD_ASSERT( impl && impl->fclose && stream );
     return impl->fclose( stream );
   }
 
 
   int fflush( FileHandle stream )
   {
-    RT_HARD_ASSERT( impl && impl->fflush );
+    RT_HARD_ASSERT( impl && impl->fflush && stream  );
     return impl->fflush( stream );
   }
 
 
   size_t fread( void *ptr, size_t size, size_t count, FileHandle stream )
   {
-    RT_HARD_ASSERT( impl && impl->fread );
+    RT_HARD_ASSERT( impl && impl->fread && stream  );
     return impl->fread( ptr, size, count, stream );
   }
 
 
   size_t fwrite( const void *ptr, size_t size, size_t count, FileHandle stream )
   {
-    RT_HARD_ASSERT( impl && impl->fwrite );
+    RT_HARD_ASSERT( impl && impl->fwrite && stream  );
     return impl->fwrite( ptr, size, count, stream );
   }
 
 
   int fseek( FileHandle stream, size_t offset, size_t origin )
   {
-    RT_HARD_ASSERT( impl && impl->fseek );
+    RT_HARD_ASSERT( impl && impl->fseek && stream  );
     return impl->fseek( stream, offset, origin );
   }
 
 
   size_t ftell( FileHandle stream )
   {
-    RT_HARD_ASSERT( impl && impl->ftell );
+    RT_HARD_ASSERT( impl && impl->ftell && stream );
     return impl->ftell( stream );
   }
 
 
   void frewind( FileHandle stream )
   {
-    RT_HARD_ASSERT( impl && impl->frewind );
+    RT_HARD_ASSERT( impl && impl->frewind && stream );
     impl->frewind( stream );
   }
 
