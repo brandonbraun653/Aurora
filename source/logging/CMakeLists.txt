@@ -1,26 +1,16 @@
 include("${COMMON_TOOL_ROOT}/cmake/utility/embedded.cmake")
 
-# ====================================================
-# Common
-# ====================================================
-set(LINK_LIBS
-  Boost::boost
-  chimera_intf_inc       # Chimera public headers
-  aurora_intf_inc        # Aurora public headers
-  ulog_inc
+gen_static_lib_variants(
+  TARGET
+  aurora_logging
+  SOURCES
+    logging_driver.cpp
+    sinks/sink_cout.cpp
+    sinks/sink_serial.cpp
+    sinks/sink_vgdb_semihosting.cpp
+  PRV_LIBRARIES
+    aurora_intf_inc
+    chimera_intf_inc
+  EXPORT_DIR
+    "${PROJECT_BINARY_DIR}/Aurora"
 )
-
-# ====================================================
-# Driver Library
-# ====================================================
-function(build_library variant)
-  set(LIB aurora_log_serial${variant})
-  add_library(${LIB} STATIC
-    serial_sink.cpp
-  )
-  target_link_libraries(${LIB} PUBLIC ulog_inc)
-  target_link_libraries(${LIB} PRIVATE ${LINK_LIBS} prj_build_target${variant} prj_device_target)
-  export(TARGETS ${LIB} FILE "${PROJECT_BINARY_DIR}/Aurora/${LIB}.cmake")
-endfunction()
-
-add_target_variants(build_library)

@@ -12,6 +12,9 @@
 #ifndef LFS_HOOKS_HPP
 #define LFS_HOOKS_HPP
 
+/* Aurora Includes */
+#include <Aurora/source/filesystem/file_types.hpp>
+
 /* LFS Includes */
 #include "lfs.h"
 
@@ -22,5 +25,13 @@ int lfs_safe_read( const struct lfs_config *c, lfs_block_t block, lfs_off_t off,
 int lfs_safe_prog( const struct lfs_config *c, lfs_block_t block, lfs_off_t off, const void *buffer, lfs_size_t size);
 int lfs_safe_erase( const struct lfs_config *c, lfs_block_t block );
 int lfs_safe_sync( const struct lfs_config *c );
+
+namespace Aurora::FileSystem::LFS
+{
+  /*-------------------------------------------------------------------------------
+  Public Data
+  -------------------------------------------------------------------------------*/
+  extern const Interface implementation;
+}
 
 #endif  /* !LFS_HOOKS_HPP */

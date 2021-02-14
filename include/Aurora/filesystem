@@ -14,9 +14,6 @@
 
 #include <Aurora/source/filesystem/file_intf.hpp>
 #include <Aurora/source/filesystem/file_types.hpp>
-#include <Aurora/source/filesystem/file_driver.hpp>
-
-// Do not include the "config" headers here. They are
-// not meant to be publicly shared.
+#include <Aurora/source/filesystem/file_config.hpp>
 
 #endif /* !AURORA_FILESYSTEM_INCLUDES */

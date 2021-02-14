@@ -17,6 +17,7 @@
 
 /* Aurora Includes */
 #include <Aurora/filesystem>
-#include <Aurora/source/filesystem/littlefs/lfs_hooks.hpp>
+#include <Aurora/source/filesystem/file_driver.hpp>
+#include <Aurora/source/filesystem/littlefs/lfs_driver.hpp>
 
 #endif /* !AURORA_FILESYSTEM_LFS_INCLUDES */

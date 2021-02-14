@@ -22,13 +22,16 @@
 #include "aurora_user_filesystem_config.hpp"
 #else
 
-/*-------------------------------------------------------------------------------
-Configuration Constants: These need to be duplicated in a user configuration file
--------------------------------------------------------------------------------*/
-/**
- *  What the default file system implemenation will hook into.
- */
-#define DEFAULT_FILESYSTEM    ( DRIVER_OS )
+namespace Aurora::FileSystem
+{
+  /*-------------------------------------------------------------------------------
+  Configuration Constants: These need to be duplicated in a user configuration file
+  -------------------------------------------------------------------------------*/
+  /**
+   *  What the default file system implemenation will hook into.
+   */
+  static constexpr BackendType DEFAULT_FILESYSTEM = BackendType::DRIVER_OS;
+}  // namespace Aurora::FileSystem
 
 #endif /* AURORA_USER_FILESYSTEM_CONFIG */
 

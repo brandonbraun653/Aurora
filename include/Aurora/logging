@@ -5,17 +5,19 @@
  *  Description:
  *    Aurora includes for logging interfaces
  *
- *  2020 | Brandon Braun | brandonbraun653@gmail.com
+ *  2020-2021 | Brandon Braun | brandonbraun653@gmail.com
  ********************************************************************************/
 
 #pragma once
 #ifndef AURORA_LOG_INCLUDES
 #define AURORA_LOG_INCLUDES
 
-#include <Aurora/source/logging/serial_sink.hpp>
-#include <uLog/config.hpp>
-#include <uLog/types.hpp>
-#include <uLog/ulog.hpp>
-#include <uLog/sinks/sink_cout.hpp>
+#include <Aurora/source/logging/logging_config.hpp>
+#include <Aurora/source/logging/logging_driver.hpp>
+#include <Aurora/source/logging/logging_types.hpp>
+#include <Aurora/source/logging/sinks/sink_cout.hpp>
+#include <Aurora/source/logging/sinks/sink_intf.hpp>
+#include <Aurora/source/logging/sinks/sink_serial.hpp>
+#include <Aurora/source/logging/sinks/sink_vgdb_semihosting.hpp>
 
 #endif /* !AURORA_LOG_INCLUDES */

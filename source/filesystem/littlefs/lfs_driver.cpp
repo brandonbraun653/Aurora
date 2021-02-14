@@ -21,9 +21,6 @@
 /* Chimera Includes */
 #include <Chimera/assert>
 
-static constexpr size_t CFG = Aurora::FileSystem::DRIVER_LITTLE_FS;
-#if defined( DEFAULT_FILESYSTEM ) && ( DEFAULT_FILESYSTEM == CFG )
-
 /*-------------------------------------------------------------------------------
 Static Data
 -------------------------------------------------------------------------------*/
@@ -151,96 +148,73 @@ int lfs_safe_sync( const struct lfs_config *c )
 }
 
 
-namespace Aurora::FileSystem
+namespace Aurora::FileSystem::LFS
 {
   /*-------------------------------------------------------------------------------
   Driver Specific Implementation
   -------------------------------------------------------------------------------*/
-  namespace Driver::LFS
-  {
-    bool attachFS( lfs_t *const fs, const lfs_config *const cfg )
-    {
-      /*-------------------------------------------------
-      Input Protection
-      -------------------------------------------------*/
-      if ( !fs || !cfg )
-      {
-        return false;
-      }
-
-      /*-------------------------------------------------
-      Cache the pointers. This assumes the given data is
-      never destroyed.
-      -------------------------------------------------*/
-      s_fs     = fs;
-      s_fs_cfg = cfg;
-      return true;
-    }
-
-
-    bool attachDevice( const Aurora::Flash::NOR::Chip_t dev, const Chimera::SPI::Channel channel, const lfs_config &cfg )
-    {
-      sNORProps = Aurora::Flash::NOR::getProperties( dev );
-      return sNORFlash.configure( dev, channel );
-    }
-
-
-    bool fullChipErase( const size_t timeout )
-    {
-      using namespace Aurora::Memory;
-
-      /*-------------------------------------------------
-      Issue the erase command
-      -------------------------------------------------*/
-      if ( sNORFlash.erase() != Status::ERR_OK )
-      {
-        return false;
-      }
-
-      /*-------------------------------------------------
-      Wait for the erase to complete
-      -------------------------------------------------*/
-      return sNORFlash.pendEvent( Event::MEM_ERASE_COMPLETE, timeout ) == Status::ERR_OK;
-    }
-
-
-    std::string_view err2str( const int error )
-    {
-      return "INVALID";
-    }
-
-  }  // namespace Driver::LFS
-
-  /*-------------------------------------------------------------------------------
-  Public Functions
-  -------------------------------------------------------------------------------*/
-  bool configureDriver( const BackendType type )
+  bool attachFS( lfs_t *const fs, const lfs_config *const cfg )
   {
     /*-------------------------------------------------
-    If any of the following checks fail, a config step
-    was missed that initialized the data.
+    Input Protection
     -------------------------------------------------*/
-    if ( !s_initialized && ( type == BackendType::DRIVER_LITTLE_FS ) )
+    if ( !fs || !cfg )
     {
-      RT_HARD_ASSERT( s_fs );
-      RT_HARD_ASSERT( s_fs_cfg );
-      RT_HARD_ASSERT( sNORProps );
-      s_initialized = true;
+      return false;
     }
 
-    return s_initialized;
+    /*-------------------------------------------------
+    Cache the pointers. This assumes the given data is
+    never destroyed.
+    -------------------------------------------------*/
+    s_fs     = fs;
+    s_fs_cfg = cfg;
+    return true;
+  }
+
+
+  bool attachDevice( const Aurora::Flash::NOR::Chip_t dev, const Chimera::SPI::Channel channel, const lfs_config &cfg )
+  {
+    sNORProps = Aurora::Flash::NOR::getProperties( dev );
+    return sNORFlash.configure( dev, channel );
+  }
+
+
+  bool fullChipErase( const size_t timeout )
+  {
+    using namespace Aurora::Memory;
+
+    /*-------------------------------------------------
+    Issue the erase command
+    -------------------------------------------------*/
+    if ( sNORFlash.erase() != Status::ERR_OK )
+    {
+      return false;
+    }
+
+    /*-------------------------------------------------
+    Wait for the erase to complete
+    -------------------------------------------------*/
+    return sNORFlash.pendEvent( Event::MEM_ERASE_COMPLETE, timeout ) == Status::ERR_OK;
+  }
+
+
+  std::string_view err2str( const int error )
+  {
+    return "INVALID";
   }
 
 
   int mount()
   {
+    using namespace Aurora::Logging;
+
     /*-------------------------------------------------
     Input Protection
     -------------------------------------------------*/
-    if( !s_initialized )
-    {
-      return LFS_ERR_INVAL;
-    }
+    RT_HARD_ASSERT( s_fs );
+    RT_HARD_ASSERT( s_fs_cfg );
+    RT_HARD_ASSERT( sNORProps );
 
     /*-------------------------------------------------
     Try mounting. It's possible to get a clean chip,
@@ -252,11 +226,11 @@ namespace Aurora::FileSystem
       /*-------------------------------------------------
       Attempt to quick format
       -------------------------------------------------*/
-      uLog::getRootSink()->flog( uLog::Level::LVL_DEBUG, "Initial mount failed with code %d. Reformatting.\r\n", err );
+      getRootSink()->flog( Level::LVL_DEBUG, "Initial mount failed with code %d. Reformatting.\r\n", err );
       err = lfs_format( s_fs, s_fs_cfg );
-      if( err )
+      if ( err )
       {
-        uLog::getRootSink()->flog( uLog::Level::LVL_DEBUG, "Reformatting failed with code %d\r\n", err );
+        getRootSink()->flog( Level::LVL_DEBUG, "Reformatting failed with code %d\r\n", err );
       }
 
       /*-------------------------------------------------
@@ -270,11 +244,11 @@ namespace Aurora::FileSystem
     -------------------------------------------------*/
     if ( err )
     {
-      uLog::getRootSink()->flog( uLog::Level::LVL_DEBUG, "Mount failed with code %d\r\n", err );
+      getRootSink()->flog( Level::LVL_DEBUG, "Mount failed with code %d\r\n", err );
     }
     else
     {
-      uLog::getRootSink()->flog( uLog::Level::LVL_DEBUG, "File system mounted\r\n" );
+      getRootSink()->flog( Level::LVL_DEBUG, "File system mounted\r\n" );
     }
 
     return err == 0;
@@ -286,5 +260,4 @@ namespace Aurora::FileSystem
     return 0;
   }
 
-#endif /* DEFAULT_FILESYSTEM == DRIVER_LITTLE_FS */
 }  // namespace Aurora::FileSystem

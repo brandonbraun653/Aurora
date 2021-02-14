@@ -25,7 +25,7 @@
 /* LittleFS Includes */
 #include "lfs.h"
 
-namespace Aurora::FileSystem::Driver
+namespace Aurora::FileSystem
 {
   /*-------------------------------------------------------------------------------
   Project Side Interface

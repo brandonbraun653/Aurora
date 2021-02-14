@@ -5,7 +5,7 @@
  *  Description:
  *    Defines the interface to a serial based sink for the uLogger system.
  *
- *  2019-2020 | Brandon Braun | brandonbraun653@gmail.com
+ *  2019-2021 | Brandon Braun | brandonbraun653@gmail.com
  ********************************************************************************/
 
 #pragma once
@@ -15,17 +15,16 @@
 /* C++ Includes */
 #include <cstdlib>
 
-/* uLog Includes */
-#include <uLog/ulog.hpp>
-#include <uLog/types.hpp>
-#include <uLog/sinks/sink_intf.hpp>
+/* Aurora Includes */
+#include <Aurora/source/logging/logging_types.hpp>
+#include <Aurora/source/logging/sinks/sink_intf.hpp>
 
 /* Chimera Includes */
 #include <Chimera/serial>
 
 namespace Aurora::Logging
 {
-  class SerialSink : public ::uLog::SinkInterface
+  class SerialSink : public SinkInterface
   {
   public:
     /**
@@ -48,11 +47,11 @@ namespace Aurora::Logging
      */
     void assignChannel( Chimera::Serial::Channel channel );
 
-    ::uLog::Result open() final override;
-    ::uLog::Result close() final override;
-    ::uLog::Result flush() final override;
-    ::uLog::IOType getIOType() final override;
-    ::uLog::Result log( const ::uLog::Level level, const void *const message, const size_t length ) final override;
+    Result open() final override;
+    Result close() final override;
+    Result flush() final override;
+    IOType getIOType() final override;
+    Result log( const Level level, const void *const message, const size_t length ) final override;
 
   private:
     Chimera::Serial::Channel mSerialChannel;

@@ -3,7 +3,6 @@ include("${COMMON_TOOL_ROOT}/cmake/utility/embedded.cmake")
 # ====================================================
 # 3rd Party Libraries
 # ====================================================
-add_subdirectory("lib/uLog")
 add_subdirectory("lib/littlefs")
 add_subdirectory("lib/embedded_template_library")
 
@@ -43,7 +42,7 @@ gen_intf_lib(
   INTF_LIBRARIES
     etl_inc
     lfs_intf_inc
-    ulog_inc
+
   EXPORT_DIR
     ${AuroraExportDir}
 )
@@ -96,20 +95,6 @@ gen_intf_lib_variants(
   LIBRARIES
     aurora_hmi_button
     aurora_hmi_rotary_encoder
-  EXPORT_DIR
-    ${AuroraExportDir}
-)
-
-
-# ====================================================
-# Logging Library
-# ====================================================
-gen_intf_lib_variants(
-  TARGET
-    aurora_logging
-  LIBRARIES
-    ulog_core
-    aurora_log_serial
   EXPORT_DIR
     ${AuroraExportDir}
 )

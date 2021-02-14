@@ -4,6 +4,8 @@ gen_static_lib_variants(
   TARGET
     aurora_filesystem_lfs_driver
   SOURCES
+    file_intf.cpp
+    generic/generic_driver.cpp
     littlefs/lfs_driver.cpp
   PRV_LIBRARIES
     aurora_intf_inc

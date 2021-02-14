@@ -30,7 +30,7 @@ add your own configuration in the given header file below.
 
 #include <Chimera/serial>
 
-namespace Chimera::Modules::uLog
+namespace Aurora::Logging
 {
   /*------------------------------------------------
   Configuration options for the default serial sink

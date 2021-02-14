@@ -46,6 +46,20 @@ namespace Aurora::FileSystem
    *  @return int
    */
   int unmount();
+
+
+  /*-------------------------------------------------------------------------------
+  Public Functions: stdio-like Interface
+  -------------------------------------------------------------------------------*/
+  FileHandle fopen( const char *filename, const char *mode );
+  int fclose( FileHandle stream );
+  int fflush( FileHandle stream );
+  size_t fread( void *ptr, size_t size, size_t count, FileHandle stream );
+  size_t fwrite( const void *ptr, size_t size, size_t count, FileHandle stream );
+  int fseek( FileHandle stream, size_t offset, size_t origin );
+  size_t ftell( FileHandle stream );
+  void frewind( FileHandle stream );
+
 }  // namespace Aurora::FileSystem
 
 #endif  /* !AURORA_FILESYSTEM_INTERFACE_HPP */

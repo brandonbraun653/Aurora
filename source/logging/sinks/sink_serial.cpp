@@ -8,7 +8,7 @@
  *  2019-2021 | Brandon Braun | brandonbraun653@gmail.com
  ********************************************************************************/
 
-/* Serial Sink Includes */
+/* Aurora Includes */
 #include <Aurora/logging>
 
 /* Chimera Includes */
@@ -23,6 +23,7 @@ namespace Aurora::Logging
   Static Data
   -------------------------------------------------------------------------------*/
   static Chimera::Serial::Driver_rPtr sink;
+
 
   /*-------------------------------------------------------------------------------
   Driver Implementation
@@ -48,7 +49,7 @@ namespace Aurora::Logging
   }
 
 
-  ::uLog::Result SerialSink::open()
+  Result SerialSink::open()
   {
     /*-------------------------------------------------
     Grab a reference to the underlying serial driver
@@ -64,46 +65,46 @@ namespace Aurora::Logging
     ------------------------------------------------*/
     if ( !sink )
     {
-      return ::uLog::Result::RESULT_FAIL;
+      return Result::RESULT_FAIL;
     }
 
-    return ::uLog::Result::RESULT_SUCCESS;
+    return Result::RESULT_SUCCESS;
   }
 
 
-  ::uLog::Result SerialSink::close()
+  Result SerialSink::close()
   {
-    ::uLog::Result sinkResult = ::uLog::Result::RESULT_SUCCESS;
+    Result sinkResult = Result::RESULT_SUCCESS;
 
     if ( sink->end() != Chimera::Status::OK )
     {
-      sinkResult = ::uLog::Result::RESULT_FAIL;
+      sinkResult = Result::RESULT_FAIL;
     }
 
     return sinkResult;
   }
 
 
-  ::uLog::Result SerialSink::flush()
+  Result SerialSink::flush()
   {
-    ::uLog::Result sinkResult = ::uLog::Result::RESULT_SUCCESS;
+    Result sinkResult = Result::RESULT_SUCCESS;
 
     if ( sink->flush( Chimera::Hardware::SubPeripheral::TXRX ) != Chimera::Status::OK )
     {
-      sinkResult = ::uLog::Result::RESULT_FAIL;
+      sinkResult = Result::RESULT_FAIL;
     }
 
     return sinkResult;
   }
 
 
-  ::uLog::IOType SerialSink::getIOType()
+  IOType SerialSink::getIOType()
   {
-    return ::uLog::IOType::SERIAL_SINK;
+    return IOType::SERIAL_SINK;
   }
 
 
-  ::uLog::Result SerialSink::log( const ::uLog::Level level, const void *const message, const size_t length )
+  Result SerialSink::log( const Level level, const void *const message, const size_t length )
   {
     using namespace Chimera::Thread;
 
@@ -112,7 +113,7 @@ namespace Aurora::Logging
     ------------------------------------------------*/
     if ( level < getLogLevel() )
     {
-      return ::uLog::Result::RESULT_INVALID_LEVEL;
+      return Result::RESULT_INVALID_LEVEL;
     }
 
     /*------------------------------------------------
@@ -120,7 +121,7 @@ namespace Aurora::Logging
     until the transfer is complete.
     ------------------------------------------------*/
     auto hwResult = Chimera::Status::OK;
-    auto ulResult = ::uLog::Result::RESULT_SUCCESS;
+    auto ulResult = Result::RESULT_SUCCESS;
 
     sink->lock();
     hwResult |= sink->write( message, length );
@@ -129,7 +130,7 @@ namespace Aurora::Logging
 
     if ( hwResult != Chimera::Status::OK )
     {
-      ulResult = ::uLog::Result::RESULT_FAIL;
+      ulResult = Result::RESULT_FAIL;
     }
 
     return ulResult;
