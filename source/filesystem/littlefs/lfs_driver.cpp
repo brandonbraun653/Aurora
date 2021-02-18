@@ -20,6 +20,10 @@
 
 /* Chimera Includes */
 #include <Chimera/assert>
+#include <Chimera/thread>
+
+/* ETL Includes */
+#include <etl/flat_map.h>
 
 /*-------------------------------------------------------------------------------
 Static Data
@@ -30,6 +34,8 @@ static const lfs_config *s_fs_cfg                  = nullptr; /**< External LFS 
 static const Aurora::Memory::Properties *sNORProps = nullptr; /**< External NOR flash properties */
 static Aurora::Flash::NOR::Driver sNORFlash;                  /**< Flash memory driver supporting the file system */
 
+static Chimera::Thread::RecursiveMutex s_file_mtx;
+static etl::flat_map<const char *, lfs_file_t, 15> s_open_files;
 
 /*-------------------------------------------------------------------------------
 Public Functions
@@ -169,6 +175,7 @@ namespace Aurora::FileSystem::LFS
     -------------------------------------------------*/
     s_fs     = fs;
     s_fs_cfg = cfg;
+    s_open_files.clear();
     return true;
   }
 
@@ -205,7 +212,7 @@ namespace Aurora::FileSystem::LFS
   }
 
 
-  int mount()
+  static int mount()
   {
     using namespace Aurora::Logging;
 
@@ -255,9 +262,150 @@ namespace Aurora::FileSystem::LFS
   }
 
 
-  int unmount()
+  static int unmount()
   {
-    return 0;
+    return lfs_unmount( s_fs );
   }
 
-}  // namespace Aurora::FileSystem
+
+  static FileHandle fopen( const char *filename, const char *mode )
+  {
+    using namespace Aurora::Logging;
+    using namespace Chimera::Thread;
+
+    LockGuard<RecursiveMutex> lk( s_file_mtx );
+
+    /*-------------------------------------------------
+    Does the file exist already in the open list?
+    -------------------------------------------------*/
+    auto iter = s_open_files.find( filename );
+    if ( iter != s_open_files.end() )
+    {
+      return &iter->second;
+    }
+
+    /*-------------------------------------------------
+    Doesn't exist, but can it be added?
+    -------------------------------------------------*/
+    if ( s_open_files.full() )
+    {
+      return nullptr;
+    }
+
+    /*-------------------------------------------------
+    Figure out the mode to open with
+    -------------------------------------------------*/
+    int flag = 0;
+    if ( ( strcmp( mode, "w" ) == 0 ) || ( strcmp( mode, "wb" ) == 0 ) )
+    {
+      flag = LFS_O_WRONLY | LFS_O_CREAT;
+    }
+    else if ( ( strcmp( mode, "w+" ) == 0 ) || ( strcmp( mode, "wb+" ) == 0 ) )
+    {
+      flag = LFS_O_WRONLY | LFS_O_CREAT | LFS_O_APPEND;
+    }
+    else if ( ( strcmp( mode, "r" ) == 0 ) || ( strcmp( mode, "rb" ) == 0 ) )
+    {
+      flag = LFS_O_RDONLY;
+    }
+    else
+    {
+      // Some mode combination was used that's not supported
+      RT_HARD_ASSERT( false );
+    }
+
+    /*-------------------------------------------------
+    Try to open the file
+    -------------------------------------------------*/
+    s_open_files.insert( { filename, {} } );
+    iter = s_open_files.find( filename );
+
+    int err = lfs_file_open( s_fs, &iter->second, filename, flag );
+    if ( err )
+    {
+      s_open_files.erase( iter );
+      getRootSink()->flog( Level::LVL_DEBUG, "Failed to open %s with code %d\r\n", filename, err );
+      return nullptr;
+    }
+
+    return &iter->second;
+  }
+
+
+  static int fclose( FileHandle stream )
+  {
+    using namespace Aurora::Logging;
+    using namespace Chimera::Thread;
+
+    LockGuard<RecursiveMutex> lk( s_file_mtx );
+    int err = 0;
+    for ( auto iter = s_open_files.begin(); iter != s_open_files.end(); iter++ )
+    {
+      if ( &iter->second == stream )
+      {
+        err = lfs_file_close( s_fs, &iter->second );
+        if ( err )
+        {
+          getRootSink()->flog( Level::LVL_DEBUG, "Failed to close %s with code %d\r\n", iter->first, err );
+        }
+        else
+        {
+          s_open_files.erase( iter );
+        }
+        break;
+      }
+    }
+
+    return err;
+  }
+
+
+  static int fflush( FileHandle stream )
+  {
+    return lfs_file_sync( s_fs, reinterpret_cast<lfs_file_t *>( stream ) );
+  }
+
+
+  static size_t fread( void *ptr, size_t size, size_t count, FileHandle stream )
+  {
+    return lfs_file_read( s_fs, reinterpret_cast<lfs_file_t *>( stream ), ptr, size * count );
+  }
+
+
+  static size_t fwrite( const void *ptr, size_t size, size_t count, FileHandle stream )
+  {
+    return lfs_file_write( s_fs, reinterpret_cast<lfs_file_t *>( stream ), ptr, size * count );
+  }
+
+
+  static int fseek( FileHandle stream, size_t offset, size_t origin )
+  {
+    return lfs_file_seek( s_fs, reinterpret_cast<lfs_file_t *>( stream ), offset, origin );
+  }
+
+
+  static size_t ftell( FileHandle stream )
+  {
+    return lfs_file_tell( s_fs, reinterpret_cast<lfs_file_t *>( stream ) );
+  }
+
+
+  static void frewind( FileHandle stream )
+  {
+    lfs_file_rewind( s_fs, reinterpret_cast<lfs_file_t *>( stream ) );
+  }
+
+  /*-------------------------------------------------------------------------------
+  Public Data
+  -------------------------------------------------------------------------------*/
+  extern const Interface implementation = { .mount   = ::Aurora::FileSystem::LFS::mount,
+                                            .unmount = ::Aurora::FileSystem::LFS::unmount,
+                                            .fopen   = ::Aurora::FileSystem::LFS::fopen,
+                                            .fclose  = ::Aurora::FileSystem::LFS::fclose,
+                                            .fflush  = ::Aurora::FileSystem::LFS::fflush,
+                                            .fread   = ::Aurora::FileSystem::LFS::fread,
+                                            .fwrite  = ::Aurora::FileSystem::LFS::fwrite,
+                                            .fseek   = ::Aurora::FileSystem::LFS::fseek,
+                                            .ftell   = ::Aurora::FileSystem::LFS::ftell,
+                                            .frewind = ::Aurora::FileSystem::LFS::frewind };
+}  // namespace Aurora::FileSystem::LFS

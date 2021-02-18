@@ -82,14 +82,14 @@ namespace Aurora::FileSystem::Generic
   /*-------------------------------------------------------------------------------
   Public Data
   -------------------------------------------------------------------------------*/
-  extern const Interface implementation = { .mount   = mount,
-                                            .unmount = unmount,
-                                            .fopen   = fopen,
-                                            .fclose  = fclose,
-                                            .fflush  = fflush,
-                                            .fread   = fread,
-                                            .fwrite  = fwrite,
-                                            .fseek   = fseek,
-                                            .ftell   = ftell,
-                                            .frewind = frewind };
+  extern const Interface implementation = { .mount   = ::Aurora::FileSystem::Generic::mount,
+                                            .unmount = ::Aurora::FileSystem::Generic::unmount,
+                                            .fopen   = ::Aurora::FileSystem::Generic::fopen,
+                                            .fclose  = ::Aurora::FileSystem::Generic::fclose,
+                                            .fflush  = ::Aurora::FileSystem::Generic::fflush,
+                                            .fread   = ::Aurora::FileSystem::Generic::fread,
+                                            .fwrite  = ::Aurora::FileSystem::Generic::fwrite,
+                                            .fseek   = ::Aurora::FileSystem::Generic::fseek,
+                                            .ftell   = ::Aurora::FileSystem::Generic::ftell,
+                                            .frewind = ::Aurora::FileSystem::Generic::frewind };
 }  // namespace Aurora::FileSystem::Generic

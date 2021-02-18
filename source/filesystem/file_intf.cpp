@@ -11,6 +11,7 @@
 /* Aurora Includes */
 #include <Aurora/filesystem>
 #include <Aurora/source/filesystem/generic/generic_driver.hpp>
+#include <Aurora/source/filesystem/littlefs/lfs_driver.hpp>
 
 /* Chimera Includes */
 #include <Chimera/assert>
@@ -30,7 +31,7 @@ namespace Aurora::FileSystem
     switch ( type )
     {
       case BackendType::DRIVER_LITTLE_FS:
-        RT_HARD_ASSERT( false );
+        impl = &LFS::implementation;
         break;
 
       case BackendType::DRIVER_OS:
