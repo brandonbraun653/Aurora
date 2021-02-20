@@ -17,37 +17,63 @@
 #include <cstdlib>
 #include <string.h>
 
+/* Aurora Includes */
+#include <Aurora/memory>
+
 /* Chimera Includes */
+#include <Chimera/assert>
 #include <Chimera/thread>
-#include <Aurora/source/memory/heap/heap.hpp>
 
 /* FreeRTOS Includes */
-
 #if defined( USING_FREERTOS_THREADS )
 #include <FreeRTOS/FreeRTOS.h>
 #include <FreeRTOS/task.h>
+#else  // Assume PC or other non-embedded system
+#define portBYTE_ALIGNMENT 4
+
+#if portBYTE_ALIGNMENT == 32
+#define portBYTE_ALIGNMENT_MASK ( 0x001f )
 #endif
 
-static constexpr size_t heapBITS_PER_BYTE = 8u;
+#if portBYTE_ALIGNMENT == 16
+#define portBYTE_ALIGNMENT_MASK ( 0x000f )
+#endif
+
+#if portBYTE_ALIGNMENT == 8
+#define portBYTE_ALIGNMENT_MASK ( 0x0007 )
+#endif
+
+#if portBYTE_ALIGNMENT == 4
+#define portBYTE_ALIGNMENT_MASK ( 0x0003 )
+#endif
+
+#if portBYTE_ALIGNMENT == 2
+#define portBYTE_ALIGNMENT_MASK ( 0x0001 )
+#endif
+
+#if portBYTE_ALIGNMENT == 1
+#define portBYTE_ALIGNMENT_MASK ( 0x0000 )
+#endif
+#endif /* USING_FREERTOS_THREADS */
 
 
 namespace Aurora::Memory
 {
   /*-------------------------------------------------------------------------------
+  Constants
+  -------------------------------------------------------------------------------*/
+  static constexpr size_t heapBITS_PER_BYTE = 8u;
+
+  /*-------------------------------------------------------------------------------
   Heap Implementation
   -------------------------------------------------------------------------------*/
   Heap::Heap()
   {
-    heapBuffer = nullptr;
-    heapSize = 0;
-
-    bufferIsDynamic = false;
-
-#if defined( USING_FREERTOS_THREADS )
-    blockStructSize = ( sizeof( BlockLink_t ) + ( portBYTE_ALIGNMENT - 1 ) ) & ~( portBYTE_ALIGNMENT_MASK );
-    minBlockSize    = blockStructSize << 1;
-#endif
-
+    mLock                         = new Chimera::Thread::RecursiveMutex();
+    heapBuffer                    = nullptr;
+    heapSize                      = 0;
+    blockStructSize               = ( sizeof( BlockLink_t ) + ( portBYTE_ALIGNMENT - 1 ) ) & ~( portBYTE_ALIGNMENT_MASK );
+    minBlockSize                  = blockStructSize << 1;
     freeBytesRemaining            = 0;
     minimumEverFreeBytesRemaining = 0;
     blockAllocatedBit             = 0;
@@ -59,201 +85,213 @@ namespace Aurora::Memory
     memset( &blockStart, 0, sizeof( BlockLink_t ) );
   }
 
+
+  Heap::Heap( Heap &&other ) : mLock( other.mLock )
+  {
+    heapBuffer                    = other.heapBuffer;
+    heapSize                      = other.heapSize;
+    blockStart                    = other.blockStart;
+    blockEnd                      = other.blockEnd;
+    freeBytesRemaining            = other.freeBytesRemaining;
+    minimumEverFreeBytesRemaining = other.minimumEverFreeBytesRemaining;
+    blockAllocatedBit             = other.blockAllocatedBit;
+    blockStructSize               = other.blockStructSize;
+    minBlockSize                  = other.minBlockSize;
+  }
+
+
   Heap::~Heap()
   {
-    if ( bufferIsDynamic )
-    {
-      delete heapBuffer;
-    }
+    delete mLock;
   }
+
 
   /*-------------------------------------------------------------------------------
   Heap: Public Functions
   -------------------------------------------------------------------------------*/
   void Heap::staticReset()
   {
-    if( bufferIsDynamic || !heapBuffer )
+    using namespace Chimera::Thread;
+
+    /*-------------------------------------------------
+    Runtime protection
+    -------------------------------------------------*/
+    if ( !heapBuffer )
     {
       return;
     }
 
+    /*-------------------------------------------------
+    Reset the buffer
+    -------------------------------------------------*/
+    LockGuard<RecursiveMutex>( *mLock );
     memset( heapBuffer, 0, heapSize );
   }
 
-  bool Heap::attachStaticBuffer( void *buffer, const size_t size )
+
+  bool Heap::assignPool( void *buffer, const size_t size )
   {
-    if (!buffer || !size)
+    using namespace Chimera::Thread;
+
+    /*-------------------------------------------------
+    Input Protection
+    -------------------------------------------------*/
+    if ( !buffer || !size )
     {
       return false;
     }
 
-    heapBuffer      = reinterpret_cast<uint8_t*>( buffer );
-    heapSize        = size;
-    bufferIsDynamic = false;
+    /*-------------------------------------------------
+    Attach the buffer
+    -------------------------------------------------*/
+    LockGuard<RecursiveMutex>( *mLock );
+    heapBuffer = reinterpret_cast<uint8_t *>( buffer );
+    heapSize   = size;
 
     return true;
   }
 
-  bool Heap::attachDynamicBuffer( const size_t size )
-  {
-    heapBuffer      = new uint8_t[ size ];
-    heapSize        = size;
-    bufferIsDynamic = ( heapBuffer != nullptr );
-
-    return bufferIsDynamic;
-  }
 
   void *Heap::malloc( size_t size )
   {
-#if defined( USING_FREERTOS_THREADS )
+    using namespace Chimera::Thread;
+
     BlockLink_t *pxBlock;
     BlockLink_t *pxPreviousBlock;
     BlockLink_t *pxNewBlockLink;
     void *pvReturn = nullptr;
 
-    vTaskSuspendAll();
+    LockGuard<RecursiveMutex>( *mLock );
+
+    /* If this is the first call to malloc then the heap will require
+    initialization to setup the list of free blocks. */
+    if ( blockEnd == nullptr )
     {
-      /* If this is the first call to malloc then the heap will require
-      initialization to setup the list of free blocks. */
-      if ( blockEnd == nullptr )
-      {
-        init();
-      }
-
-      /* Check the requested block size is not so large that the top bit is
-      set.  The top bit of the block size member of the BlockLink_t structure
-      is used to determine who owns the block - the application or the
-      kernel, so it must be free. */
-      if ( ( size & blockAllocatedBit ) == 0 )
-      {
-        /* The wanted size is increased so it can contain a BlockLink_t
-        structure in addition to the requested amount of bytes. */
-        if ( size > 0 )
-        {
-          size += blockStructSize;
-
-          /* Ensure that blocks are always aligned to the required number
-          of bytes. */
-          if ( ( size & portBYTE_ALIGNMENT_MASK ) != 0x00 )
-          {
-            /* Byte alignment required. */
-            size += ( portBYTE_ALIGNMENT - ( size & portBYTE_ALIGNMENT_MASK ) );
-            configASSERT( ( size & portBYTE_ALIGNMENT_MASK ) == 0 );
-          }
-        }
-
-        if ( ( size > 0 ) && ( size <= freeBytesRemaining ) )
-        {
-          /* Traverse the list from the start	(lowest address) block until
-          one	of adequate size is found. */
-          pxPreviousBlock = &blockStart;
-          pxBlock         = blockStart.next;
-          while ( ( pxBlock->size < size ) && ( pxBlock->next != nullptr ) )
-          {
-            pxPreviousBlock = pxBlock;
-            pxBlock         = pxBlock->next;
-          }
-
-          /* If the end marker was reached then a block of adequate size
-          was	not found. */
-          if ( pxBlock != blockEnd )
-          {
-            /* Return the memory space pointed to - jumping over the
-            BlockLink_t structure at its start. */
-            pvReturn = ( void * )( ( ( uint8_t * )pxPreviousBlock->next ) + blockStructSize );
-
-            /* This block is being returned for use so must be taken out
-            of the list of free blocks. */
-            pxPreviousBlock->next = pxBlock->next;
-
-            /* If the block is larger than required it can be split into
-            two. */
-            if ( ( pxBlock->size - size ) > minBlockSize )
-            {
-              /* This block is to be split into two.  Create a new
-              block following the number of bytes requested. The void
-              cast is used to prevent byte alignment warnings from the
-              compiler. */
-              pxNewBlockLink = reinterpret_cast<BlockLink_t *>( ( ( uint8_t * )pxBlock ) + size );
-              configASSERT( ( ( ( size_t )pxNewBlockLink ) & portBYTE_ALIGNMENT_MASK ) == 0 );
-
-              /* Calculate the sizes of two blocks split from the
-              single block. */
-              pxNewBlockLink->size = pxBlock->size - size;
-              pxBlock->size        = size;
-
-              /* Insert the new block into the list of free blocks. */
-              prvInsertBlockIntoFreeList( pxNewBlockLink );
-            }
-
-            freeBytesRemaining -= pxBlock->size;
-
-            if ( freeBytesRemaining < minimumEverFreeBytesRemaining )
-            {
-              minimumEverFreeBytesRemaining = freeBytesRemaining;
-            }
-
-            /* The block is being returned - it is allocated and owned
-            by the application and has no "next" block. */
-            pxBlock->size |= blockAllocatedBit;
-            pxBlock->next = nullptr;
-          }
-        }
-      }
-
-      traceMALLOC( pvReturn, size );
+      init();
     }
-    ( void )xTaskResumeAll();
 
-    configASSERT( ( ( ( size_t )pvReturn ) & ( size_t )portBYTE_ALIGNMENT_MASK ) == 0 );
+    /* Check the requested block size is not so large that the top bit is
+    set.  The top bit of the block size member of the BlockLink_t structure
+    is used to determine who owns the block - the application or the
+    kernel, so it must be free. */
+    if ( ( size & blockAllocatedBit ) == 0 )
+    {
+      /* The wanted size is increased so it can contain a BlockLink_t
+      structure in addition to the requested amount of bytes. */
+      if ( size > 0 )
+      {
+        size += blockStructSize;
+
+        /* Ensure that blocks are always aligned to the required number
+        of bytes. */
+        if ( ( size & portBYTE_ALIGNMENT_MASK ) != 0x00 )
+        {
+          /* Byte alignment required. */
+          size += ( portBYTE_ALIGNMENT - ( size & portBYTE_ALIGNMENT_MASK ) );
+          RT_HARD_ASSERT( ( size & portBYTE_ALIGNMENT_MASK ) == 0 );
+        }
+      }
+
+      if ( ( size > 0 ) && ( size <= freeBytesRemaining ) )
+      {
+        /* Traverse the list from the start	(lowest address) block until
+        one	of adequate size is found. */
+        pxPreviousBlock = &blockStart;
+        pxBlock         = blockStart.next;
+        while ( ( pxBlock->size < size ) && ( pxBlock->next != nullptr ) )
+        {
+          pxPreviousBlock = pxBlock;
+          pxBlock         = pxBlock->next;
+        }
+
+        /* If the end marker was reached then a block of adequate size
+        was	not found. */
+        if ( pxBlock != blockEnd )
+        {
+          /* Return the memory space pointed to - jumping over the
+          BlockLink_t structure at its start. */
+          pvReturn = ( void * )( ( ( uint8_t * )pxPreviousBlock->next ) + blockStructSize );
+
+          /* This block is being returned for use so must be taken out
+          of the list of free blocks. */
+          pxPreviousBlock->next = pxBlock->next;
+
+          /* If the block is larger than required it can be split into
+          two. */
+          if ( ( pxBlock->size - size ) > minBlockSize )
+          {
+            /* This block is to be split into two.  Create a new
+            block following the number of bytes requested. The void
+            cast is used to prevent byte alignment warnings from the
+            compiler. */
+            pxNewBlockLink = reinterpret_cast<BlockLink_t *>( ( ( uint8_t * )pxBlock ) + size );
+            RT_HARD_ASSERT( ( ( ( size_t )pxNewBlockLink ) & portBYTE_ALIGNMENT_MASK ) == 0 );
+
+            /* Calculate the sizes of two blocks split from the
+            single block. */
+            pxNewBlockLink->size = pxBlock->size - size;
+            pxBlock->size        = size;
+
+            /* Insert the new block into the list of free blocks. */
+            prvInsertBlockIntoFreeList( pxNewBlockLink );
+          }
+
+          freeBytesRemaining -= pxBlock->size;
+
+          if ( freeBytesRemaining < minimumEverFreeBytesRemaining )
+          {
+            minimumEverFreeBytesRemaining = freeBytesRemaining;
+          }
+
+          /* The block is being returned - it is allocated and owned
+          by the application and has no "next" block. */
+          pxBlock->size |= blockAllocatedBit;
+          pxBlock->next = nullptr;
+        }
+      }
+    }
+
+    RT_HARD_ASSERT( ( ( ( size_t )pvReturn ) & ( size_t )portBYTE_ALIGNMENT_MASK ) == 0 );
     return pvReturn;
-#else
-    return new uint8_t[ size ];
-#endif
   }
+
 
   void Heap::free( void *pv )
   {
-#if defined( USING_FREERTOS_THREADS )
+    using namespace Chimera::Thread;
+
     uint8_t *puc = ( uint8_t * )pv;
     BlockLink_t *pxLink;
 
     if ( pv != nullptr )
     {
-      /* The memory being freed will have an BlockLink_t structure immediately
-      before it. */
+      /* The memory being freed will have an BlockLink_t structure immediately before it. */
       puc -= blockStructSize;
 
       /* This casting is to keep the compiler from issuing warnings. */
       pxLink = reinterpret_cast<BlockLink_t *>( puc );
 
       /* Check the block is actually allocated. */
-      configASSERT( ( pxLink->size & blockAllocatedBit ) != 0 );
-      configASSERT( pxLink->next == nullptr );
+      RT_HARD_ASSERT( ( pxLink->size & blockAllocatedBit ) != 0 );
+      RT_HARD_ASSERT( pxLink->next == nullptr );
 
       if ( ( pxLink->size & blockAllocatedBit ) != 0 )
       {
         if ( pxLink->next == nullptr )
         {
-          /* The block is being returned to the heap - it is no longer
-          allocated. */
+          LockGuard<RecursiveMutex>( *mLock );
+
+          /* The block is being returned to the heap - it is no longer allocated. */
           pxLink->size &= ~blockAllocatedBit;
 
-          vTaskSuspendAll();
-          {
-            /* Add this block to the list of free blocks. */
-            freeBytesRemaining += pxLink->size;
-            traceFREE( pv, pxLink->size );
-            prvInsertBlockIntoFreeList( pxLink );
-          }
-          ( void )xTaskResumeAll();
+          /* Add this block to the list of free blocks. */
+          freeBytesRemaining += pxLink->size;
+          prvInsertBlockIntoFreeList( pxLink );
         }
       }
     }
-#else
-    delete pv;
-#endif
   }
+
 
   /*-------------------------------------------------------------------------------
   Heap: Private Functions
@@ -263,14 +301,17 @@ namespace Aurora::Memory
     return freeBytesRemaining;
   }
 
+
   size_t Heap::xPortGetMinimumEverFreeHeapSize( void )
   {
     return minimumEverFreeBytesRemaining;
   }
 
+
   void Heap::init()
   {
-#if defined( USING_FREERTOS_THREADS )
+    using namespace Chimera::Thread;
+
     BlockLink_t *pxFirstFreeBlock;
     uint8_t *pucAlignedHeap;
     size_t uxAddress;
@@ -291,21 +332,21 @@ namespace Aurora::Memory
     /* xStart is used to hold a pointer to the first item in the list of free
     blocks.  The void cast is used to prevent compiler warnings. */
     blockStart.next = reinterpret_cast<BlockLink_t *>( pucAlignedHeap );
-    blockStart.size      = ( size_t )0;
+    blockStart.size = ( size_t )0;
 
     /* pxEnd is used to mark the end of the list of free blocks and is inserted
     at the end of the heap space. */
     uxAddress = ( ( size_t )pucAlignedHeap ) + xTotalHeapSize;
     uxAddress -= blockStructSize;
     uxAddress &= ~( ( size_t )portBYTE_ALIGNMENT_MASK );
-    blockEnd                  = reinterpret_cast<BlockLink_t *>( uxAddress );
-    blockEnd->size      = 0;
+    blockEnd       = reinterpret_cast<BlockLink_t *>( uxAddress );
+    blockEnd->size = 0;
     blockEnd->next = nullptr;
 
     /* To start with there is a single free block that is sized to take up the
     entire heap space, minus the space taken by pxEnd. */
-    pxFirstFreeBlock                  = reinterpret_cast<BlockLink_t *>( pucAlignedHeap );
-    pxFirstFreeBlock->size      = uxAddress - ( size_t )pxFirstFreeBlock;
+    pxFirstFreeBlock       = reinterpret_cast<BlockLink_t *>( pucAlignedHeap );
+    pxFirstFreeBlock->size = uxAddress - ( size_t )pxFirstFreeBlock;
     pxFirstFreeBlock->next = blockEnd;
 
     /* Only one block exists - and it covers the entire usable heap space. */
@@ -314,12 +355,13 @@ namespace Aurora::Memory
 
     /* Work out the position of the top bit in a size_t variable. */
     blockAllocatedBit = ( ( size_t )1 ) << ( ( sizeof( size_t ) * heapBITS_PER_BYTE ) - 1 );
-#endif
   }
+
 
   void Heap::prvInsertBlockIntoFreeList( BlockLink_t *pxBlockToInsert )
   {
-#if defined( USING_FREERTOS_THREADS )
+    using namespace Chimera::Thread;
+
     BlockLink_t *pxIterator;
     uint8_t *puc;
 
@@ -368,6 +410,5 @@ namespace Aurora::Memory
     {
       pxIterator->next = pxBlockToInsert;
     }
-#endif
   }
-}    // namespace RF24::Network::Memory
+}  // namespace Aurora::Memory

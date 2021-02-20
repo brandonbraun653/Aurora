@@ -1,12 +1,12 @@
 /********************************************************************************
-*  File Name:
-*    heap.hpp
-*
-*  Description:
-*    Implements a dynamic memory allocation heap from a buffer
-*
-*  2019-2021 | Brandon Braun | brandonbraun653@gmail.com
-********************************************************************************/
+ *  File Name:
+ *    heap.hpp
+ *
+ *  Description:
+ *    Implements a dynamic memory allocation heap from a buffer
+ *
+ *  2019-2021 | Brandon Braun | brandonbraun653@gmail.com
+ ********************************************************************************/
 
 #pragma once
 #ifndef AURORA_MEMORY_HEAP_HPP
@@ -15,6 +15,9 @@
 /* C++ Includes */
 #include <cstdint>
 #include <cstdlib>
+
+/* Chimera Includes */
+#include <Chimera/thread>
 
 namespace Aurora::Memory
 {
@@ -27,10 +30,11 @@ namespace Aurora::Memory
   {
   public:
     Heap();
+    Heap( Heap &&other );
     ~Heap();
 
     /**
-     *  Resets the entire heap memory to zero if the memory is statically allocated
+     *  Resets the entire heap memory to zero
      *  @return void
      */
     void staticReset();
@@ -45,16 +49,7 @@ namespace Aurora::Memory
      *  @param[in]  size      How many bytes are in the buffer
      *  @return bool
      */
-    bool attachStaticBuffer( void * buffer, const size_t size );
-
-    /**
-     *  Dynamically allocates a memory pool from the global heap to create
-     *  a smaller, managed heap.
-     *
-     *  @param[in]  size      How many bytes should be allocated
-     *  @return bool
-     */
-    bool attachDynamicBuffer( const size_t size );
+    bool assignPool( void *buffer, const size_t size );
 
     /**
      *  Standard malloc implementation
@@ -73,8 +68,6 @@ namespace Aurora::Memory
     void free( void *pv );
 
   private:
-    bool bufferIsDynamic; /**< Tracks if the managed buffer is dynamically allocated */
-
     /*------------------------------------------------
     FreeRTOS variables for managing the heap allocations. For descriptions
     of what each actually does, please look at the heap4.c source code.
@@ -84,6 +77,8 @@ namespace Aurora::Memory
       BlockLink_t *next;
       size_t size;
     };
+
+    Chimera::Thread::RecursiveMutex *mLock;
 
     uint8_t *heapBuffer;
     size_t heapSize;
@@ -103,6 +98,6 @@ namespace Aurora::Memory
     size_t xPortGetFreeHeapSize();
     size_t xPortGetMinimumEverFreeHeapSize();
   };
-}    // namespace RF24::Network::Memory
+}  // namespace Aurora::Memory
 
-#endif  /* !AURORA_MEMORY_HEAP_HPP */
+#endif /* !AURORA_MEMORY_HEAP_HPP */
