@@ -293,6 +293,15 @@ namespace Aurora::Memory
   }
 
 
+  size_t Heap::available() const
+  {
+    using namespace Chimera::Thread;
+    LockGuard<RecursiveMutex>( *mLock );
+
+    return freeBytesRemaining;
+  }
+
+
   /*-------------------------------------------------------------------------------
   Heap: Private Functions
   -------------------------------------------------------------------------------*/

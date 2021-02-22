@@ -13,3 +13,6 @@
 [submodule "lib/littlefs/lfs"]
 	path = lib/littlefs/lfs
 	url = https://github.com/ARMmbed/littlefs.git
+[submodule "lib/sprout"]
+	path = lib/sprout
+	url = https://github.com/bolero-MURAKAMI/Sprout.git

@@ -31,6 +31,12 @@ add_subdirectory("source/memory")
 set(AuroraExportDir "${PROJECT_BINARY_DIR}/Aurora")
 
 # ====================================================
+# 3rd Party Library
+# ====================================================
+gen_intf_lib(TARGET sprout_intf_inc INTF_INCLUDES "lib/sprout" EXPORT_DIR ${AuroraExportDir})
+
+
+# ====================================================
 # Interface Library
 # ====================================================
 gen_intf_lib(
@@ -42,6 +48,7 @@ gen_intf_lib(
   INTF_LIBRARIES
     etl_inc
     lfs_intf_inc
+    sprout_intf_inc
 
   EXPORT_DIR
     ${AuroraExportDir}

@@ -67,6 +67,12 @@ namespace Aurora::Memory
      */
     void free( void *pv );
 
+    /**
+     *  Gets the remaining bytes available in the heap
+     *  @return size_t
+     */
+    size_t available() const;
+
   private:
     /*------------------------------------------------
     FreeRTOS variables for managing the heap allocations. For descriptions
