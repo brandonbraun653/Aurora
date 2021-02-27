@@ -56,7 +56,7 @@ namespace Aurora::Datastore
     bool registered = false;
     if ( !mObservableMap->available() || ( mObservableMap->find( observable.key() ) != mObservableMap->end() ) )
     {
-      mDelegateRegistry.call<CB_REGISTER_FAIL>();
+      mCBService_registry.call<CB_REGISTER_FAIL>();
     }
     else  // Register the observer
     {
@@ -100,7 +100,7 @@ namespace Aurora::Datastore
     auto iterator = mObservableMap->find( key );
     if ( iterator == mObservableMap->end() )
     {
-      mDelegateRegistry.call<CB_INVALID_KEY>();
+      mCBService_registry.call<CB_INVALID_KEY>();
       goto exit;
     }
 
@@ -129,7 +129,7 @@ namespace Aurora::Datastore
     auto iterator = mObservableMap->find( key );
     if ( iterator == mObservableMap->end() )
     {
-      mDelegateRegistry.call<CB_INVALID_KEY>();
+      mCBService_registry.call<CB_INVALID_KEY>();
       goto exit;
     }
 

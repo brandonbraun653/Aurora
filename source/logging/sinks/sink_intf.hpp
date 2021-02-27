@@ -163,6 +163,7 @@ namespace Aurora::Logging
       /*------------------------------------------------
       Attach the user's message, or what will fit anyways
       ------------------------------------------------*/
+      #pragma GCC diagnostic ignored "-Wformat-security"
       snprintf( mLogBuffer.data() + bytesWritten, mLogBuffer.size() - bytesWritten, str, args... );
       result = log( lvl, mLogBuffer.data(), strlen( mLogBuffer.data() ) );
 

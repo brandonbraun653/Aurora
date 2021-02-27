@@ -137,7 +137,7 @@ namespace Aurora::Database
     /*-------------------------------------------------
     Helper for tracking/invoking callbacks
     -------------------------------------------------*/
-    etl::delegate_service<CallbackId::CB_NUM_OPTIONS> mDelegateRegistry;
+    etl::delegate_service<CallbackId::CB_NUM_OPTIONS> mCBService_registry;
 
     /*-------------------------------------------------
     Helper Functions

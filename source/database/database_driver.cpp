@@ -81,7 +81,7 @@ namespace Aurora::Database
     EntryList::iterator it = findKey( key );
     if ( it == mEntryList.end() || !it->entry.data || !it->entry.size )
     {
-      mDelegateRegistry.call<CB_INVALID_KEY>();
+      mCBService_registry.call<CB_INVALID_KEY>();
       goto exit;
     }
 
@@ -91,7 +91,7 @@ namespace Aurora::Database
     crc = getEntryCRC32( it->entry );
     if ( crc != it->crc32 )
     {
-      mDelegateRegistry.call<CB_CRC_ERROR>();
+      mCBService_registry.call<CB_CRC_ERROR>();
       goto exit;
     }
 
@@ -133,7 +133,7 @@ namespace Aurora::Database
     EntryList::iterator it = findKey( key );
     if ( it == mEntryList.end() || !it->entry.data || !it->entry.size )
     {
-      mDelegateRegistry.call<CB_INVALID_KEY>();
+      mCBService_registry.call<CB_INVALID_KEY>();
       goto exit;
     }
 
@@ -142,7 +142,7 @@ namespace Aurora::Database
     -------------------------------------------------*/
     if ( !( it->access & MemAccess::MEM_WRITE ) )
     {
-      mDelegateRegistry.call<CB_PERMISSION>();
+      mCBService_registry.call<CB_PERMISSION>();
       goto exit;
     }
 
@@ -180,7 +180,7 @@ namespace Aurora::Database
     -------------------------------------------------*/
     if ( !mEntryList.available() )
     {
-      mDelegateRegistry.call<CB_MAX_ENTRY_ERROR>();
+      mCBService_registry.call<CB_MAX_ENTRY_ERROR>();
       result = Chimera::Status::FULL;
       goto exit;
     }
@@ -190,7 +190,7 @@ namespace Aurora::Database
     -------------------------------------------------*/
     if ( findKey( key ) != mEntryList.end() )
     {
-      mDelegateRegistry.call<CB_INVALID_KEY>();
+      mCBService_registry.call<CB_INVALID_KEY>();
       result = Chimera::Status::FAIL;
       goto exit;
     }
@@ -209,7 +209,7 @@ namespace Aurora::Database
 
     if ( tmp.entry.data == nullptr )
     {
-      mDelegateRegistry.call<CB_MEM_ALLOC_ERROR>();
+      mCBService_registry.call<CB_MEM_ALLOC_ERROR>();
       result = Chimera::Status::MEMORY;
       goto exit;
     }
@@ -287,11 +287,11 @@ namespace Aurora::Database
     this->lock();
     if ( id == CallbackId::CB_UNHANDLED )
     {
-      mDelegateRegistry.register_unhandled_delegate( func );
+      mCBService_registry.register_unhandled_delegate( func );
     }
     else
     {
-      mDelegateRegistry.register_delegate( id, func );
+      mCBService_registry.register_delegate( id, func );
     }
 
     this->unlock();
