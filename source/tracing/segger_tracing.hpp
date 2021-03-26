@@ -3,7 +3,7 @@
  *    segger_tracing.hpp
  *
  *  Description:
- *    Pulls in the descriptions needed for tracing with the Segger System View
+ *    Pulls in the headers needed for tracing with Segger System View
  *
  *  2021 | Brandon Braun | brandonbraun653@gmail.com
  *******************************************************************************/
@@ -12,12 +12,8 @@
 #ifndef AURORA_TRACING_SEGGER_SYSTEM_VIEW_HPP
 #define AURORA_TRACING_SEGGER_SYSTEM_VIEW_HPP
 
-namespace Aurora::Trace
-{
-  /*-------------------------------------------------------------------------------
-  Import the Segger driver
-  -------------------------------------------------------------------------------*/
-  #include "SEGGER_SYSVIEW.h"
-}  // namespace Aurora::Tracing
+#include "SEGGER.h"
+#include "SEGGER_RTT.h"
+#include "SEGGER_SYSVIEW.h"
 
 #endif  /* !AURORA_TRACING_SEGGER_SYSTEM_VIEW_HPP */

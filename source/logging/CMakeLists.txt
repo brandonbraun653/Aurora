@@ -6,6 +6,7 @@ gen_static_lib_variants(
   SOURCES
     logging_driver.cpp
     sinks/sink_cout.cpp
+    sinks/sink_jlink.cpp
     sinks/sink_serial.cpp
     sinks/sink_vgdb_semihosting.cpp
   PRV_LIBRARIES

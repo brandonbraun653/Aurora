@@ -72,6 +72,7 @@ namespace Aurora::Logging
   {
     CONSOLE_SINK,
     FILE_SINK,
+    JLINK_SINK,
     SERIAL_SINK,
     VGDB_SINK
   };

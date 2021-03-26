@@ -17,6 +17,7 @@
 #include <Aurora/source/logging/logging_types.hpp>
 #include <Aurora/source/logging/sinks/sink_cout.hpp>
 #include <Aurora/source/logging/sinks/sink_intf.hpp>
+#include <Aurora/source/logging/sinks/sink_jlink.hpp>
 #include <Aurora/source/logging/sinks/sink_serial.hpp>
 #include <Aurora/source/logging/sinks/sink_vgdb_semihosting.hpp>
 
