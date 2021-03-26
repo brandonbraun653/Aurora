@@ -3,8 +3,9 @@ include("${COMMON_TOOL_ROOT}/cmake/utility/embedded.cmake")
 # ====================================================
 # 3rd Party Libraries
 # ====================================================
-add_subdirectory("lib/littlefs")
 add_subdirectory("lib/embedded_template_library")
+add_subdirectory("lib/littlefs")
+add_subdirectory("lib/segger")
 
 add_library(type_safe_inc INTERFACE)
 target_include_directories(type_safe_inc INTERFACE "lib/type_safe/include")
@@ -24,6 +25,7 @@ add_subdirectory("source/hmi")
 add_subdirectory("source/logging")
 add_subdirectory("source/math")
 add_subdirectory("source/memory")
+add_subdirectory("source/tracing")
 
 # ====================================================
 # Library Exports
@@ -49,6 +51,7 @@ gen_intf_lib(
     etl_inc
     lfs_intf_inc
     sprout_intf_inc
+    segger_sys_view_intf
 
   EXPORT_DIR
     ${AuroraExportDir}

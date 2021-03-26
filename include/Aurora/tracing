@@ -1,0 +1,17 @@
+/********************************************************************************
+ *  File Name:
+ *    tracing
+ *
+ *  Description:
+ *    Aurora Tracing Includes
+ *
+ *  2021 | Brandon Braun | brandonbraun653@gmail.com
+ ********************************************************************************/
+
+#pragma once
+#ifndef AURORA_TRACING_INCLUDES
+#define AURORA_TRACING_INCLUDES
+
+#include <Aurora/source/tracing/segger_tracing.hpp>
+
+#endif /* !AURORA_TRACING_INCLUDES */
