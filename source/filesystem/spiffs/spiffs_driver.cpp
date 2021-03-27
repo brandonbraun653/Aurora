@@ -147,6 +147,8 @@ namespace Aurora::FileSystem::SPIFFS
     using namespace Aurora::Logging;
     using namespace Aurora::Memory;
 
+    namespace fileSys = ::Aurora::FileSystem;
+
     /*-------------------------------------------------
     Input Protection
     -------------------------------------------------*/
@@ -193,8 +195,6 @@ namespace Aurora::FileSystem::SPIFFS
     Try mounting. It's possible to get a clean chip,
     which will need some formatting before mounting.
     -------------------------------------------------*/
-    // sNORFlash.erase(10000);
-
     for ( auto x = 0; x < 3; x++ )
     {
       getRootSink()->flog( Level::LVL_DEBUG, "Mounting filesystem\r\n" );
@@ -216,13 +216,14 @@ namespace Aurora::FileSystem::SPIFFS
         write_data.boot_count = 351;
         memcpy( write_data.drive_name, drive_name.data(), drive_name.length() );
 
-        spiffs_file fd = SPIFFS_open( &fs, boot_file.data(), SPIFFS_CREAT | SPIFFS_TRUNC | SPIFFS_RDWR, 0 );
-        SPIFFS_write( &fs, fd, ( u8_t * )&write_data, sizeof( BootData ) );
-        SPIFFS_close( &fs, fd );
+        FileHandle fd = fileSys::fopen( boot_file.data(), "w+" );
+        fileSys::fwrite( &write_data, 1, sizeof( BootData ), fd );
+        fileSys::fclose( fd );
 
-        fd = SPIFFS_open(&fs, boot_file.data(), SPIFFS_RDWR, 0);
-        SPIFFS_read( &fs, fd, ( u8_t * )&read_data, sizeof( BootData ) );
-        SPIFFS_close( &fs, fd );
+        fd = fileSys::fopen( boot_file.data(), "rb" );
+        fileSys::frewind( fd );
+        fileSys::fread( &read_data, 1, sizeof( BootData ), fd );
+        fileSys::fclose( fd );
 
         if( ( memcmp( &write_data, &read_data, sizeof(BootData)) == 0 ) && ( SPIFFS_errno( &fs ) == SPIFFS_OK ) )
         {
@@ -289,11 +290,11 @@ namespace Aurora::FileSystem::SPIFFS
     int flag = 0;
     if ( ( strcmp( mode, "w" ) == 0 ) || ( strcmp( mode, "wb" ) == 0 ) )
     {
-      flag = SPIFFS_O_WRONLY | SPIFFS_O_CREAT;
+      flag = SPIFFS_RDWR | SPIFFS_O_CREAT;
     }
     else if ( ( strcmp( mode, "w+" ) == 0 ) || ( strcmp( mode, "wb+" ) == 0 ) )
     {
-      flag = SPIFFS_O_WRONLY | SPIFFS_O_CREAT | SPIFFS_O_APPEND;
+      flag = SPIFFS_RDWR | SPIFFS_O_CREAT | SPIFFS_O_APPEND;
     }
     else if ( ( strcmp( mode, "r" ) == 0 ) || ( strcmp( mode, "rb" ) == 0 ) )
     {
