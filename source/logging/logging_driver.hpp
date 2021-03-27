@@ -87,6 +87,16 @@ namespace Aurora::Logging
    */
   Result log( const Level lvl, const void *const msg, const size_t length );
 
+  /**
+   *  Logs a formatted string to every registered sink that is listening to the
+   *  requested logging level.
+   *
+   *  @param[in]  lvl       The severity level of the message to be logged
+   *  @param[in]  fmt       Format string
+   *  @return Result
+   */
+  Result flog( const Level lvl, const char *fmt, ... );
+
 }  // namespace Aurora::Logging
 
 #endif /* MICRO_LOGGER_HPP */

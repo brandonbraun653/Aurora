@@ -12,6 +12,8 @@
 #include <Aurora/filesystem>
 #include <Aurora/source/filesystem/generic/generic_driver.hpp>
 #include <Aurora/source/filesystem/littlefs/lfs_driver.hpp>
+#include <Aurora/source/filesystem/spiffs/spiffs_driver.hpp>
+#include <Aurora/source/filesystem/yaffs/yaffs2_driver.hpp>
 
 /* Chimera Includes */
 #include <Chimera/assert>
@@ -28,14 +30,23 @@ namespace Aurora::FileSystem
   -------------------------------------------------------------------------------*/
   bool configureDriver( const BackendType type )
   {
+    // TODO: Come back later and turn this into a registration function
     switch ( type )
     {
+      case BackendType::DRIVER_SPIFFS:
+        impl = &SPIFFS::implementation;
+        break;
+
       case BackendType::DRIVER_LITTLE_FS:
-        impl = &LFS::implementation;
+        impl = nullptr; //&LFS::implementation;
+        break;
+
+      case BackendType::DRIVER_YAFFS2:
+        impl = nullptr; //&YAFFS::implementation;
         break;
 
       case BackendType::DRIVER_OS:
-        impl = &Generic::implementation;
+        impl = nullptr; //&Generic::implementation;
         break;
 
       default:

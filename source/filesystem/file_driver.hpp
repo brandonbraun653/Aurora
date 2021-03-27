@@ -22,8 +22,6 @@
 /* Chimera Includes */
 #include <Chimera/spi>
 
-/* LittleFS Includes */
-#include "lfs.h"
 
 namespace Aurora::FileSystem
 {
@@ -38,11 +36,11 @@ namespace Aurora::FileSystem
      *
      *  @note This is assuming a single FS is in use system wide
      *
-     *  @param[in]  fs        The control block to attach
-     *  @param[in]  cfg       Memory storage config options
+     *  @param[in]  fs        The control block to attach   (lfs_t)
+     *  @param[in]  cfg       Memory storage config options (lfs_config)
      *  @return bool
      */
-    bool attachFS( lfs_t *const fs, const lfs_config *const cfg );
+    bool attachFS( void *const fs, const void *const cfg );
 
     /**
      *  Attaches a generic memory device to the opaque pointer contained in the
@@ -50,10 +48,10 @@ namespace Aurora::FileSystem
      *  to act on the proper device at runtime.
      *
      *  @param[in]  dev       The device to attach
-     *  @param[in]  cfg       LittleFS configuration structure
+     *  @param[in]  cfg       LittleFS configuration structure (lfs_config)
      *  @return bool
      */
-    bool attachDevice( const Aurora::Flash::NOR::Chip_t dev, const Chimera::SPI::Channel channel, const lfs_config &cfg );
+    bool attachDevice( const Aurora::Flash::NOR::Chip_t dev, const Chimera::SPI::Channel channel, const void *const cfg );
 
     /**
      *  Erases the device completely
@@ -61,7 +59,7 @@ namespace Aurora::FileSystem
      *  @param[in] timeout    How long to wait for the chip to erase
      *  @return bool
      */
-    bool fullChipErase( const size_t timeout );
+     bool fullChipErase( const size_t timeout );
 
     /**
      *  Utility function to convert the given error code into a
@@ -77,12 +75,33 @@ namespace Aurora::FileSystem
 
   namespace YAFFS
   {
-  }
+    /**
+     *  Attaches a generic memory device to the opaque pointer contained in the
+     *  LittleFS configuration structure. This allows the read/write/erase hooks
+     *  to act on the proper device at runtime.
+     *
+     *  @param[in]  dev       The device to attach
+     *  @param[in]  cfg       LittleFS configuration structure
+     *  @return bool
+     */
+    bool attachDevice( const Aurora::Flash::NOR::Chip_t dev, const Chimera::SPI::Channel channel );
+  }  // namespace YAFFS
 
-  namespace OS
+
+  namespace SPIFFS
   {
-  }
+    /**
+     *  Attaches a generic memory device to the opaque pointer contained in the
+     *  LittleFS configuration structure. This allows the read/write/erase hooks
+     *  to act on the proper device at runtime.
+     *
+     *  @param[in]  dev       The device to attach
+     *  @param[in]  cfg       LittleFS configuration structure
+     *  @return bool
+     */
+    bool attachDevice( const Aurora::Flash::NOR::Chip_t dev, const Chimera::SPI::Channel channel );
+  }  // namespace SPIFFS
 
-}  // namespace Aurora::FileSystem::Driver
+}  // namespace Aurora::FileSystem
 
 #endif /* !AURORA_FILE_SYSTEM_DRIVER_INTERFACES_HPP */

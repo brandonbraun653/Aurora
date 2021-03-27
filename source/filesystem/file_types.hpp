@@ -20,7 +20,8 @@ namespace Aurora::FileSystem
   /*-------------------------------------------------------------------------------
   Aliases
   -------------------------------------------------------------------------------*/
-  using FileHandle = void *;
+  using FileHandle = int;
+  //using FileHandle = void *;
 
   /*-------------------------------------------------------------------------------
   Enumerations
@@ -29,6 +30,7 @@ namespace Aurora::FileSystem
   {
     DRIVER_LITTLE_FS, /**< Little FS embedded driver */
     DRIVER_YAFFS2,    /**< Yet-Another-FAT-File-System (YAFFS) */
+    DRIVER_SPIFFS,    /**< SPI Flash FileSystem */
     DRIVER_OS,        /**< Compiled OS target file system, aka C++17 filesystem library */
 
     DRIVER_NUM_OPTIONS,

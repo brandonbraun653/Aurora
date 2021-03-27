@@ -122,6 +122,78 @@ namespace Aurora::Flash::NOR
   }
 
 
+  bool address2WriteChunkOffset( const Chip_t device, const size_t address, size_t *const chunk, size_t *const offset )
+  {
+    using namespace Aurora::Memory;
+
+    /*-------------------------------------------------
+    Input Protection
+    -------------------------------------------------*/
+    const Properties *props = nullptr;
+
+    if ( !chunk || !offset )
+    {
+      return false;
+    }
+    else if ( props = getProperties( device ); !props )
+    {
+      return false;
+    }
+
+    /*-------------------------------------------------
+    Figure out the chunk ID in use
+    -------------------------------------------------*/
+    size_t write_size         = 0;
+    size_t chunk_id           = 0;
+    size_t chunk_base_address = 0;
+
+    switch ( props->writeChunk )
+    {
+      case Chunk::PAGE:
+        write_size = props->pageSize;
+        break;
+
+      case Chunk::BLOCK:
+        write_size = props->blockSize;
+        break;
+
+      case Chunk::SECTOR:
+        write_size = props->sectorSize;
+        break;
+
+      default:
+        return false;
+        break;
+    }
+
+    if ( write_size == 0 )
+    {
+      return false;
+    }
+
+    chunk_id           = address / write_size;
+    chunk_base_address = chunk_id * write_size;
+
+    /*-------------------------------------------------
+    Figure out the byte offset inside the chunk
+    -------------------------------------------------*/
+    size_t byte_offset = 0;
+    if ( address < chunk_base_address )
+    {
+      return false;
+    }
+
+    byte_offset = address - chunk_base_address;
+
+    /*-------------------------------------------------
+    Give the data back to the user
+    -------------------------------------------------*/
+    *chunk  = chunk_id;
+    *offset = byte_offset;
+    return true;
+  }
+
+
   /*-------------------------------------------------------------------------------
   Device Driver Implementation
   -------------------------------------------------------------------------------*/
@@ -503,7 +575,7 @@ namespace Aurora::Flash::NOR
     {
       return Aurora::Memory::Status::ERR_UNSUPPORTED;
     }
-    else if( !props->eventPoll )
+    else if ( !props->eventPoll )
     {
       return Aurora::Memory::Status::ERR_DRIVER_ERR;
     }

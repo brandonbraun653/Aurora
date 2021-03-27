@@ -6,6 +6,7 @@ include("${COMMON_TOOL_ROOT}/cmake/utility/embedded.cmake")
 add_subdirectory("lib/embedded_template_library")
 add_subdirectory("lib/littlefs")
 add_subdirectory("lib/segger")
+add_subdirectory("lib/spiffs")
 
 add_library(type_safe_inc INTERFACE)
 target_include_directories(type_safe_inc INTERFACE "lib/type_safe/include")
@@ -95,6 +96,27 @@ gen_intf_lib_variants(
   EXPORT_DIR
     ${AuroraExportDir}
 )
+
+gen_intf_lib_variants(
+  TARGET
+    aurora_filesystem_spiffs
+  LIBRARIES
+    aurora_filesystem_spiffs_core
+    aurora_filesystem_spiffs_driver
+  EXPORT_DIR
+    ${AuroraExportDir}
+)
+
+gen_intf_lib_variants(
+  TARGET
+    aurora_filesystem_yaffs
+  LIBRARIES
+    yaffs_core                      #Defined in the yaffs2 submodule
+    aurora_filesystem_yaffs_driver
+  EXPORT_DIR
+    ${AuroraExportDir}
+)
+
 
 # ====================================================
 # Human-Machine Interface Library

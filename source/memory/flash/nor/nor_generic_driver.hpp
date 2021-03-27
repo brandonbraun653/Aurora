@@ -66,6 +66,18 @@ namespace Aurora::Flash::NOR
    */
   bool sector2Address( const Chip_t device, const size_t sector, size_t *const address );
 
+  /**
+   *  Converts a raw memory address into the chunk id and byte offset for the device configured
+   *  write chunk size.
+   *
+   *  @param[in]  device        The device being converted
+   *  @param[in]  address       The raw address to parse
+   *  @param[out] chunk         Base write chunk ID the address lives in
+   *  @param[out] offset        Byte offset inside the write chunk
+   *  @return bool
+   */
+  bool address2WriteChunkOffset( const Chip_t device, const size_t address, size_t *const chunk, size_t *const offset );
+
   /*-------------------------------------------------------------------------------
   Classes
   -------------------------------------------------------------------------------*/
