@@ -8,6 +8,8 @@
  *  2021 | Brandon Braun | brandonbraun653@gmail.com
  *******************************************************************************/
 
+#if defined( EMBEDDED )
+
 /* Aurora Includes */
 #include <Aurora/logging>
 #include <Aurora/tracing>
@@ -103,3 +105,5 @@ namespace Aurora::Logging
   }
 
 }  // namespace Aurora::Logging
+
+#endif  /* EMBEDDED */
