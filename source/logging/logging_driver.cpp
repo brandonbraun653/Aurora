@@ -10,7 +10,9 @@
 
 /* C++ Includes */
 #include <array>
+#include <cstdarg>
 #include <cstdint>
+#include <cstdio>
 #include <limits>
 #include <string>
 
@@ -90,7 +92,7 @@ namespace Aurora::Logging
         /* Did we find the first location that is free? */
         if ( ( nullIndex == invalidIndex ) && ( sinkRegistry[ i ] == nullptr ) )
         {
-          nullIndex = i;
+          nullIndex      = i;
           registryIsFull = false;
         }
 
@@ -98,8 +100,8 @@ namespace Aurora::Logging
         if ( sinkRegistry[ i ] == sink )
         {
           sinkIsRegistered = true;
-          registryIsFull = false;
-          result = Result::RESULT_SUCCESS;
+          registryIsFull   = false;
+          result           = Result::RESULT_SUCCESS;
           break;
         }
       }
@@ -142,7 +144,7 @@ namespace Aurora::Logging
 
         sinkRegistry[ index ].reset();
         sinkRegistry[ index ] = nullptr;
-        result = Result::RESULT_SUCCESS;
+        result                = Result::RESULT_SUCCESS;
       }
       else if ( sink == nullptr )
       {
@@ -172,7 +174,7 @@ namespace Aurora::Logging
     if ( x.try_lock_for( defaultLockTimeout ) )
     {
       globalRootSink = sink;
-      result = Result::RESULT_SUCCESS;
+      result         = Result::RESULT_SUCCESS;
     }
 
     return result;
@@ -195,7 +197,7 @@ namespace Aurora::Logging
     std::uintptr_t offsetAddress = reinterpret_cast<std::uintptr_t>( &sinkHandle );
     std::uintptr_t beginAddress  = reinterpret_cast<std::uintptr_t>( &sinkRegistry[ 0 ] );
     std::uintptr_t secondAddress = reinterpret_cast<std::uintptr_t>( &sinkRegistry[ 1 ] );
-    size_t elementSize = secondAddress - beginAddress;
+    size_t elementSize           = secondAddress - beginAddress;
 
     if ( ( sinkHandle == nullptr ) || ( beginAddress > offsetAddress ) || !elementSize )
     {
@@ -246,4 +248,77 @@ namespace Aurora::Logging
     return Result::RESULT_SUCCESS;
   }
 
-}    // namespace uLog
+
+  Result flog( const Level lvl, const char *const file, const size_t line, const char *fmt, ... )
+  {
+    /*------------------------------------------------
+    Input boundary checking
+    ------------------------------------------------*/
+    if ( ( lvl < globalLogLevel ) || !file || !fmt )
+    {
+      return Result::RESULT_FAIL;
+    }
+
+    /*-------------------------------------------------
+    Format the log string into the message buffer
+    -------------------------------------------------*/
+    char msg_buffer[ 256 ];
+    va_list argptr;
+    va_start( argptr, fmt );
+    memset( msg_buffer, 0, sizeof( msg_buffer ) );
+    vsnprintf( msg_buffer, ARRAY_COUNT( msg_buffer ), fmt, argptr );
+    va_end( argptr );
+
+    /*-------------------------------------------------
+    Allocate memory for the log message
+    -------------------------------------------------*/
+    int byteOffset = 0;
+    char log_buffer[ 512 ];
+    memset( log_buffer, 0, sizeof( log_buffer ) );
+
+    /*-------------------------------------------------
+    Create the logging level
+    -------------------------------------------------*/
+    std::string_view str_level = "";
+    switch( lvl )
+    {
+      case Level::LVL_TRACE:
+        str_level = "[TRACE]";
+        break;
+
+      case Level::LVL_DEBUG:
+        str_level = "[DEBUG]";
+        break;
+
+      case Level::LVL_INFO:
+        str_level = "[INFO]";
+        break;
+
+      case Level::LVL_WARN:
+        str_level = "[WARN]";
+        break;
+
+      case Level::LVL_ERROR:
+        str_level = "[ERROR]";
+        break;
+
+      case Level::LVL_FATAL:
+        str_level = "[FATAL]";
+        break;
+
+      default:
+        return Result::RESULT_INVALID_LEVEL;
+    };
+
+    /*-------------------------------------------------
+    Format the full message
+    -------------------------------------------------*/
+    snprintf( log_buffer, ARRAY_COUNT( log_buffer ), "%-10.10s %-7.7s -- %ld: %s\r\n", file, str_level.data(), Chimera::millis(), msg_buffer );
+
+    /*-------------------------------------------------
+    Log through the standard method
+    -------------------------------------------------*/
+    return log( lvl, log_buffer, strlen( log_buffer ) );
+  }
+
+}  // namespace Aurora::Logging

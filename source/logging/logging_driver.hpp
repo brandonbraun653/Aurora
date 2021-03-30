@@ -9,8 +9,8 @@
  ********************************************************************************/
 
 #pragma once
-#ifndef MICRO_LOGGER_HPP
-#define MICRO_LOGGER_HPP
+#ifndef AURORA_LOGGING_DRIVER_HPP
+#define AURORA_LOGGING_DRIVER_HPP
 
 /* C++ Includes */
 #include <array>
@@ -92,11 +92,13 @@ namespace Aurora::Logging
    *  requested logging level.
    *
    *  @param[in]  lvl       The severity level of the message to be logged
+   *  @param[in]  file      Which file this is being logged from
+   *  @param[in]  line      Line this is being logged from
    *  @param[in]  fmt       Format string
    *  @return Result
    */
-  Result flog( const Level lvl, const char *fmt, ... );
+  Result flog( const Level lvl, const char *const file, const size_t line, const char *fmt, ... );
 
 }  // namespace Aurora::Logging
 
-#endif /* MICRO_LOGGER_HPP */
+#endif /* AURORA_LOGGING_DRIVER_HPP */
