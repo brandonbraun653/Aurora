@@ -313,7 +313,7 @@ namespace Aurora::Logging
     /*-------------------------------------------------
     Format the full message
     -------------------------------------------------*/
-    snprintf( log_buffer, ARRAY_COUNT( log_buffer ), "%-10.10s %-7.7s -- %ld: %s\r\n", file, str_level.data(), Chimera::millis(), msg_buffer );
+    snprintf( log_buffer, ARRAY_COUNT( log_buffer ), "%-15.15s %-7.7s -- %ld: %s", file, str_level.data(), Chimera::millis(), msg_buffer );
 
     /*-------------------------------------------------
     Log through the standard method
