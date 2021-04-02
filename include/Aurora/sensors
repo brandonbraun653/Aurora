@@ -1,0 +1,25 @@
+/********************************************************************************
+ *  File Name:
+ *    sensors
+ *
+ *  Description:
+ *    Aurora includes for sensors implementations
+ *
+ *  2021 | Brandon Braun | brandonbraun653@gmail.com
+ ********************************************************************************/
+
+#pragma once
+#ifndef AURORA_SENSORS_INCLUDES
+#define AURORA_SENSORS_INCLUDES
+
+#if defined( SIMULATOR )
+#include <zmq.hpp>
+#endif /* SIMULATOR */
+
+#include <Aurora/source/sensors/accel_intf.hpp>
+// #include <Aurora/source/sensors/gyro_intf.hpp>
+// #include <Aurora/source/sensors/mag_intf.hpp>
+#include <Aurora/source/sensors/sensor_intf.hpp>
+#include <Aurora/source/sensors/sensor_types.hpp>
+
+#endif /* !AURORA_SENSORS_INCLUDES */
