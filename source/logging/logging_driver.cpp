@@ -283,27 +283,27 @@ namespace Aurora::Logging
     switch( lvl )
     {
       case Level::LVL_TRACE:
-        str_level = "[TRACE]";
+        str_level = "TRACE";
         break;
 
       case Level::LVL_DEBUG:
-        str_level = "[DEBUG]";
+        str_level = "DEBUG";
         break;
 
       case Level::LVL_INFO:
-        str_level = "[INFO]";
+        str_level = "INFO";
         break;
 
       case Level::LVL_WARN:
-        str_level = "[WARN]";
+        str_level = "WARN";
         break;
 
       case Level::LVL_ERROR:
-        str_level = "[ERROR]";
+        str_level = "ERROR";
         break;
 
       case Level::LVL_FATAL:
-        str_level = "[FATAL]";
+        str_level = "FATAL";
         break;
 
       default:
@@ -313,7 +313,8 @@ namespace Aurora::Logging
     /*-------------------------------------------------
     Format the full message
     -------------------------------------------------*/
-    snprintf( log_buffer, ARRAY_COUNT( log_buffer ), "%-15.15s %-7.7s -- %ld: %s", file, str_level.data(), Chimera::millis(), msg_buffer );
+    snprintf( log_buffer, ARRAY_COUNT( log_buffer ), "[%ld][%-25.25s:%4ld][%-5.5s] -- %s", Chimera::millis(), file,
+              line,  str_level.data(), msg_buffer );
 
     /*-------------------------------------------------
     Log through the standard method
