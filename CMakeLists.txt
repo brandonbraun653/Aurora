@@ -27,6 +27,7 @@ add_subdirectory("source/logging")
 add_subdirectory("source/math")
 add_subdirectory("source/memory")
 add_subdirectory("source/tracing")
+add_subdirectory("source/util")
 
 # ====================================================
 # Library Exports
@@ -66,6 +67,7 @@ gen_intf_lib_variants(
     aurora_core
   LIBRARIES
     aurora_math
+    aurora_utility
   EXPORT_DIR
     ${AuroraExportDir}
 )
