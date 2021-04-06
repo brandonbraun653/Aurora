@@ -28,6 +28,16 @@
 namespace Aurora::Database
 {
   /*-------------------------------------------------------------------------------
+  Forward Declarations
+  -------------------------------------------------------------------------------*/
+  class RAM;
+
+  /*-------------------------------------------------------------------------------
+  Public Functions
+  -------------------------------------------------------------------------------*/
+
+
+  /*-------------------------------------------------------------------------------
   Classes
   -------------------------------------------------------------------------------*/
   class RAM : public Chimera::Thread::Lockable<RAM>
@@ -85,6 +95,16 @@ namespace Aurora::Database
      *  @return bool          Validity. If false, the key doesn't exist or an internal error occurred.
      */
     bool write( const Key &key, const void *const data );
+
+    /**
+     *  Inserts a new entry into the database with default settings
+     *
+     *  @param[in]  key       Key that is being created
+     *  @param[in]  size      Number of bytes to allocate for the data
+     *  @return Chimera::Status_t
+     */
+    Chimera::Status_t insert( const Key &key, const size_t size );
+
 
     /**
      *  Inserts a new entry into the database using the default store

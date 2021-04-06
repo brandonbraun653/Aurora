@@ -43,7 +43,7 @@ Logging helper macros
 #define LOG_IF_TRACE( predicate, str, ... ) \
   if ( !predicate )                         \
   {                                         \
-    LOG_TRACE( str, __VA_ARGS__ );          \
+    LOG_TRACE( str, ##__VA_ARGS__ );        \
   }
 
 
@@ -52,7 +52,7 @@ Logging helper macros
 #define LOG_IF_DEBUG( predicate, str, ... ) \
   if ( !predicate )                         \
   {                                         \
-    LOG_DEBUG( str, __VA_ARGS__ );          \
+    LOG_DEBUG( str, ##__VA_ARGS__ );        \
   }
 
 
@@ -61,7 +61,7 @@ Logging helper macros
 #define LOG_IF_INFO( predicate, str, ... ) \
   if ( !predicate )                        \
   {                                        \
-    LOG_INFO( str, __VA_ARGS__ );          \
+    LOG_INFO( str, ##__VA_ARGS__ );        \
   }
 
 
@@ -70,7 +70,7 @@ Logging helper macros
 #define LOG_IF_WARN( predicate, str, ... ) \
   if ( !predicate )                        \
   {                                        \
-    LOG_WARN( str, __VA_ARGS__ );          \
+    LOG_WARN( str, ##__VA_ARGS__ );        \
   }
 
 
@@ -79,7 +79,7 @@ Logging helper macros
 #define LOG_IF_ERROR( predicate, str, ... ) \
   if ( !predicate )                         \
   {                                         \
-    LOG_ERROR( str, __VA_ARGS__ );          \
+    LOG_ERROR( str, ##__VA_ARGS__ );        \
   }
 
 
@@ -88,7 +88,7 @@ Logging helper macros
 #define LOG_IF_FATAL( predicate, str, ... ) \
   if ( !predicate )                         \
   {                                         \
-    LOG_FATAL( str, __VA_ARGS__ );          \
+    LOG_FATAL( str, ##__VA_ARGS__ );        \
   }
 
 #endif /* !LOGGING_MACROS_HPP */

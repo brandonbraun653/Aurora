@@ -162,6 +162,12 @@ namespace Aurora::Database
   }
 
 
+  Chimera::Status_t RAM::insert( const Key &key, const size_t size )
+  {
+    return insert( key, nullptr, size, MemAccess::MEM_RW );
+  }
+
+
   Chimera::Status_t RAM::insert( const Key &key, const void *const data, const size_t size, const MemAccess access )
   {
     /*-------------------------------------------------
@@ -216,8 +222,13 @@ namespace Aurora::Database
     else if ( data )
     {
       memcpy( tmp.entry.data, data, size );
-      tmp.crc32 = getEntryCRC32( tmp.entry );
     }
+    else
+    {
+      memset( tmp.entry.data, 0, size );
+    }
+
+    tmp.crc32 = getEntryCRC32( tmp.entry );
 
     /*-------------------------------------------------
     Copy the entry into the registry list
