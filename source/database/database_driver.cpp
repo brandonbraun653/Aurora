@@ -173,7 +173,7 @@ namespace Aurora::Database
     /*-------------------------------------------------
     Input Protection
     -------------------------------------------------*/
-    if ( !data || !size )
+    if ( !size )
     {
       return Chimera::Status::INVAL_FUNC_PARAM;
     }

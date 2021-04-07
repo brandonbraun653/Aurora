@@ -31,6 +31,11 @@ namespace Aurora::Utility
   {
   public:
     /**
+     * @brief Default construct a new Periodic Timeout object
+     */
+    PeriodicTimeout();
+
+    /**
      * @brief Construct a new Periodic Timeout object
      *
      * @param period    How often the timeout should expire in milliseconds
@@ -38,6 +43,13 @@ namespace Aurora::Utility
      */
     PeriodicTimeout( const size_t period, const size_t initial );
     ~PeriodicTimeout();
+
+    /**
+     * @brief Sets the timeout period
+     *
+     * @param period    Timeout period in milliseconds
+     */
+    void setTimeout( const size_t period );
 
     /**
      * @brief Has the periodic timeout expired yet?

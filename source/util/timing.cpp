@@ -8,6 +8,10 @@
  *  2021 | Brandon Braun | brandonbraun653@gmail.com
  *******************************************************************************/
 
+/* STL Includes */
+#include <cstddef>
+#include <limits>
+
 /* Aurora Includes */
 #include <Aurora/utility>
 
@@ -19,15 +23,23 @@ namespace Aurora::Utility
   /*-------------------------------------------------------------------------------
   Classes
   -------------------------------------------------------------------------------*/
+  PeriodicTimeout::PeriodicTimeout() : mPeriod( std::numeric_limits<size_t>::max() ), mLast( 0 )
+  {
+  }
+
   PeriodicTimeout::PeriodicTimeout( const size_t period, const size_t initial ) : mPeriod( period ), mLast( initial )
   {
-
   }
 
 
   PeriodicTimeout::~PeriodicTimeout()
   {
+  }
 
+
+  void PeriodicTimeout::setTimeout( const size_t timeout )
+  {
+    mPeriod = timeout;
   }
 
 

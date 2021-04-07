@@ -17,8 +17,8 @@
 #endif /* SIMULATOR */
 
 #include <Aurora/source/sensors/accel_intf.hpp>
-// #include <Aurora/source/sensors/gyro_intf.hpp>
-// #include <Aurora/source/sensors/mag_intf.hpp>
+#include <Aurora/source/sensors/gyro_intf.hpp>
+#include <Aurora/source/sensors/mag_intf.hpp>
 #include <Aurora/source/sensors/sensor_intf.hpp>
 #include <Aurora/source/sensors/sensor_types.hpp>
 
