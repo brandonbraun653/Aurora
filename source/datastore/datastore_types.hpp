@@ -16,7 +16,7 @@
 #include <cstdint>
 
 /* ETL Includes */
-#include <etl/reference_flat_map.h>
+#include <etl/flat_map.h>
 
 /* Aurora Includes */
 #include <Aurora/source/datastore/datastore_intf.hpp>
@@ -28,10 +28,10 @@ namespace Aurora::Datastore
   /*-------------------------------------------------------------------------------
   Aliases
   -------------------------------------------------------------------------------*/
-  using ObservableMap = etl::ireference_flat_map<Database::Key, IObservableAttr>;
+  using ObservableMap = etl::iflat_map<Database::Key, IObservableAttr *const>;
 
   template<const size_t SIZE>
-  using ObservableMapStorage = etl::reference_flat_map<Database::Key, IObservableAttr, SIZE>;
+  using ObservableMapStorage = etl::flat_map<Database::Key, IObservableAttr *const, SIZE>;
 
   /*-------------------------------------------------------------------------------
   Enumerations

@@ -52,9 +52,10 @@ namespace Aurora::Datastore
      *  Registers a new observable object with the manager
      *
      *  @param[in]  observable    The observable data
+     *  @param[in]  database      Back end database
      *  @return bool
      */
-    bool registerObservable( IObservableAttr &observable );
+    bool registerObservable( IObservableAttr *const observable, Database::RAM *const database );
 
     /**
      *  Processes the observables to update their data. Must be called

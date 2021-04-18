@@ -45,7 +45,7 @@ namespace Aurora::Datastore
   }
 
 
-  bool Manager::registerObservable( IObservableAttr &observable )
+  bool Manager::registerObservable( IObservableAttr *const observable, Database::RAM *const database )
   {
     this->lock();
 
@@ -54,14 +54,28 @@ namespace Aurora::Datastore
     key already exist in the registry?
     -------------------------------------------------*/
     bool registered = false;
-    if ( !mObservableMap->available() || ( mObservableMap->find( observable.key() ) != mObservableMap->end() ) )
+    if ( !observable || !mObservableMap->available() || ( mObservableMap->find( observable->key() ) != mObservableMap->end() ) )
     {
       mCBService_registry.call<CB_REGISTER_FAIL>();
     }
     else  // Register the observer
     {
-      ObservableMap::value_type tmp = { observable.key(), observable };
-      mObservableMap->insert( tmp );
+      /*-------------------------------------------------
+      Register the observable into the map
+      -------------------------------------------------*/
+      ObservableMap::value_type tmp = { observable->key(), observable };
+      mObservableMap->insert( std::move( tmp ) );
+
+      /*-------------------------------------------------
+      Let the observable know where its core data storage
+      is located.
+      -------------------------------------------------*/
+      observable->assignDatabase( database );
+
+      /*-------------------------------------------------
+      Allocate memory in the database for the observable
+      -------------------------------------------------*/
+      database->insert( observable->key(), observable->size() );
       registered = true;
     }
 
@@ -75,7 +89,18 @@ namespace Aurora::Datastore
     this->lock();
     for ( auto iterator = mObservableMap->begin(); iterator != mObservableMap->end(); iterator++ )
     {
-      iterator->second.update();
+
+      // TODO: Need to process timeouts
+
+      if( iterator->second )
+      {
+        iterator->second->update();
+      }
+      else
+      {
+        /* Hitting this means a nullptr dereference was about to occur */
+        Chimera::insert_debug_breakpoint();
+      }
     }
     this->unlock();
   }
@@ -107,7 +132,7 @@ namespace Aurora::Datastore
     /*-------------------------------------------------
     Read out the data
     -------------------------------------------------*/
-    result = iterator->second.read( data, size );
+    result = iterator->second->read( data, size );
 
   /*-------------------------------------------------
   Common exit sequence
@@ -136,7 +161,7 @@ namespace Aurora::Datastore
     /*-------------------------------------------------
     Read out the data
     -------------------------------------------------*/
-    iterator->second.update();
+    iterator->second->update();
     result = true;
 
   /*-------------------------------------------------
