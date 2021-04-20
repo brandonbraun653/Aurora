@@ -8,7 +8,7 @@
  *  2021 | Brandon Braun | brandonbraun653@gmail.com
  *******************************************************************************/
 
-#if defined( EMBEDDED )
+#if defined( EMBEDDED ) && defined( SEGGER_SYS_VIEW )
 
 /* Aurora Includes */
 #include <Aurora/logging>
@@ -106,4 +106,4 @@ namespace Aurora::Logging
 
 }  // namespace Aurora::Logging
 
-#endif  /* EMBEDDED */
+#endif  /* EMBEDDED && SEGGER_SYS_VIEW */
