@@ -12,6 +12,7 @@
 #ifndef AURORA_UTIL_INCLUDES
 #define AURORA_UTIL_INCLUDES
 
+#include <Aurora/source/util/enum.hpp>
 #include <Aurora/source/util/timing.hpp>
 #include <Aurora/source/util/utility_common.hpp>
 
