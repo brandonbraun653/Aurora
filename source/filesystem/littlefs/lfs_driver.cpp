@@ -233,11 +233,11 @@ namespace Aurora::FileSystem::LFS
       /*-------------------------------------------------
       Attempt to quick format
       -------------------------------------------------*/
-      getRootSink()->flog( Level::LVL_DEBUG, "Initial mount failed with code %d. Reformatting.\r\n", err );
+      LOG_DEBUG( "Initial mount failed with code %d. Reformatting.\r\n", err );
       err = lfs_format( s_fs, s_fs_cfg );
       if ( err )
       {
-        getRootSink()->flog( Level::LVL_DEBUG, "Reformatting failed with code %d\r\n", err );
+        LOG_DEBUG( "Reformatting failed with code %d\r\n", err );
       }
 
       /*-------------------------------------------------
@@ -251,11 +251,11 @@ namespace Aurora::FileSystem::LFS
     -------------------------------------------------*/
     if ( err )
     {
-      getRootSink()->flog( Level::LVL_DEBUG, "Mount failed with code %d\r\n", err );
+      LOG_DEBUG( "Mount failed with code %d\r\n", err );
     }
     else
     {
-      getRootSink()->flog( Level::LVL_DEBUG, "File system mounted\r\n" );
+      LOG_DEBUG( "File system mounted\r\n" );
     }
 
     return err == 0;
@@ -324,7 +324,7 @@ namespace Aurora::FileSystem::LFS
     if ( err )
     {
       s_open_files.erase( iter );
-      getRootSink()->flog( Level::LVL_DEBUG, "Failed to open %s with code %d\r\n", filename, err );
+      LOG_DEBUG( "Failed to open %s with code %d\r\n", filename, err );
       return nullptr;
     }
 
@@ -346,7 +346,7 @@ namespace Aurora::FileSystem::LFS
         err = lfs_file_close( s_fs, &iter->second );
         if ( err )
         {
-          getRootSink()->flog( Level::LVL_DEBUG, "Failed to close %s with code %d\r\n", iter->first, err );
+          LOG_DEBUG( "Failed to close %s with code %d\r\n", iter->first, err );
         }
         else
         {

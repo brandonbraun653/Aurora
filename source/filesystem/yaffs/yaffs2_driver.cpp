@@ -460,11 +460,11 @@ namespace Aurora::FileSystem::YAFFS
     //   /*-------------------------------------------------
     //   Attempt to quick format
     //   -------------------------------------------------*/
-    //   getRootSink()->flog( Level::LVL_DEBUG, "Initial mount failed with code %d. Reformatting.\r\n", err );
+    //   LOG_DEBUG( "Initial mount failed with code %d. Reformatting.\r\n", err );
     //   err = lfs_format( s_fs, s_fs_cfg );
     //   if ( err )
     //   {
-    //     getRootSink()->flog( Level::LVL_DEBUG, "Reformatting failed with code %d\r\n", err );
+    //     LOG_DEBUG( "Reformatting failed with code %d\r\n", err );
     //   }
 
     //   /*-------------------------------------------------
@@ -478,11 +478,11 @@ namespace Aurora::FileSystem::YAFFS
     -------------------------------------------------*/
     if ( err )
     {
-      getRootSink()->flog( Level::LVL_DEBUG, "Mount failed with code %d\r\n", yaffs_get_error() );
+      LOG_DEBUG( "Mount failed with code %d\r\n", yaffs_get_error() );
     }
     else
     {
-      getRootSink()->flog( Level::LVL_DEBUG, "File system mounted\r\n" );
+      LOG_DEBUG( "File system mounted\r\n" );
     }
 
     return err == 0;
@@ -550,7 +550,7 @@ namespace Aurora::FileSystem::YAFFS
     iter->second = yaffs_open( filename, flag, S_IFMT );
     if ( iter->second < 0 )
     {
-      getRootSink()->flog( Level::LVL_DEBUG, "Failed to open %s with code %d\r\n", filename, iter->second );
+      LOG_DEBUG( "Failed to open %s with code %d\r\n", filename, iter->second );
       s_open_files.erase( iter );
       return -1;
     }
@@ -573,7 +573,7 @@ namespace Aurora::FileSystem::YAFFS
         err = yaffs_close( iter->second );
         if ( err )
         {
-          getRootSink()->flog( Level::LVL_DEBUG, "Failed to close %s with code %d\r\n", iter->first, err );
+          LOG_DEBUG( "Failed to close %s with code %d\r\n", iter->first, err );
         }
         else
         {

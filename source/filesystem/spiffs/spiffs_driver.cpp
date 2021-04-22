@@ -197,13 +197,13 @@ namespace Aurora::FileSystem::SPIFFS
     -------------------------------------------------*/
     for ( auto x = 0; x < 3; x++ )
     {
-      getRootSink()->flog( Level::LVL_DEBUG, "Mounting filesystem\r\n" );
+      LOG_DEBUG( "Mounting filesystem\r\n" );
       SPIFFS_mount( &fs, &cfg, spiffs_work_buf, spiffs_fds, sizeof( spiffs_fds ), spiffs_cache_buf, sizeof( spiffs_cache_buf ),
                     0 );
 
       if ( SPIFFS_mounted( &fs ) )
       {
-        getRootSink()->flog( Level::LVL_DEBUG, "Filesystem attached, validating...\r\n" );
+        LOG_DEBUG( "Filesystem attached, validating...\r\n" );
 
         /*-------------------------------------------------
         Validate the drive is working properly by dumping
@@ -227,15 +227,15 @@ namespace Aurora::FileSystem::SPIFFS
 
         if( ( memcmp( &write_data, &read_data, sizeof(BootData)) == 0 ) && ( SPIFFS_errno( &fs ) == SPIFFS_OK ) )
         {
-          getRootSink()->flog( Level::LVL_DEBUG, "Ok\r\n" );
+          LOG_DEBUG( "Ok\r\n" );
           return 0;
         }
         else
         {
-          getRootSink()->flog( Level::LVL_DEBUG, "Cannot access filesystem. Assuming corrupted. Erasing device...\r\n" );
+          LOG_DEBUG( "Cannot access filesystem. Assuming corrupted. Erasing device...\r\n" );
           SPIFFS_unmount( &fs );
           sNORFlash.erase( 10000 );
-          getRootSink()->flog( Level::LVL_DEBUG, "Erased\r\n" );
+          LOG_DEBUG( "Erased\r\n" );
         }
       }
       else
@@ -244,7 +244,7 @@ namespace Aurora::FileSystem::SPIFFS
         Can immediately attempt to format. Assuming either
         a corrupt or blank chip.
         -------------------------------------------------*/
-        getRootSink()->flog( Level::LVL_DEBUG, "Mount failed. Formatting...\r\n" );
+        LOG_DEBUG( "Mount failed. Formatting...\r\n" );
         SPIFFS_format( &fs );
       }
     }
@@ -315,7 +315,7 @@ namespace Aurora::FileSystem::SPIFFS
     iter->second = SPIFFS_open( &fs, filename, flag, 0 );
     if ( iter->second < 0 )
     {
-      getRootSink()->flog( Level::LVL_DEBUG, "Failed to open %s with code %d\r\n", filename, iter->second );
+      LOG_DEBUG( "Failed to open %s with code %d\r\n", filename, iter->second );
       s_open_files.erase( iter );
       return -1;
     }
@@ -338,7 +338,7 @@ namespace Aurora::FileSystem::SPIFFS
         err = SPIFFS_close( &fs, iter->second );
         if ( err )
         {
-          getRootSink()->flog( Level::LVL_DEBUG, "Failed to close %s with code %d\r\n", iter->first, err );
+          LOG_DEBUG( "Failed to close %s with code %d\r\n", iter->first, err );
         }
         else
         {
