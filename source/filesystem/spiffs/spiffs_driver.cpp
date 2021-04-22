@@ -120,6 +120,12 @@ namespace Aurora::FileSystem::SPIFFS
   }
 
 
+  Aurora::Flash::NOR::Driver *getDriver()
+  {
+    return &sNORFlash;
+  }
+
+
   bool fullChipErase( const size_t timeout )
   {
     using namespace Aurora::Memory;

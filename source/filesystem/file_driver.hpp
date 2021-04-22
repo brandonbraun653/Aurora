@@ -17,6 +17,7 @@
 #include <string_view>
 
 /* Aurora Includes */
+#include <Aurora/source/memory/flash/nor/nor_generic_driver.hpp>
 #include <Aurora/source/memory/flash/nor/nor_generic_types.hpp>
 
 /* Chimera Includes */
@@ -100,6 +101,8 @@ namespace Aurora::FileSystem
      *  @return bool
      */
     bool attachDevice( const Aurora::Flash::NOR::Chip_t dev, const Chimera::SPI::Channel channel );
+
+    Aurora::Flash::NOR::Driver *getDriver();
   }  // namespace SPIFFS
 
 }  // namespace Aurora::FileSystem
