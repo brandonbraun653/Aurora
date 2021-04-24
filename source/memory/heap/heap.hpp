@@ -15,6 +15,7 @@
 /* C++ Includes */
 #include <cstdint>
 #include <cstdlib>
+#include <memory>
 
 /* Chimera Includes */
 #include <Chimera/thread>
@@ -84,7 +85,7 @@ namespace Aurora::Memory
       size_t size;
     };
 
-    Chimera::Thread::RecursiveMutex *mLock;
+    std::shared_ptr<Chimera::Thread::RecursiveMutex> mLock;
 
     uint8_t *heapBuffer;
     size_t heapSize;

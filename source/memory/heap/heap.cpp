@@ -15,6 +15,7 @@
 /* C++ Includes */
 #include <cstdint>
 #include <cstdlib>
+#include <memory>
 #include <string.h>
 
 /* Aurora Includes */
@@ -69,7 +70,7 @@ namespace Aurora::Memory
   -------------------------------------------------------------------------------*/
   Heap::Heap()
   {
-    mLock                         = new Chimera::Thread::RecursiveMutex();
+    mLock                         = std::make_shared<Chimera::Thread::RecursiveMutex>();
     heapBuffer                    = nullptr;
     heapSize                      = 0;
     blockStructSize               = ( sizeof( BlockLink_t ) + ( portBYTE_ALIGNMENT - 1 ) ) & ~( portBYTE_ALIGNMENT_MASK );
@@ -102,7 +103,6 @@ namespace Aurora::Memory
 
   Heap::~Heap()
   {
-    delete mLock;
   }
 
 
@@ -124,8 +124,9 @@ namespace Aurora::Memory
     /*-------------------------------------------------
     Reset the buffer
     -------------------------------------------------*/
-    LockGuard<RecursiveMutex> guard( *mLock );
+    mLock->lock();
     memset( heapBuffer, 0, heapSize );
+    mLock->unlock();
   }
 
 
@@ -144,9 +145,10 @@ namespace Aurora::Memory
     /*-------------------------------------------------
     Attach the buffer
     -------------------------------------------------*/
-    LockGuard<RecursiveMutex> guard( *mLock );
+    mLock->lock();
     heapBuffer = reinterpret_cast<uint8_t *>( buffer );
     heapSize   = size;
+    mLock->unlock();
 
     return true;
   }
@@ -161,7 +163,7 @@ namespace Aurora::Memory
     BlockLink_t *pxNewBlockLink;
     void *pvReturn = nullptr;
 
-    LockGuard<RecursiveMutex> guard( *mLock );
+    mLock->lock();
 
     /* If this is the first call to malloc then the heap will require
     initialization to setup the list of free blocks. */
@@ -251,6 +253,8 @@ namespace Aurora::Memory
       }
     }
 
+    mLock->unlock();
+
     RT_HARD_ASSERT( ( ( ( size_t )pvReturn ) & ( size_t )portBYTE_ALIGNMENT_MASK ) == 0 );
     return pvReturn;
   }
@@ -279,7 +283,7 @@ namespace Aurora::Memory
       {
         if ( pxLink->next == nullptr )
         {
-          LockGuard<RecursiveMutex> guard( *mLock );
+          mLock->lock();
 
           /* The block is being returned to the heap - it is no longer allocated. */
           pxLink->size &= ~blockAllocatedBit;
@@ -287,6 +291,8 @@ namespace Aurora::Memory
           /* Add this block to the list of free blocks. */
           freeBytesRemaining += pxLink->size;
           prvInsertBlockIntoFreeList( pxLink );
+
+          mLock->unlock();
         }
       }
     }
@@ -296,9 +302,11 @@ namespace Aurora::Memory
   size_t Heap::available() const
   {
     using namespace Chimera::Thread;
-    LockGuard<RecursiveMutex> guard( *mLock );
 
-    return freeBytesRemaining;
+    mLock->lock();
+    size_t tmp = freeBytesRemaining;
+    mLock->unlock();
+    return tmp;
   }
 
 
