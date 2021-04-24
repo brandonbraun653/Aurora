@@ -23,11 +23,11 @@ namespace Aurora::Utility
   /*-------------------------------------------------------------------------------
   Classes
   -------------------------------------------------------------------------------*/
-  PeriodicTimeout::PeriodicTimeout() : mPeriod( std::numeric_limits<size_t>::max() ), mLast( 0 )
+  PeriodicTimeout::PeriodicTimeout() : mLast( 0 ), mPeriod( std::numeric_limits<size_t>::max() )
   {
   }
 
-  PeriodicTimeout::PeriodicTimeout( const size_t period, const size_t initial ) : mPeriod( period ), mLast( initial )
+  PeriodicTimeout::PeriodicTimeout( const size_t period, const size_t initial ) : mLast( initial ), mPeriod( period )
   {
   }
 

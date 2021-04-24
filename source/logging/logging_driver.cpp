@@ -272,7 +272,6 @@ namespace Aurora::Logging
     /*-------------------------------------------------
     Allocate memory for the log message
     -------------------------------------------------*/
-    int byteOffset = 0;
     char log_buffer[ 512 ];
     memset( log_buffer, 0, sizeof( log_buffer ) );
 
@@ -313,7 +312,7 @@ namespace Aurora::Logging
     /*-------------------------------------------------
     Format the full message
     -------------------------------------------------*/
-    snprintf( log_buffer, ARRAY_COUNT( log_buffer ), "[%ld][%-25.25s:%4ld][%-5.5s] -- %s", Chimera::millis(), file,
+    snprintf( log_buffer, ARRAY_COUNT( log_buffer ), "[%d][%-25.25s:%4d][%-5.5s] -- %s", Chimera::millis(), file,
               line,  str_level.data(), msg_buffer );
 
     /*-------------------------------------------------

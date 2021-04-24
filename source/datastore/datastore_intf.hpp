@@ -159,7 +159,7 @@ namespace Aurora::Datastore
   class BaseObservable : public etl::observable<etl::observer<DataType>, NumObservers>, virtual public IObservableAttr
   {
   public:
-    BaseObservable() : mDB( nullptr ), mLastUpdate( 0 ), mKey( AccessKey ), mRate( Rate ), mTimeout( Timeout )
+    BaseObservable() : mLastUpdate( 0 ), mDB( nullptr ), mKey( AccessKey ), mRate( Rate ), mTimeout( Timeout )
     {
     }
 

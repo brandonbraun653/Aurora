@@ -28,7 +28,7 @@ namespace Aurora::Logging
   /*-------------------------------------------------------------------------------
   Driver Implementation
   -------------------------------------------------------------------------------*/
-  SerialSink::SerialSink( Chimera::Serial::Channel channel ) : mSerialChannel( channel ), SinkInterface()
+  SerialSink::SerialSink( Chimera::Serial::Channel channel ) : SinkInterface(), mSerialChannel( channel )
   {
   }
 

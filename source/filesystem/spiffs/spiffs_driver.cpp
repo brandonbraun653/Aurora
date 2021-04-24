@@ -80,7 +80,6 @@ namespace Aurora::FileSystem::SPIFFS
   /*-------------------------------------------------------------------------------
   Static Data
   -------------------------------------------------------------------------------*/
-  static bool s_initialized                          = false;   /**< Is the module initialized? */
   static const Aurora::Memory::Properties *sNORProps = nullptr; /**< External NOR flash properties */
   static Aurora::Flash::NOR::Driver sNORFlash;                  /**< Flash memory driver supporting the file system */
   static Aurora::Flash::NOR::Chip_t sDevice;

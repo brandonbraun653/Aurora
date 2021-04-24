@@ -5,7 +5,7 @@
  *  Description:
  *    Human machine interface driver for a GPIO based button
  *
- *  2020 | Brandon Braun | brandonbraun653@gmail.com
+ *  2020-2021 | Brandon Braun | brandonbraun653@gmail.com
  *******************************************************************************/
 
 /* Aurora Includes */
@@ -24,7 +24,8 @@ namespace Aurora::HMI::Button
   EdgeTrigger Implementation
   -------------------------------------------------------------------------------*/
   EdgeTrigger::EdgeTrigger() :
-      mCallback( EdgeCallback() ), mConfig( {} ), mNumEvents( 0 ), mMaxNumSamples( 0 ), mEnabled( false )
+      mEnabled( false ), mCallback( EdgeCallback() ), mConfig( {} ), mNumEvents( 0 ), mDebounced( 0 ), mDebounceMsk( 0 ),
+      mMaxNumSamples( 0 ), mCurrentNumSamples( 0 ), mLastStableState( Chimera::GPIO::State::LOW )
   {
   }
 

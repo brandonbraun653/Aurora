@@ -124,7 +124,7 @@ namespace Aurora::Memory
     /*-------------------------------------------------
     Reset the buffer
     -------------------------------------------------*/
-    LockGuard<RecursiveMutex>( *mLock );
+    LockGuard<RecursiveMutex> guard( *mLock );
     memset( heapBuffer, 0, heapSize );
   }
 
@@ -144,7 +144,7 @@ namespace Aurora::Memory
     /*-------------------------------------------------
     Attach the buffer
     -------------------------------------------------*/
-    LockGuard<RecursiveMutex>( *mLock );
+    LockGuard<RecursiveMutex> guard( *mLock );
     heapBuffer = reinterpret_cast<uint8_t *>( buffer );
     heapSize   = size;
 
@@ -161,7 +161,7 @@ namespace Aurora::Memory
     BlockLink_t *pxNewBlockLink;
     void *pvReturn = nullptr;
 
-    LockGuard<RecursiveMutex>( *mLock );
+    LockGuard<RecursiveMutex> guard( *mLock );
 
     /* If this is the first call to malloc then the heap will require
     initialization to setup the list of free blocks. */
@@ -279,7 +279,7 @@ namespace Aurora::Memory
       {
         if ( pxLink->next == nullptr )
         {
-          LockGuard<RecursiveMutex>( *mLock );
+          LockGuard<RecursiveMutex> guard( *mLock );
 
           /* The block is being returned to the heap - it is no longer allocated. */
           pxLink->size &= ~blockAllocatedBit;
@@ -296,7 +296,7 @@ namespace Aurora::Memory
   size_t Heap::available() const
   {
     using namespace Chimera::Thread;
-    LockGuard<RecursiveMutex>( *mLock );
+    LockGuard<RecursiveMutex> guard( *mLock );
 
     return freeBytesRemaining;
   }
