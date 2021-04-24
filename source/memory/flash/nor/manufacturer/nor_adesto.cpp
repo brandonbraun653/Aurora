@@ -37,7 +37,7 @@ namespace Aurora::Flash::NOR::Adesto
       .blockSize       = 4 * 1024,
       .sectorSize      = 32 * 1024,
       .startAddress    = 0,
-      .endAddress      = 8 * 1024 * 1024,
+      .endAddress      = 1024 * 1024,
       .startUpDelay    = 20 * Chimera::Thread::TIMEOUT_1MS,
       .pagePgmDelay    = 5 * Chimera::Thread::TIMEOUT_1MS,
       .blockEraseDelay = 1300 * Chimera::Thread::TIMEOUT_1MS,

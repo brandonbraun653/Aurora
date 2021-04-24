@@ -8,6 +8,10 @@
  *  2021 | Brandon Braun | brandonbraun653@gmail.com
  *******************************************************************************/
 
+/* Aurora Includes */
+#include <Aurora/logging>
+#include <Aurora/utility>
+
 /* Chimera Includes */
 #include <Chimera/assert>
 #include <Chimera/common>
@@ -206,6 +210,7 @@ namespace Aurora::Flash::NOR
   {
   }
 
+
   /*-------------------------------------------------------------------------------
   Driver: Generic Memory Interface
   -------------------------------------------------------------------------------*/
@@ -223,7 +228,9 @@ namespace Aurora::Flash::NOR
 
   Aurora::Memory::Status Driver::write( const size_t chunk, const size_t offset, const void *const data, const size_t length )
   {
+    using namespace Aurora::Logging;
     using namespace Aurora::Memory;
+    using namespace Chimera::Thread;
 
     /*-------------------------------------------------
     Input Protection
@@ -270,6 +277,11 @@ namespace Aurora::Flash::NOR
     }
 
     address += offset;
+    if( ( address + length ) >= props->endAddress )
+    {
+      Chimera::insert_debug_breakpoint();
+      return Status::ERR_OVERRUN;
+    }
 
     /*-------------------------------------------------
     Acquire access to this driver
@@ -299,19 +311,25 @@ namespace Aurora::Flash::NOR
 
     // Tell the hardware which address to write into
     mSPI->writeBytes( cmdBuffer.data(), CFI::PAGE_PROGRAM_OPS_LEN );
-    mSPI->await( Chimera::Event::Trigger::TRIGGER_TRANSFER_COMPLETE, Chimera::Thread::TIMEOUT_BLOCK );
+    mSPI->await( Chimera::Event::Trigger::TRIGGER_TRANSFER_COMPLETE, TIMEOUT_BLOCK );
 
     // Dump the data
     mSPI->writeBytes( data, length );
-    mSPI->await( Chimera::Event::Trigger::TRIGGER_TRANSFER_COMPLETE, Chimera::Thread::TIMEOUT_BLOCK );
+    mSPI->await( Chimera::Event::Trigger::TRIGGER_TRANSFER_COMPLETE, TIMEOUT_BLOCK );
 
     // Release the SPI and disable the memory chip
     mSPI->setChipSelect( Chimera::GPIO::State::HIGH );
     mSPI->unlock();
 
     /*-------------------------------------------------
+    Wait for the hardware to finish the operation
+    -------------------------------------------------*/
+    pendEvent( Event::MEM_WRITE_COMPLETE, TIMEOUT_BLOCK );
+
+    /*-------------------------------------------------
     Release access to this driver and exit
     -------------------------------------------------*/
+    LOG_DEBUG( "Write %d bytes to address 0x%.8X\r\n", length, address );
     this->unlock();
     return Aurora::Memory::Status::ERR_OK;
   }
@@ -367,6 +385,12 @@ namespace Aurora::Flash::NOR
 
     address += offset;
 
+    if( ( address + length ) >= props->endAddress )
+    {
+      Chimera::insert_debug_breakpoint();
+      return Status::ERR_OVERRUN;
+    }
+
     /*-------------------------------------------------
     Acquire access to this driver
     -------------------------------------------------*/
@@ -402,6 +426,7 @@ namespace Aurora::Flash::NOR
     /*-------------------------------------------------
     Release access to this driver and exit
     -------------------------------------------------*/
+    LOG_DEBUG( "Read %d bytes from address 0x%.8X\r\n", length, address );
     this->unlock();
     return Aurora::Memory::Status::ERR_OK;
   }
@@ -410,6 +435,7 @@ namespace Aurora::Flash::NOR
   Aurora::Memory::Status Driver::erase( const size_t chunk )
   {
     using namespace Aurora::Memory;
+    using namespace Chimera::Thread;
 
     /*-------------------------------------------------
     Input Protection
@@ -459,23 +485,27 @@ namespace Aurora::Flash::NOR
     chunk size to erase.
     -------------------------------------------------*/
     size_t eraseOpsLen = CFI::BLOCK_ERASE_OPS_LEN;
+    size_t traceEraseLenKilo = 0;
     switch ( eraseSize )
     {
       case CHUNK_SIZE_4K:
         cmdBuffer[ 0 ] = CFI::BLOCK_ERASE_4K;
+        traceEraseLenKilo = 4;
         break;
 
       case CHUNK_SIZE_32K:
         cmdBuffer[ 0 ] = CFI::BLOCK_ERASE_32K;
+        traceEraseLenKilo = 32;
         break;
 
       case CHUNK_SIZE_64K:
         cmdBuffer[ 0 ] = CFI::BLOCK_ERASE_64K;
+        traceEraseLenKilo = 64;
         break;
 
       default:  // Weird erase size
         Chimera::insert_debug_breakpoint();
-        return Aurora::Memory::Status::ERR_UNSUPPORTED;
+        return Status::ERR_UNSUPPORTED;
         break;
     }
 
@@ -506,13 +536,19 @@ namespace Aurora::Flash::NOR
     mSPI->lock();
     spiResult |= mSPI->setChipSelect( Chimera::GPIO::State::LOW );
     spiResult |= mSPI->readWriteBytes( cmdBuffer.data(), cmdBuffer.data(), eraseOpsLen );
-    spiResult |= mSPI->await( Chimera::Event::Trigger::TRIGGER_TRANSFER_COMPLETE, Chimera::Thread::TIMEOUT_BLOCK );
+    spiResult |= mSPI->await( Chimera::Event::Trigger::TRIGGER_TRANSFER_COMPLETE, TIMEOUT_BLOCK );
     spiResult |= mSPI->setChipSelect( Chimera::GPIO::State::HIGH );
     mSPI->unlock();
 
     /*-------------------------------------------------
+    Wait for the hardware to finish the operation
+    -------------------------------------------------*/
+    pendEvent( Event::MEM_ERASE_COMPLETE, TIMEOUT_BLOCK );
+
+    /*-------------------------------------------------
     Release access to this driver
     -------------------------------------------------*/
+    LOG_DEBUG( "Erase %d kB at address 0x%.8X\r\n", traceEraseLenKilo, address );
     this->unlock();
     if ( spiResult == Chimera::Status::OK )
     {
@@ -527,6 +563,18 @@ namespace Aurora::Flash::NOR
 
   Aurora::Memory::Status Driver::erase()
   {
+    using namespace Aurora::Memory;
+    using namespace Chimera::Thread;
+
+    /*-------------------------------------------------
+    Input Protection
+    -------------------------------------------------*/
+    const Properties *props = nullptr;
+    if ( props = getProperties( mChip ); !props )
+    {
+      return Aurora::Memory::Status::ERR_UNSUPPORTED;
+    }
+
     /*-------------------------------------------------
     Per datasheet specs, the write enable command must
     be sent before issuing the actual data.
@@ -546,8 +594,14 @@ namespace Aurora::Flash::NOR
     mSPI->unlock();
 
     /*-------------------------------------------------
+    Wait for the hardware to finish the operation
+    -------------------------------------------------*/
+    pendEvent( Event::MEM_ERASE_COMPLETE, TIMEOUT_BLOCK );
+
+    /*-------------------------------------------------
     Release access to this driver
     -------------------------------------------------*/
+    LOG_DEBUG( "Erase entire chip\r\n" );
     if ( spiResult == Chimera::Status::OK )
     {
       return Aurora::Memory::Status::ERR_OK;
@@ -586,6 +640,10 @@ namespace Aurora::Flash::NOR
     return props->eventPoll( static_cast<uint8_t>( mSPIChannel ), static_cast<uint8_t>( mChip ), event, timeout );
   }
 
+
+  /*-------------------------------------------------------------------------------
+  Driver: NOR Specific Interface
+  -------------------------------------------------------------------------------*/
   bool Driver::configure( const Chip_t device, const Chimera::SPI::Channel channel )
   {
     mChip       = device;
@@ -594,6 +652,18 @@ namespace Aurora::Flash::NOR
 
     return static_cast<bool>( mSPI );
   }
+
+
+  void Driver::transfer( const void *const cmd, void *const output, const size_t size )
+  {
+    mSPI->lock();
+    mSPI->setChipSelect( Chimera::GPIO::State::LOW );
+    mSPI->readWriteBytes( cmd, output, size );
+    mSPI->await( Chimera::Event::Trigger::TRIGGER_TRANSFER_COMPLETE, Chimera::Thread::TIMEOUT_BLOCK );
+    mSPI->setChipSelect( Chimera::GPIO::State::HIGH );
+    mSPI->unlock();
+  }
+
 
   /*-------------------------------------------------------------------------------
   Driver: Private Interface

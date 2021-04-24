@@ -114,6 +114,8 @@ namespace Aurora::Flash::NOR
      */
     bool configure( const Chip_t device, const Chimera::SPI::Channel channel );
 
+    void transfer( const void *const cmd, void *const output, const size_t size );
+
   private:
     friend Chimera::Thread::Lockable<Driver>;
 

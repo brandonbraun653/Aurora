@@ -88,7 +88,7 @@ namespace Aurora::Memory
   /**
    *  Manufacturer specific polling for an Read/Write/Erase event flag. There isn't
    *  really a standard for checking the status of an operation (that the author is
-   *  aware of).
+   *  aware of), so this function will serve as a redirect into that functionality.
    *
    *  @param[in]  channel     Peripheral channel in use for the device (SPI, I2C, MMC, etc)
    *  @param[in]  device      Specific device identifier. This can influence the read protocol.

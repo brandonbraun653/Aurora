@@ -35,7 +35,7 @@ namespace Aurora::FileSystem::SPIFFS
   /*-------------------------------------------------------------------------------
   Constants
   -------------------------------------------------------------------------------*/
-  static const std::string_view boot_file = "!@#$%^&*()_spiffs_boot_log.bin";
+  static const std::string_view boot_file  = "!@#$%^&*()_spiffs_boot_log.bin";
   static const std::string_view drive_name = "spiffs_fs_drive";
 
   /*-------------------------------------------------------------------------------
@@ -198,6 +198,12 @@ namespace Aurora::FileSystem::SPIFFS
     cfg.hal_erase_f      = spiffs_erase;
 
     /*-------------------------------------------------
+    Debug only
+    -------------------------------------------------*/
+    // sNORFlash.erase();
+    // SPIFFS_format( &fs );
+
+    /*-------------------------------------------------
     Try mounting. It's possible to get a clean chip,
     which will need some formatting before mounting.
     -------------------------------------------------*/
@@ -231,7 +237,7 @@ namespace Aurora::FileSystem::SPIFFS
         fileSys::fread( &read_data, 1, sizeof( BootData ), fd );
         fileSys::fclose( fd );
 
-        if( ( memcmp( &write_data, &read_data, sizeof(BootData)) == 0 ) && ( SPIFFS_errno( &fs ) == SPIFFS_OK ) )
+        if ( ( memcmp( &write_data, &read_data, sizeof( BootData ) ) == 0 ) && ( SPIFFS_errno( &fs ) == SPIFFS_OK ) )
         {
           LOG_DEBUG( "Ok\r\n" );
           return 0;
@@ -341,7 +347,8 @@ namespace Aurora::FileSystem::SPIFFS
     {
       if ( iter->second == stream )
       {
-        err = SPIFFS_close( &fs, iter->second );
+        SPIFFS_fflush( &fs, stream );
+        err = SPIFFS_close( &fs, stream );
         if ( err )
         {
           LOG_DEBUG( "Failed to close %s with code %d\r\n", iter->first, err );
