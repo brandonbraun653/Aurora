@@ -67,6 +67,16 @@ namespace Aurora::Memory
     virtual Status write( const size_t chunk, const size_t offset, const void *const data, const size_t length ) = 0;
 
     /**
+     * @brief Writes data at an absolute address
+     *
+     * @param address       Address to start writing at
+     * @param data          The buffer of data that will be written
+     * @param length        Number of bytes to be written
+     * @return Status
+     */
+    virtual Status write( const size_t address, const void *const data, const size_t length ) = 0;
+
+    /**
      *  Reads a contiguous length of memory starting at the given chunk.
      *
      *  @param[in]  chunk         The chunk id to start the read from
@@ -78,12 +88,31 @@ namespace Aurora::Memory
     virtual Status read( const size_t chunk, const size_t offset, void *const data, const size_t length ) = 0;
 
     /**
+     * @brief Reads a contiguous length of memory from an absolute address
+     *
+     * @param address     Address to begin reading from
+     * @param data        Buffer of data to read into
+     * @param length      How many bytes to read out
+     * @return Status
+     */
+    virtual Status read( const size_t address, void *const data, const size_t length ) = 0;
+
+    /**
      *  Erase a block of memory that corresponds with the device's erase block size
      *
      *  @param[in]  block         The block id to erase
      *  @return Status
      */
     virtual Status erase( const size_t block ) = 0;
+
+    /**
+     * @brief Erases a section of memory
+     *
+     * @param address     Address to start erasing at
+     * @param length      Number of bytes to erase
+     * @return Status
+     */
+    virtual Status erase( const size_t address, const size_t length ) = 0;
 
     /**
      *  Erases the entire chip. Typically this is a single command, so it saves on

@@ -47,6 +47,10 @@ namespace Aurora::FileSystem
    */
   int unmount();
 
+  /**
+   * @brief Completely wipes the entire filesystem
+   */
+  void massErase();
 
   /*-------------------------------------------------------------------------------
   Public Functions: stdio-like Interface

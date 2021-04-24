@@ -96,8 +96,11 @@ namespace Aurora::Flash::NOR
     Aurora::Memory::Status open() final override;
     Aurora::Memory::Status close() final override;
     Aurora::Memory::Status write( const size_t chunk, const size_t offset, const void *const data, const size_t length ) final override;
+    Aurora::Memory::Status write( const size_t address, const void *const data, const size_t length ) final override;
     Aurora::Memory::Status read( const size_t chunk, const size_t offset, void *const data, const size_t length ) final override;
+    Aurora::Memory::Status read( const size_t address, void *const data, const size_t length ) final override;
     Aurora::Memory::Status erase( const size_t chunk ) final override;
+    Aurora::Memory::Status erase( const size_t address, const size_t length ) final override;
     Aurora::Memory::Status erase() final override;
     Aurora::Memory::Status flush() final override;
     Aurora::Memory::Status pendEvent( const Aurora::Memory::Event event, const size_t timeout ) final override;
@@ -114,7 +117,21 @@ namespace Aurora::Flash::NOR
      */
     bool configure( const Chip_t device, const Chimera::SPI::Channel channel );
 
+    /**
+     * @brief Exposes the raw data bus interface to the user
+     *
+     * @param cmd     Buffer to the command to send to the NOR chip
+     * @param output  Buffer to read in the RX half of the transfer
+     * @param size    Size of both buffers
+     */
     void transfer( const void *const cmd, void *const output, const size_t size );
+
+    /**
+     * @brief Gets the configured device type
+     *
+     * @return Chip_t
+     */
+    Chip_t deviceType();
 
   private:
     friend Chimera::Thread::Lockable<Driver>;

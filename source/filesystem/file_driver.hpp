@@ -102,7 +102,13 @@ namespace Aurora::FileSystem
      */
     bool attachDevice( const Aurora::Flash::NOR::Chip_t dev, const Chimera::SPI::Channel channel );
 
-    Aurora::Flash::NOR::Driver *getDriver();
+    /**
+     * @brief Gets the NOR driver that backs the SPIFF implementation
+     *
+     * @return Aurora::Flash::NOR::Driver*
+     */
+    Aurora::Flash::NOR::Driver *getNORDriver();
+
   }  // namespace SPIFFS
 
 }  // namespace Aurora::FileSystem

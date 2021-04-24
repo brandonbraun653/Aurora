@@ -27,6 +27,12 @@
 namespace Aurora::Flash::NOR
 {
   /*-------------------------------------------------------------------------------
+  Constants
+  -------------------------------------------------------------------------------*/
+  static constexpr bool LOG_ENABLE = false;
+  #define NOR_LOG( x ) if constexpr( LOG_ENABLE ) { ( x ); }
+
+  /*-------------------------------------------------------------------------------
   Static Functions
   -------------------------------------------------------------------------------*/
   bool unitChunk2Address( const size_t unitSize, const size_t unitId, const size_t maxAddress, size_t *address )
@@ -233,26 +239,21 @@ namespace Aurora::Flash::NOR
     using namespace Chimera::Thread;
 
     /*-------------------------------------------------
-    Input Protection
+    Ensure device attributes exist for configured chip
     -------------------------------------------------*/
-    const Properties *props = nullptr;
-
-    if ( !data || !length )
-    {
-      return Aurora::Memory::Status::ERR_BAD_ARG;
-    }
-    else if ( props = getProperties( mChip ); !props )
+    const Properties *attr = nullptr;
+    if ( attr = getProperties( mChip ); !attr )
     {
       return Aurora::Memory::Status::ERR_UNSUPPORTED;
     }
 
     /*-------------------------------------------------
-    Figure out the chunk size in use
+    Translate the chunk ID into a physical address
     -------------------------------------------------*/
     size_t address = 0;
     bool validity  = false;
 
-    switch ( props->writeChunk )
+    switch ( attr->writeChunk )
     {
       case Chunk::PAGE:
         validity = page2Address( mChip, chunk, &address );
@@ -271,27 +272,45 @@ namespace Aurora::Flash::NOR
         break;
     }
 
-    if ( !validity )
+    address += offset;
+
+    /*-------------------------------------------------
+    Do some simple bounds checking
+    -------------------------------------------------*/
+    if( !validity || ( ( address + length ) >= attr->endAddress ) )
     {
+      Chimera::insert_debug_breakpoint();
       return Status::ERR_BAD_ARG;
     }
 
-    address += offset;
-    if( ( address + length ) >= props->endAddress )
-    {
-      Chimera::insert_debug_breakpoint();
-      return Status::ERR_OVERRUN;
-    }
+    /*-------------------------------------------------
+    Write to the absolute address
+    -------------------------------------------------*/
+    return this->write( address, data, length );
+  }
+
+
+  Aurora::Memory::Status Driver::write( const size_t address, const void *const data, const size_t length )
+  {
+    using namespace Aurora::Logging;
+    using namespace Aurora::Memory;
+    using namespace Chimera::Thread;
 
     /*-------------------------------------------------
-    Acquire access to this driver
+    Input protection
     -------------------------------------------------*/
-    this->lock();
+    if ( !data || !length )
+    {
+      return Aurora::Memory::Status::ERR_BAD_ARG;
+    }
+
+    LockGuard lock( *this );
 
     /*-------------------------------------------------
     Per datasheet specs, the write enable command must
     be sent before issuing the actual data.
     -------------------------------------------------*/
+    NOR_LOG( LOG_DEBUG( "Write %d bytes to address 0x%.8X\r\n", length, address ) );
     issueWriteEnable();
 
     /*-------------------------------------------------
@@ -305,11 +324,11 @@ namespace Aurora::Flash::NOR
     /*-------------------------------------------------
     Perform the SPI transaction
     -------------------------------------------------*/
-    // Acquire the SPI and enable the memory chip
+    // Acquire the SPI and enable the NOR chip
     mSPI->lock();
     mSPI->setChipSelect( Chimera::GPIO::State::LOW );
 
-    // Tell the hardware which address to write into
+    // Tell NOR controller which address to write into
     mSPI->writeBytes( cmdBuffer.data(), CFI::PAGE_PROGRAM_OPS_LEN );
     mSPI->await( Chimera::Event::Trigger::TRIGGER_TRANSFER_COMPLETE, TIMEOUT_BLOCK );
 
@@ -317,20 +336,18 @@ namespace Aurora::Flash::NOR
     mSPI->writeBytes( data, length );
     mSPI->await( Chimera::Event::Trigger::TRIGGER_TRANSFER_COMPLETE, TIMEOUT_BLOCK );
 
-    // Release the SPI and disable the memory chip
+    // Release the SPI and disable the NOR chip
     mSPI->setChipSelect( Chimera::GPIO::State::HIGH );
     mSPI->unlock();
 
     /*-------------------------------------------------
-    Wait for the hardware to finish the operation
+    Wait for NOR to finalize the write
     -------------------------------------------------*/
     pendEvent( Event::MEM_WRITE_COMPLETE, TIMEOUT_BLOCK );
 
     /*-------------------------------------------------
     Release access to this driver and exit
     -------------------------------------------------*/
-    LOG_DEBUG( "Write %d bytes to address 0x%.8X\r\n", length, address );
-    this->unlock();
     return Aurora::Memory::Status::ERR_OK;
   }
 
@@ -340,26 +357,21 @@ namespace Aurora::Flash::NOR
     using namespace Aurora::Memory;
 
     /*-------------------------------------------------
-    Input Protection
+    Ensure device attributes exist for configured chip
     -------------------------------------------------*/
-    const Properties *props = nullptr;
-
-    if ( !data || !length )
-    {
-      return Aurora::Memory::Status::ERR_BAD_ARG;
-    }
-    else if ( props = getProperties( mChip ); !props )
+    const Properties *attr = nullptr;
+    if ( attr = getProperties( mChip ); !attr )
     {
       return Aurora::Memory::Status::ERR_UNSUPPORTED;
     }
 
     /*-------------------------------------------------
-    Figure out the chunk size in use
+    Translate the chunk ID into a physical address
     -------------------------------------------------*/
     size_t address = 0;
     bool validity  = false;
 
-    switch ( props->readChunk )
+    switch ( attr->readChunk )
     {
       case Chunk::PAGE:
         validity = page2Address( mChip, chunk, &address );
@@ -378,28 +390,46 @@ namespace Aurora::Flash::NOR
         break;
     }
 
-    if ( !validity )
+    address += offset;
+
+    /*-------------------------------------------------
+    Do some simple bounds checking
+    -------------------------------------------------*/
+    if( !validity || ( ( address + length ) >= attr->endAddress ) )
     {
+      Chimera::insert_debug_breakpoint();
       return Status::ERR_BAD_ARG;
     }
 
-    address += offset;
+    /*-------------------------------------------------
+    Read from the absolute address
+    -------------------------------------------------*/
+    return this->read( address, data, length );
+  }
 
-    if( ( address + length ) >= props->endAddress )
-    {
-      Chimera::insert_debug_breakpoint();
-      return Status::ERR_OVERRUN;
-    }
+
+  Aurora::Memory::Status Driver::read( const size_t address, void *const data, const size_t length )
+  {
+    using namespace Aurora::Logging;
+    using namespace Aurora::Memory;
+    using namespace Chimera::Thread;
 
     /*-------------------------------------------------
-    Acquire access to this driver
+    Input protection
     -------------------------------------------------*/
-    this->lock();
+    if ( !data || !length )
+    {
+      return Aurora::Memory::Status::ERR_BAD_ARG;
+    }
+
+    LockGuard lock( *this );
 
     /*-------------------------------------------------
     Initialize the command sequence. The high speed
     command works for all frequency ranges.
     -------------------------------------------------*/
+    NOR_LOG( LOG_DEBUG( "Read %d bytes from address 0x%.8X\r\n", length, address ) );
+
     cmdBuffer[ 0 ] = CFI::READ_ARRAY_HS;
     cmdBuffer[ 1 ] = ( address & ADDRESS_BYTE_3_MSK ) >> ADDRESS_BYTE_3_POS;
     cmdBuffer[ 2 ] = ( address & ADDRESS_BYTE_2_MSK ) >> ADDRESS_BYTE_2_POS;
@@ -409,6 +439,7 @@ namespace Aurora::Flash::NOR
     /*-------------------------------------------------
     Perform the SPI transaction
     -------------------------------------------------*/
+    // Acquire the SPI and enable the NOR chip
     mSPI->lock();
     mSPI->setChipSelect( Chimera::GPIO::State::LOW );
 
@@ -420,14 +451,10 @@ namespace Aurora::Flash::NOR
     mSPI->readBytes( data, length );
     mSPI->await( Chimera::Event::Trigger::TRIGGER_TRANSFER_COMPLETE, Chimera::Thread::TIMEOUT_BLOCK );
 
+    // Release the SPI and disable the NOR chip
     mSPI->setChipSelect( Chimera::GPIO::State::HIGH );
     mSPI->unlock();
 
-    /*-------------------------------------------------
-    Release access to this driver and exit
-    -------------------------------------------------*/
-    LOG_DEBUG( "Read %d bytes from address 0x%.8X\r\n", length, address );
-    this->unlock();
     return Aurora::Memory::Status::ERR_OK;
   }
 
@@ -447,7 +474,8 @@ namespace Aurora::Flash::NOR
     }
 
     /*-------------------------------------------------
-    Figure out the chunk size in use
+    Translate the chunk ID into an absolute address and
+    a device specific erase size.
     -------------------------------------------------*/
     size_t address   = 0;
     size_t eraseSize = 0;
@@ -481,12 +509,27 @@ namespace Aurora::Flash::NOR
     }
 
     /*-------------------------------------------------
+    Invoke the absolute erase function
+    -------------------------------------------------*/
+    return this->erase( address, eraseSize );
+  }
+
+
+  Aurora::Memory::Status Driver::erase( const size_t address, const size_t length )
+  {
+    using namespace Aurora::Logging;
+    using namespace Aurora::Memory;
+    using namespace Chimera::Thread;
+
+    LockGuard lock( *this );
+
+    /*-------------------------------------------------
     Determine the op-code to use based on the requested
     chunk size to erase.
     -------------------------------------------------*/
     size_t eraseOpsLen = CFI::BLOCK_ERASE_OPS_LEN;
     size_t traceEraseLenKilo = 0;
-    switch ( eraseSize )
+    switch ( length )
     {
       case CHUNK_SIZE_4K:
         cmdBuffer[ 0 ] = CFI::BLOCK_ERASE_4K;
@@ -508,11 +551,7 @@ namespace Aurora::Flash::NOR
         return Status::ERR_UNSUPPORTED;
         break;
     }
-
-    /*-------------------------------------------------
-    Acquire access to this driver
-    -------------------------------------------------*/
-    this->lock();
+    NOR_LOG( LOG_DEBUG( "Erase %d kB at address 0x%.8X\r\n", traceEraseLenKilo, address ) );
 
     /*-------------------------------------------------
     Per datasheet specs, the write enable command must
@@ -544,20 +583,9 @@ namespace Aurora::Flash::NOR
     Wait for the hardware to finish the operation
     -------------------------------------------------*/
     pendEvent( Event::MEM_ERASE_COMPLETE, TIMEOUT_BLOCK );
+    NOR_LOG( LOG_DEBUG( "Erase complete\r\n" ) );
 
-    /*-------------------------------------------------
-    Release access to this driver
-    -------------------------------------------------*/
-    LOG_DEBUG( "Erase %d kB at address 0x%.8X\r\n", traceEraseLenKilo, address );
-    this->unlock();
-    if ( spiResult == Chimera::Status::OK )
-    {
-      return Aurora::Memory::Status::ERR_OK;
-    }
-    else
-    {
-      return Aurora::Memory::Status::ERR_DRIVER_ERR;
-    }
+    return ( spiResult == Chimera::Status::OK ) ? Status::ERR_OK : Status::ERR_DRIVER_ERR;
   }
 
 
@@ -575,10 +603,13 @@ namespace Aurora::Flash::NOR
       return Aurora::Memory::Status::ERR_UNSUPPORTED;
     }
 
+    LockGuard lock( *this );
+
     /*-------------------------------------------------
     Per datasheet specs, the write enable command must
     be sent before issuing the actual data.
     -------------------------------------------------*/
+    NOR_LOG( LOG_DEBUG( "Erase entire chip\r\n" ) );
     issueWriteEnable();
 
     /*-------------------------------------------------
@@ -597,19 +628,9 @@ namespace Aurora::Flash::NOR
     Wait for the hardware to finish the operation
     -------------------------------------------------*/
     pendEvent( Event::MEM_ERASE_COMPLETE, TIMEOUT_BLOCK );
+    NOR_LOG( LOG_DEBUG( "Erase complete\r\n" ) );
 
-    /*-------------------------------------------------
-    Release access to this driver
-    -------------------------------------------------*/
-    LOG_DEBUG( "Erase entire chip\r\n" );
-    if ( spiResult == Chimera::Status::OK )
-    {
-      return Aurora::Memory::Status::ERR_OK;
-    }
-    else
-    {
-      return Aurora::Memory::Status::ERR_DRIVER_ERR;
-    }
+    return ( spiResult == Chimera::Status::OK ) ? Status::ERR_OK : Status::ERR_DRIVER_ERR;
   }
 
 
@@ -662,6 +683,12 @@ namespace Aurora::Flash::NOR
     mSPI->await( Chimera::Event::Trigger::TRIGGER_TRANSFER_COMPLETE, Chimera::Thread::TIMEOUT_BLOCK );
     mSPI->setChipSelect( Chimera::GPIO::State::HIGH );
     mSPI->unlock();
+  }
+
+
+  Chip_t Driver::deviceType()
+  {
+    return mChip;
   }
 
 

@@ -22,6 +22,7 @@ gen_static_lib_variants(
   SOURCES
     file_intf.cpp
     spiffs/spiffs_driver.cpp
+    spiffs/spiffs_posix.cpp
   PRV_LIBRARIES
     aurora_intf_inc
     chimera_intf_inc

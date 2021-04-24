@@ -10,6 +10,7 @@
 
 /* Aurora Includes */
 #include <Aurora/filesystem>
+#include <Aurora/filesystem_spiffs>
 #include <Aurora/source/filesystem/generic/generic_driver.hpp>
 #include <Aurora/source/filesystem/littlefs/lfs_driver.hpp>
 #include <Aurora/source/filesystem/spiffs/spiffs_driver.hpp>
@@ -70,6 +71,12 @@ namespace Aurora::FileSystem
   {
     RT_HARD_ASSERT( impl && impl->unmount );
     return impl->unmount();
+  }
+
+
+  void massErase()
+  {
+    SPIFFS::getNORDriver()->erase();
   }
 
 
