@@ -12,8 +12,9 @@
 #ifndef AURORA_FILESYSTEM_INCLUDES
 #define AURORA_FILESYSTEM_INCLUDES
 
+#include <Aurora/source/filesystem/file_binary.hpp>
+#include <Aurora/source/filesystem/file_config.hpp>
 #include <Aurora/source/filesystem/file_intf.hpp>
 #include <Aurora/source/filesystem/file_types.hpp>
-#include <Aurora/source/filesystem/file_config.hpp>
 
 #endif /* !AURORA_FILESYSTEM_INCLUDES */
