@@ -22,8 +22,7 @@
 namespace Aurora::FileSystem
 {
   /*-------------------------------------------------------------------------------
-  Public Functions:
-  All of these interfaces must be defined in some back end interface driver.
+  Public Functions
   -------------------------------------------------------------------------------*/
   /**
    *  Configures the file system to use the appropriate driver. This
@@ -51,6 +50,15 @@ namespace Aurora::FileSystem
    * @brief Completely wipes the entire filesystem
    */
   void massErase();
+
+  /**
+   * @brief Checks if the given file handle is valid
+   *
+   * @param stream            Handle to check
+   * @return true             Valid
+   * @return false            Not valid
+   */
+  bool fIsValid( FileHandle &stream );
 
   /*-------------------------------------------------------------------------------
   Public Functions: stdio-like Interface

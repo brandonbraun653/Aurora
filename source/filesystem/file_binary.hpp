@@ -35,9 +35,13 @@ namespace Aurora::FileSystem
     enum ECode : uint8_t
     {
       ERR_OK,           /**< No error */
+      ERR_BAD_ARG,      /**< Invalid argument passed to function */
       ERR_CRC_FAIL,     /**< The data was corrupted */
+      ERR_WRITE_FAIL,   /**< Data write reported a failure */
+      ERR_READ_FAIL,    /**< Data failed to be read */
       ERR_NO_FILE,      /**< The file doesn't exist */
-      ERR_PERMISSION,   /**< The requested IO operation was not allowed */
+      ERR_NOT_OPEN,     /**< The file isn't open */
+      ERR_SIZING,       /**< There was a sizing issue in a read/write command */
     };
 
     /*-------------------------------------------------
@@ -45,6 +49,16 @@ namespace Aurora::FileSystem
     -------------------------------------------------*/
     BinaryFile();
     ~BinaryFile();
+
+    /**
+     * @brief Creates an empty file
+     * If the file already exists, it will be destroyed.
+     *
+     * @param filename      Name of the file to create
+     * @return true         File created successfully
+     * @return false        File was not created
+     */
+    bool create( const std::string_view &filename );
 
     /**
      * @brief Opens the specified file
@@ -89,18 +103,23 @@ namespace Aurora::FileSystem
      */
     ECode getError();
 
+    /**
+     * @brief Clears any set error codes
+     */
+    void clearErrors();
+
   protected:
     struct LogStruct
     {
-      uint32_t crc;           /**< CRC of the entire file */
+      uint32_t crc;           /**< CRC of the entire file + this LogStruct */
       const uint8_t version;  /**< Log structure version */
-      uint8_t pad[ 3 ];       /**< Unused */
-      uint32_t file_size;     /**< Length of the file in bytes */
+      uint8_t _pad[ 3 ];      /**< Unused */
+      uint32_t file_size;     /**< Length of the user's data in bytes */
       uint32_t timestamp;     /**< Last time written */
 
       LogStruct() : version( StructVersion )
       {
-        memset( pad, 0, sizeof( pad ) );
+        memset( _pad, 0, sizeof( _pad ) );
         crc       = 0xCCCCCCCC;
         file_size = 0xCCCCCCCC;
         timestamp = 0xCCCCCCCC;

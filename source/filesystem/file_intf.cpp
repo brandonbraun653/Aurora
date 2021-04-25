@@ -80,6 +80,14 @@ namespace Aurora::FileSystem
   }
 
 
+  bool fIsValid( FileHandle &stream )
+  {
+    return stream >= 0;
+  }
+
+  /*-------------------------------------------------------------------------------
+  STDIO Interface
+  -------------------------------------------------------------------------------*/
   FileHandle fopen( const char *filename, const char *mode )
   {
     RT_HARD_ASSERT( impl && impl->fopen );

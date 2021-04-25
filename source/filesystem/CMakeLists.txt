@@ -1,11 +1,25 @@
 include("${COMMON_TOOL_ROOT}/cmake/utility/embedded.cmake")
 
+# Core Library
+gen_static_lib_variants(
+  TARGET
+    aurora_filesystem_core
+  SOURCES
+    file_binary.cpp
+    file_intf.cpp
+  PRV_LIBRARIES
+    aurora_intf_inc
+    chimera_intf_inc
+    lfs_intf_inc
+  EXPORT_DIR
+    "${PROJECT_BINARY_DIR}/Aurora"
+)
+
 # Little FS Target
 gen_static_lib_variants(
   TARGET
     aurora_filesystem_lfs_driver
   SOURCES
-    file_intf.cpp
     littlefs/lfs_driver.cpp
   PRV_LIBRARIES
     aurora_intf_inc
@@ -20,7 +34,6 @@ gen_static_lib_variants(
   TARGET
     aurora_filesystem_spiffs_driver
   SOURCES
-    file_intf.cpp
     spiffs/spiffs_driver.cpp
     spiffs/spiffs_posix.cpp
   PRV_LIBRARIES
@@ -36,7 +49,6 @@ gen_static_lib_variants(
   TARGET
     aurora_filesystem_yaffs_driver
   SOURCES
-    file_intf.cpp
     yaffs/yaffs2_driver.cpp
   PRV_LIBRARIES
     aurora_intf_inc
@@ -45,3 +57,4 @@ gen_static_lib_variants(
   EXPORT_DIR
     "${PROJECT_BINARY_DIR}/Aurora"
 )
+
