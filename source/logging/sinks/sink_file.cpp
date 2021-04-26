@@ -8,6 +8,8 @@
  *  2021 | Brandon Braun | brandonbraun653@gmail.com
  *******************************************************************************/
 
+#if !defined( EMBEDDED )
+
 /* C++ Includes */
 #include <iostream>
 #include <string>
@@ -74,3 +76,4 @@ namespace Aurora::Logging
   }
 }  // namespace Aurora::Logging
 
+#endif  /* !EMBEDDED */
