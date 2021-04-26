@@ -5,7 +5,7 @@
  *  Description:
  *    Aurora version information
  *
- *  2020 | Brandon Braun | brandonbraun653@gmail.com
+ *  2020-2021 | Brandon Braun | brandonbraun653@gmail.com
  ********************************************************************************/
 
 #pragma once
@@ -17,7 +17,7 @@
 
 namespace Aurora
 {
-  static constexpr std::string_view version = "1.0.0";
+  static constexpr std::string_view version = "1.1.0";
 }
 
 #endif /* !AURORA_VERSION_HPP */
