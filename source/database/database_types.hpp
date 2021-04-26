@@ -16,8 +16,9 @@
 #include <cstdint>
 
 /* ETL Includes */
-#include <etl/cstring.h>
+#include <etl/string.h>
 #include <etl/list.h>
+#include <etl/pool.h>
 #include <etl/delegate.h>
 #include <etl/delegate_service.h>
 
@@ -36,11 +37,6 @@ namespace Aurora::Database
   Aliases
   -------------------------------------------------------------------------------*/
   using Key = size_t;
-
-  using EntryList = etl::list<Entry, 0>;
-
-  template<const size_t SIZE>
-  using EntryStore = etl::pool<EntryList::pool_type, SIZE>;
 
   /*-------------------------------------------------------------------------------
   Enumerations
@@ -173,6 +169,15 @@ namespace Aurora::Database
       crc32      = 0;
     }
   };
+
+  /*-------------------------------------------------------------------------------
+  Aliases
+  -------------------------------------------------------------------------------*/
+  //using EntryList = etl::list<Entry, 0>;
+  typedef etl::list<Entry, 0> List;
+
+  template<const size_t SIZE>
+  using EntryStore = etl::pool<List::pool_type, SIZE>;
 
 }  // namespace Aurora::Database
 
