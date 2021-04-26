@@ -173,11 +173,10 @@ namespace Aurora::Database
   /*-------------------------------------------------------------------------------
   Aliases
   -------------------------------------------------------------------------------*/
-  //using EntryList = etl::list<Entry, 0>;
-  typedef etl::list<Entry, 0> List;
+  using EntryList = etl::list_ext<Entry>;
 
   template<const size_t SIZE>
-  using EntryStore = etl::pool<List::pool_type, SIZE>;
+  using EntryStore = etl::pool<EntryList::pool_type, SIZE>;
 
 }  // namespace Aurora::Database
 

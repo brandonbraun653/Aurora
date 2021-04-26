@@ -100,7 +100,6 @@ namespace Aurora::Database
      */
     Chimera::Status_t insert( const Key &key, const size_t size );
 
-
     /**
      *  Inserts a new entry into the database using the default store
      *
