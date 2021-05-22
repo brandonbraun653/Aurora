@@ -4,6 +4,7 @@ gen_static_lib_variants(
   TARGET
     aurora_utility
   SOURCES
+    strings.cpp
     timing.cpp
   PRV_LIBRARIES
     aurora_intf_inc
