@@ -5,7 +5,7 @@
  *  Description:
  *    Aurora includes for human-machine interfaces
  *
- *  2020 | Brandon Braun | brandonbraun653@gmail.com
+ *  2020-2021 | Brandon Braun | brandonbraun653@gmail.com
  ********************************************************************************/
 
 #pragma once
@@ -15,5 +15,6 @@
 #include <Aurora/source/hmi/button/hmi_button_driver.hpp>
 #include <Aurora/source/hmi/button/hmi_button_types.hpp>
 #include <Aurora/source/hmi/rotary_encoder/hmi_rotary_encoder_driver.hpp>
+#include <Aurora/source/hmi/sr/hmi_sr_input.hpp>
 
 #endif /* !AURORA_HMI_INCLUDES */

@@ -132,6 +132,7 @@ gen_intf_lib_variants(
   LIBRARIES
     aurora_hmi_button
     aurora_hmi_rotary_encoder
+    aurora_hmi_shift_register
   EXPORT_DIR
     ${AuroraExportDir}
 )

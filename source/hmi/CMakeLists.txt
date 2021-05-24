@@ -1,2 +1,3 @@
 add_subdirectory(button)
 add_subdirectory(rotary_encoder)
+add_subdirectory(sr)

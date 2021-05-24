@@ -5,7 +5,7 @@
  *  Description:
  *    Aurora includes for various design math implementations
  *
- *  2020 | Brandon Braun | brandonbraun653@gmail.com
+ *  2020-2021 | Brandon Braun | brandonbraun653@gmail.com
  ********************************************************************************/
 
 #pragma once
@@ -14,5 +14,6 @@
 
 #include <Aurora/source/math/conversion.hpp>
 #include <Aurora/source/math/math.hpp>
+#include <Aurora/source/math/math_constexpr.hpp>
 
 #endif /* !AURORA_MATH_INCLUDES */

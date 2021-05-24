@@ -60,4 +60,41 @@ namespace Aurora::Math
     return result;
   }
 
+
+  size_t maxBitSet( uint32_t value )
+  {
+    unsigned int v         = value;  // 32-bit value to find the log2 of
+    const unsigned int b[] = { 0x2, 0xC, 0xF0, 0xFF00, 0xFFFF0000 };
+    const unsigned int S[] = { 1, 2, 4, 8, 16 };
+    int i;
+
+    register unsigned int r = 0;  // result of log2(v) will go here
+    for ( i = 4; i >= 0; i-- )    // unroll for speed...
+    {
+      if ( v & b[ i ] )
+      {
+        v >>= S[ i ];
+        r |= S[ i ];
+      }
+    }
+
+    return r;
+  }
+
+
+  size_t maxBitSetPow2( uint32_t value )
+  {
+    unsigned int v = value;  // 32-bit value to find the log2 of
+    static const unsigned int b[] = { 0xAAAAAAAA, 0xCCCCCCCC, 0xF0F0F0F0, 0xFF00FF00, 0xFFFF0000 };
+    register unsigned int r       = ( v & b[ 0 ] ) != 0;
+    int i;
+
+    for ( i = 4; i > 0; i-- )  // unroll for speed...
+    {
+      r |= ( ( v & b[ i ] ) != 0 ) << i;
+    }
+
+    return r;
+  }
+
 }  // namespace Aurora::Math

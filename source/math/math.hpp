@@ -5,7 +5,7 @@
  *  Description:
  *    Math functions
  *
- *  2020 | Brandon Braun | brandonbraun653@gmail.com
+ *  2020-2021 | Brandon Braun | brandonbraun653@gmail.com
  *******************************************************************************/
 
 #pragma once
@@ -14,6 +14,7 @@
 
 /* STL Includes */
 #include <cstddef>
+#include <cstdint>
 
 namespace Aurora::Math
 {
@@ -47,6 +48,23 @@ namespace Aurora::Math
    *  @return float           Percent error
    */
   float percentError( const float actual, const float expected );
+
+  /**
+   * @brief Gets position of the highest bit set in a number
+   *
+   * @param value     Value to check
+   * @return size_t
+   */
+  size_t maxBitSet( uint32_t value );
+
+  /**
+   * @brief Gets position of the highest bit set in a number
+   * Assumes number is a power of 2.
+   *
+   * @param value     Value to check
+   * @return size_t
+   */
+  size_t maxBitSetPow2( uint32_t value );
 
 }  // namespace Aurora::Math
 
