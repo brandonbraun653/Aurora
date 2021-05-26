@@ -42,13 +42,13 @@ namespace Aurora::HMI::Encoder
     /*-------------------------------------------------
     Input protection
     -------------------------------------------------*/
-    /* clang-format off */
-    if ( !cfg.encACfg.validity ||
-         !cfg.encBCfg.validity ||
-         !cfg.btnNumSamples ||
-         !cfg.btnSampleRate ||
-         !( cfg.btnSampleRate < cfg.btnDebounceTime ) )
-    { /* clang-format on */
+    if ( !cfg.encACfg.validity || !cfg.encBCfg.validity )
+    {
+      return false;
+    }
+    else if ( cfg.btnCfg.validity
+              && ( !cfg.btnNumSamples || !cfg.btnSampleRate || !( cfg.btnSampleRate < cfg.btnDebounceTime ) ) )
+    {
       return false;
     }
     else
