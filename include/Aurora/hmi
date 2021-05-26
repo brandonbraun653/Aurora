@@ -15,6 +15,6 @@
 #include <Aurora/source/hmi/button/hmi_button_driver.hpp>
 #include <Aurora/source/hmi/button/hmi_button_types.hpp>
 #include <Aurora/source/hmi/rotary_encoder/hmi_rotary_encoder_driver.hpp>
-#include <Aurora/source/hmi/sr/hmi_sr_input.hpp>
+#include <Aurora/source/hmi/shift_register/hmi_sr_input.hpp>
 
 #endif /* !AURORA_HMI_INCLUDES */

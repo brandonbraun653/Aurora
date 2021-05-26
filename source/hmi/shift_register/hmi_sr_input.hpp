@@ -76,23 +76,23 @@ namespace Aurora::HMI::SR
   -------------------------------------------------------------------------------*/
   struct InputConfig
   {
-    InputBits bit;       /**< Which bit is being configured */
-    Polarity polarity;   /**< Polarity of the bit */
-    size_t debounceTime; /**< Minimum stability of the bit */
+    bool configured;      /**< Has this bit been configured? */
+    InputBits bit;        /**< Which bit is being configured */
+    Polarity polarity;    /**< Polarity of the bit */
+    size_t debounceTime;  /**< Minimum time to sample the bit */
   };
 
   struct BitState
   {
     bool active;
-    size_t debounceMask; /**< Tracking for sequential samples */
     size_t debounceStart;
     size_t numSamples;
-    Chimera::GPIO::State logicalState;
+    Chimera::GPIO::State lastState;
   };
 
   struct InputEvent
   {
-    InputBits bit;    /**< Which bit caused the event */
+    uint8_t bit;      /**< Which bit caused the event */
     Edge edge;        /**< Edge transition type */
     State state;      /**< Is the bit active or inactive? */
     size_t timestamp; /**< Time the event was processed */

@@ -16,6 +16,11 @@
 /* Chimera Includes */
 #include <Chimera/thread>
 
+/*-------------------------------------------------------------------------------
+Macros
+-------------------------------------------------------------------------------*/
+#define BIT_TO_IO_STATE( bit, data ) ( ( ( 1u << bit ) & data ) ? Chimera::GPIO::State::HIGH : Chimera::GPIO::State::LOW )
+
 namespace Aurora::HMI::SR
 {
   /*-------------------------------------------------------------------------------
@@ -56,16 +61,29 @@ namespace Aurora::HMI::SR
     mDriverCfg = cfg;
     mEventQueue.clear();
 
+    /*-------------------------------------------------
+    Read the current state of the SR
+    -------------------------------------------------*/
+    uint32_t sr_data = 0;
+    if ( !readSR( &sr_data, mDriverCfg.byteWidth ) )
+    {
+      return Chimera::Status::FAIL;
+    }
+
+    /*-------------------------------------------------
+    Update each bit to their default values
+    -------------------------------------------------*/
     for ( size_t x = 0; x < ARRAY_COUNT( mBitConfig ); x++ )
     {
       mBitConfig[ x ].bit          = 0;
       mBitConfig[ x ].debounceTime = Chimera::Thread::TIMEOUT_BLOCK;
       mBitConfig[ x ].polarity     = Polarity::INVALID;
+      mBitConfig[ x ].configured   = false;
 
-      mBitState[ x ].debounceMask  = 0;
       mBitState[ x ].debounceStart = 0;
       mBitState[ x ].numSamples    = 0;
-      mBitState[ x ].logicalState  = Chimera::GPIO::State::LOW;
+      mBitState[ x ].active        = false;
+      mBitState[ x ].lastState     = BIT_TO_IO_STATE( x, sr_data );
     }
 
     return Chimera::Status::OK;
@@ -111,15 +129,12 @@ namespace Aurora::HMI::SR
     }
 
     /*-------------------------------------------------
-    Assign the config
+    Update the config and current state
     -------------------------------------------------*/
-    mBitConfig[ idx ] = cfg;
-
-    mBitState[ idx ].logicalState = Chimera::GPIO::State::LOW;
-    if ( ( 1u << idx ) & sr_data )
-    {
-      mBitState[ idx ].logicalState = Chimera::GPIO::State::HIGH;
-    }
+    mBitConfig[ idx ]            = cfg;
+    mBitConfig[ idx ].configured = true;
+    mBitState[ idx ].active      = false;
+    mBitState[ idx ].lastState   = BIT_TO_IO_STATE( idx, sr_data );
 
     return Chimera::Status::OK;
   }
@@ -177,9 +192,10 @@ namespace Aurora::HMI::SR
     for ( size_t bit = 0; bit < 32; bit++ )
     {
       /*-------------------------------------------------
-      Is this bit even supported in the global mask?
+      Is this bit supported in the global mask and has it
+      been configured?
       -------------------------------------------------*/
-      if ( !( ( 1u << bit ) & mDriverCfg.inputMask ) )
+      if ( !( ( 1u << bit ) & mDriverCfg.inputMask ) || !mBitConfig[ bit ].configured )
       {
         continue;
       }
@@ -187,55 +203,20 @@ namespace Aurora::HMI::SR
       /*-------------------------------------------------
       Detect start of new debounce
       -------------------------------------------------*/
-      auto currState = ( ( 1u << bit ) & sr_data ) ? Chimera::GPIO::State::HIGH : Chimera::GPIO::State::LOW;
+      auto currState = BIT_TO_IO_STATE( bit, sr_data );
 
-      if ( !mBitState[ bit ].active && ( currState != mBitState[ bit ].logicalState ) )
+      if ( !mBitState[ bit ].active )
       {
-        mBitState[ bit ].debounceMask  = 0;
-        mBitState[ bit ].debounceStart = Chimera::millis();
-        mBitState[ bit ].numSamples    = 0;
-        mBitState[ bit ].active        = true;
-      }
-      else
-      {
-        continue;
-      }
-
-      /*-------------------------------------------------
-      Update the debounce mask for another sample
-      -------------------------------------------------*/
-      mBitState[ bit ].numSamples++;
-      mBitState[ bit ].debounceMask <<= 1u;
-      if ( sr_data & ( 1u << bit ) )
-      {
-        mBitState[ bit ].debounceMask |= 1u;
-      }
-      else
-      {
-        mBitState[ bit ].debounceMask &= ~1u;
-      }
-
-      /*-------------------------------------------------
-      Are all acquired samples up to this point the same?
-      -------------------------------------------------*/
-      RT_HARD_ASSERT( mBitState[ bit ].numSamples < 32 );
-
-      // Generate N bits set
-      uint32_t bit_mask = ( 1 << mBitState[ bit ].numSamples ) - 1;
-
-      // Check each sample is the same
-      bool all_samples_uniform = false;
-      uint32_t masked_data     = bit_mask & mBitState[ bit ].debounceMask;
-
-      if ( 1u & masked_data )
-      {
-        // Currently measuring a logically high state
-        all_samples_uniform = ( bit_mask == masked_data );
-      }
-      else
-      {
-        // Currently measuring a logically low state
-        all_samples_uniform = ( 0 == masked_data );
+        if( currState != mBitState[ bit ].lastState )
+        {
+          mBitState[ bit ].debounceStart = Chimera::millis();
+          mBitState[ bit ].numSamples    = 0;
+          mBitState[ bit ].active        = true;
+        }
+        else
+        {
+          continue;
+        }
       }
 
       /*-------------------------------------------------
@@ -243,17 +224,6 @@ namespace Aurora::HMI::SR
       -------------------------------------------------*/
       if ( ( Chimera::millis() - mBitState[ bit ].debounceStart ) >= mBitConfig[ bit ].debounceTime )
       {
-        /*-------------------------------------------------
-        Disable debouncing on this bit
-        -------------------------------------------------*/
-        mBitState[ bit ].active       = false;
-        mBitState[ bit ].logicalState = currState;
-
-        if ( !all_samples_uniform )
-        {
-          continue;
-        }
-
         /*-------------------------------------------------
         Prepare new event to post to queue
         -------------------------------------------------*/
@@ -263,20 +233,22 @@ namespace Aurora::HMI::SR
         /*-------------------------------------------------
         Which bit is set?
         -------------------------------------------------*/
-        newEvent.bit = ( 1u << bit );
+        newEvent.bit = bit;
 
         /*-------------------------------------------------
         Determine the edge transition
         -------------------------------------------------*/
-        if ( ( sr_data & ( 1u << bit ) ) && ( mBitState[ bit ].logicalState == Chimera::GPIO::State::LOW ) )
+        if ( ( currState == Chimera::GPIO::State::HIGH ) && ( mBitState[ bit ].lastState == Chimera::GPIO::State::LOW ) )
         {
-          newEvent.edge                 = Edge::RISING;
-          mBitState[ bit ].logicalState = Chimera::GPIO::State::HIGH;
+          newEvent.edge = Edge::RISING;
+        }
+        else if( ( currState == Chimera::GPIO::State::LOW ) && ( mBitState[ bit ].lastState == Chimera::GPIO::State::HIGH ) )
+        {
+          newEvent.edge = Edge::FALLING;
         }
         else
         {
-          newEvent.edge                 = Edge::FALLING;
-          mBitState[ bit ].logicalState = Chimera::GPIO::State::LOW;
+          RT_HARD_ASSERT( false );
         }
 
         /*-------------------------------------------------
@@ -287,6 +259,12 @@ namespace Aurora::HMI::SR
         {
           newEvent.state = State::ACTIVE;
         }
+
+        /*-------------------------------------------------
+        Disable debouncing on this bit
+        -------------------------------------------------*/
+        mBitState[ bit ].active    = false;
+        mBitState[ bit ].lastState = currState;
 
         /*-------------------------------------------------
         Post the event
