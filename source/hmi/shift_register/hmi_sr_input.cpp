@@ -248,7 +248,13 @@ namespace Aurora::HMI::SR
         }
         else
         {
-          RT_HARD_ASSERT( false );
+          /*-------------------------------------------------
+          Invalid condition. Might occur if there is some
+          rapid pressing of the keys. Reset the tracking.
+          -------------------------------------------------*/
+          mBitState[ bit ].active    = false;
+          mBitState[ bit ].lastState = currState;
+          continue;
         }
 
         /*-------------------------------------------------
