@@ -12,6 +12,10 @@
 #ifndef AURORA_FILESYSTEM_INCLUDES
 #define AURORA_FILESYSTEM_INCLUDES
 
+#if defined( SIMULATOR )
+#include <filesystem>
+#endif
+
 #include <Aurora/source/filesystem/file_binary.hpp>
 #include <Aurora/source/filesystem/file_config.hpp>
 #include <Aurora/source/filesystem/file_intf.hpp>

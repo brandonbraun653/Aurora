@@ -14,6 +14,18 @@ gen_static_lib_variants(
   EXPORT_DIR
     "${PROJECT_BINARY_DIR}/Aurora"
 )
+# Little FS Target
+gen_static_lib_variants(
+  TARGET
+    aurora_filesystem_generic_driver
+  SOURCES
+    generic/generic_driver.cpp
+  PRV_LIBRARIES
+    aurora_intf_inc
+    chimera_intf_inc
+  EXPORT_DIR
+    "${PROJECT_BINARY_DIR}/Aurora"
+)
 
 # Little FS Target
 gen_static_lib_variants(

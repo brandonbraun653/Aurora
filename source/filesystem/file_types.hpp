@@ -20,8 +20,11 @@ namespace Aurora::FileSystem
   /*-------------------------------------------------------------------------------
   Aliases
   -------------------------------------------------------------------------------*/
+  #if defined( SIMULATOR )
+  using FileHandle = void *;
+  #else
   using FileHandle = int;
-  //using FileHandle = void *;
+  #endif
 
   /*-------------------------------------------------------------------------------
   Enumerations

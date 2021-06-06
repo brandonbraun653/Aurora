@@ -95,7 +95,7 @@ gen_intf_lib_variants(
   LIBRARIES
     aurora_filesystem_lfs_core
     aurora_filesystem_lfs_driver
-    aurora_filesystem_core
+
   EXPORT_DIR
     ${AuroraExportDir}
 )
@@ -106,7 +106,6 @@ gen_intf_lib_variants(
   LIBRARIES
     aurora_filesystem_spiffs_core
     aurora_filesystem_spiffs_driver
-    aurora_filesystem_core
   EXPORT_DIR
     ${AuroraExportDir}
 )
@@ -117,7 +116,6 @@ gen_intf_lib_variants(
   LIBRARIES
     yaffs_core                      #Defined in the yaffs2 submodule
     aurora_filesystem_yaffs_driver
-    aurora_filesystem_core
   EXPORT_DIR
     ${AuroraExportDir}
 )

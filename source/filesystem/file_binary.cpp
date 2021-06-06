@@ -22,9 +22,15 @@ namespace Aurora::FileSystem
   /*-------------------------------------------------------------------------------
   Binary File
   -------------------------------------------------------------------------------*/
-  BinaryFile::BinaryFile() : mIsOpen( false ), mFileHandle( {} )
+  BinaryFile::BinaryFile() : mIsOpen( false )
   {
     mError = this->ERR_OK;
+
+    #if defined( SIMULATOR )
+    mFileHandle = nullptr;
+    #else
+    mFileHandle = 0;
+    #endif
   }
 
 

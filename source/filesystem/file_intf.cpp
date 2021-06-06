@@ -34,21 +34,17 @@ namespace Aurora::FileSystem
     // TODO: Come back later and turn this into a registration function
     switch ( type )
     {
+      #if defined( EMBEDDED )
       case BackendType::DRIVER_SPIFFS:
         impl = &SPIFFS::implementation;
         break;
+      #endif  /* EMBEDDED */
 
-      case BackendType::DRIVER_LITTLE_FS:
-        impl = nullptr; //&LFS::implementation;
-        break;
-
-      case BackendType::DRIVER_YAFFS2:
-        impl = nullptr; //&YAFFS::implementation;
-        break;
-
+      #if defined( SIMULATOR )
       case BackendType::DRIVER_OS:
-        impl = nullptr; //&Generic::implementation;
+        impl = &Generic::implementation;
         break;
+      #endif  /* SIMULATOR */
 
       default:
         impl = nullptr;
@@ -82,7 +78,11 @@ namespace Aurora::FileSystem
 
   bool fIsValid( FileHandle &stream )
   {
+    #if defined( SIMULATOR )
+    return stream != nullptr;
+    #else
     return stream >= 0;
+    #endif
   }
 
   /*-------------------------------------------------------------------------------
