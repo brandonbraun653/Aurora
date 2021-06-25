@@ -85,7 +85,7 @@ namespace Aurora::Memory
       size_t size;
     };
 
-    std::shared_ptr<Chimera::Thread::RecursiveMutex> mLock;
+    std::shared_ptr<Chimera::Thread::Mutex> mLock;
 
     uint8_t *heapBuffer;
     size_t heapSize;
@@ -96,6 +96,8 @@ namespace Aurora::Memory
     size_t blockAllocatedBit;
     size_t blockStructSize;
     size_t minBlockSize;
+    size_t bytesAllocated;
+    size_t bytesFreed;
 
     /*------------------------------------------------
     Internal FreeRTOS functions to manage the heap

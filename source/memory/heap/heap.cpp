@@ -19,6 +19,7 @@
 #include <string.h>
 
 /* Aurora Includes */
+#include <Aurora/logging>
 #include <Aurora/memory>
 
 /* Chimera Includes */
@@ -58,6 +59,8 @@
 #endif /* USING_FREERTOS_THREADS */
 
 
+#define DEBUG_MODULE    ( false )
+
 namespace Aurora::Memory
 {
   /*-------------------------------------------------------------------------------
@@ -70,7 +73,7 @@ namespace Aurora::Memory
   -------------------------------------------------------------------------------*/
   Heap::Heap()
   {
-    mLock                         = std::make_shared<Chimera::Thread::RecursiveMutex>();
+    mLock                         = std::make_shared<Chimera::Thread::Mutex>();
     heapBuffer                    = nullptr;
     heapSize                      = 0;
     blockStructSize               = ( sizeof( BlockLink_t ) + ( portBYTE_ALIGNMENT - 1 ) ) & ~( portBYTE_ALIGNMENT_MASK );
@@ -78,6 +81,8 @@ namespace Aurora::Memory
     freeBytesRemaining            = 0;
     minimumEverFreeBytesRemaining = 0;
     blockAllocatedBit             = 0;
+    bytesAllocated                = 0;
+    bytesFreed                    = 0;
 
     /*------------------------------------------------
     Initialize the start/end list pointers
@@ -98,6 +103,8 @@ namespace Aurora::Memory
     blockAllocatedBit             = other.blockAllocatedBit;
     blockStructSize               = other.blockStructSize;
     minBlockSize                  = other.minBlockSize;
+    bytesAllocated                = other.bytesAllocated;
+    bytesFreed                    = other.bytesFreed;
   }
 
 
@@ -112,6 +119,7 @@ namespace Aurora::Memory
   void Heap::staticReset()
   {
     using namespace Chimera::Thread;
+    LockGuard lck( *mLock.get() );
 
     /*-------------------------------------------------
     Runtime protection
@@ -124,9 +132,7 @@ namespace Aurora::Memory
     /*-------------------------------------------------
     Reset the buffer
     -------------------------------------------------*/
-    mLock->lock();
     memset( heapBuffer, 0, heapSize );
-    mLock->unlock();
   }
 
 
@@ -145,10 +151,12 @@ namespace Aurora::Memory
     /*-------------------------------------------------
     Attach the buffer
     -------------------------------------------------*/
-    mLock->lock();
-    heapBuffer = reinterpret_cast<uint8_t *>( buffer );
-    heapSize   = size;
-    mLock->unlock();
+    LockGuard lck( *mLock.get() );
+
+    heapBuffer     = reinterpret_cast<uint8_t *>( buffer );
+    heapSize       = size;
+    bytesAllocated = 0;
+    bytesFreed     = 0;
 
     return true;
   }
@@ -157,13 +165,12 @@ namespace Aurora::Memory
   void *Heap::malloc( size_t size )
   {
     using namespace Chimera::Thread;
+    LockGuard lck( *mLock.get() );
 
     BlockLink_t *pxBlock;
     BlockLink_t *pxPreviousBlock;
     BlockLink_t *pxNewBlockLink;
     void *pvReturn = nullptr;
-
-    mLock->lock();
 
     /* If this is the first call to malloc then the heap will require
     initialization to setup the list of free blocks. */
@@ -240,6 +247,10 @@ namespace Aurora::Memory
 
           freeBytesRemaining -= pxBlock->size;
 
+          /* Track bytes allocated */
+          bytesAllocated += size;
+          LOG_IF_DEBUG( DEBUG_MODULE, "Alloc %d bytes at address 0x%.8X\r\n", pxBlock->size, reinterpret_cast<std::uintptr_t>( pxBlock ) );
+
           if ( freeBytesRemaining < minimumEverFreeBytesRemaining )
           {
             minimumEverFreeBytesRemaining = freeBytesRemaining;
@@ -253,8 +264,6 @@ namespace Aurora::Memory
       }
     }
 
-    mLock->unlock();
-
     RT_HARD_ASSERT( ( ( ( size_t )pvReturn ) & ( size_t )portBYTE_ALIGNMENT_MASK ) == 0 );
     return pvReturn;
   }
@@ -263,6 +272,7 @@ namespace Aurora::Memory
   void Heap::free( void *pv )
   {
     using namespace Chimera::Thread;
+    LockGuard lck( *mLock.get() );
 
     uint8_t *puc = ( uint8_t * )pv;
     BlockLink_t *pxLink;
@@ -283,16 +293,16 @@ namespace Aurora::Memory
       {
         if ( pxLink->next == nullptr )
         {
-          mLock->lock();
-
           /* The block is being returned to the heap - it is no longer allocated. */
           pxLink->size &= ~blockAllocatedBit;
+
+          /* Track allocated bytes */
+          bytesFreed += pxLink->size;
+          LOG_IF_DEBUG( DEBUG_MODULE, "Freed %d bytes at address 0x%.8X\r\n", pxLink->size, reinterpret_cast<std::uintptr_t>( pxLink ) );
 
           /* Add this block to the list of free blocks. */
           freeBytesRemaining += pxLink->size;
           prvInsertBlockIntoFreeList( pxLink );
-
-          mLock->unlock();
         }
       }
     }
@@ -302,11 +312,9 @@ namespace Aurora::Memory
   size_t Heap::available() const
   {
     using namespace Chimera::Thread;
+    LockGuard lck( *mLock.get() );
 
-    mLock->lock();
-    size_t tmp = freeBytesRemaining;
-    mLock->unlock();
-    return tmp;
+    return freeBytesRemaining;
   }
 
 
