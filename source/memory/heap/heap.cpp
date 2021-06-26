@@ -59,7 +59,7 @@
 #endif /* USING_FREERTOS_THREADS */
 
 
-#define DEBUG_MODULE    ( false )
+#define DEBUG_MODULE    ( true )
 
 namespace Aurora::Memory
 {
