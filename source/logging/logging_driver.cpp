@@ -310,6 +310,11 @@ namespace Aurora::Logging
     };
 
     /*-------------------------------------------------
+    Grab the name of the current thread of execution
+    -------------------------------------------------*/
+    //Chimera::Thread::TaskName thread_name = Chimera::Thread::this_thread::get_name();
+
+    /*-------------------------------------------------
     Format the full message
     -------------------------------------------------*/
     snprintf( log_buffer, ARRAY_COUNT( log_buffer ), "[%d][%-25.25s:%4d][%-5.5s] -- %s", Chimera::millis(), file,

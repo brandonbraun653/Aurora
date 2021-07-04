@@ -58,6 +58,11 @@
 #endif
 #endif /* USING_FREERTOS_THREADS */
 
+/* Valgrind Includes */
+#if defined( SIMULATOR )
+#include <valgrind/valgrind.h>
+#endif  /* SIMULATOR */
+
 
 #define DEBUG_MODULE    ( false )
 
@@ -73,6 +78,7 @@ namespace Aurora::Memory
   -------------------------------------------------------------------------------*/
   Heap::Heap()
   {
+    // TODO: Allocate this within the assigned heap memory
     mLock                         = std::make_shared<Chimera::Thread::Mutex>();
     heapBuffer                    = nullptr;
     heapSize                      = 0;
@@ -157,6 +163,13 @@ namespace Aurora::Memory
     heapSize       = size;
     bytesAllocated = 0;
     bytesFreed     = 0;
+
+    memset( heapBuffer, 0, heapSize );
+
+    if constexpr( SIMULATOR )
+    {
+      VALGRIND_CREATE_MEMPOOL( reinterpret_cast<std::uintptr_t>( heapBuffer ), heapSize, true );
+    }
 
     return true;
   }
@@ -256,6 +269,13 @@ namespace Aurora::Memory
             minimumEverFreeBytesRemaining = freeBytesRemaining;
           }
 
+          if constexpr( SIMULATOR )
+          {
+            VALGRIND_MEMPOOL_ALLOC( reinterpret_cast<std::uintptr_t>( heapBuffer ),
+                                    reinterpret_cast<std::uintptr_t>( pxBlock ),
+                                    size );
+          }
+
           /* The block is being returned - it is allocated and owned
           by the application and has no "next" block. */
           pxBlock->size |= blockAllocatedBit;
@@ -299,6 +319,12 @@ namespace Aurora::Memory
           /* Track allocated bytes */
           bytesFreed += pxLink->size;
           LOG_IF_DEBUG( DEBUG_MODULE, "Freed %d bytes at address 0x%.8X\r\n", pxLink->size, reinterpret_cast<std::uintptr_t>( pxLink ) );
+
+          if constexpr( SIMULATOR )
+          {
+            VALGRIND_MEMPOOL_FREE( reinterpret_cast<std::uintptr_t>( heapBuffer ),
+                                   reinterpret_cast<std::uintptr_t>( pxLink ) );
+          }
 
           /* Add this block to the list of free blocks. */
           freeBytesRemaining += pxLink->size;
