@@ -74,6 +74,10 @@ namespace Aurora::Memory
      */
     size_t available() const;
 
+    size_t allocated() const;
+
+    size_t freed() const;
+
   private:
     /*------------------------------------------------
     FreeRTOS variables for managing the heap allocations. For descriptions

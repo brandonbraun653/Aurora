@@ -61,10 +61,10 @@
 /* Valgrind Includes */
 #if defined( SIMULATOR )
 #include <valgrind/valgrind.h>
-#endif  /* SIMULATOR */
+#endif /* SIMULATOR */
 
 
-#define DEBUG_MODULE    ( false )
+#define DEBUG_MODULE ( false )
 
 namespace Aurora::Memory
 {
@@ -159,17 +159,23 @@ namespace Aurora::Memory
     -------------------------------------------------*/
     LockGuard lck( *mLock.get() );
 
-    heapBuffer     = reinterpret_cast<uint8_t *>( buffer );
-    heapSize       = size;
-    bytesAllocated = 0;
-    bytesFreed     = 0;
+    heapBuffer         = reinterpret_cast<uint8_t *>( buffer );
+    heapSize           = size;
+    bytesAllocated     = 0;
+    bytesFreed         = 0;
+    freeBytesRemaining = size;
 
     memset( heapBuffer, 0, heapSize );
 
-    if constexpr( SIMULATOR )
+    if constexpr ( SIMULATOR )
     {
       VALGRIND_CREATE_MEMPOOL( reinterpret_cast<std::uintptr_t>( heapBuffer ), heapSize, true );
     }
+
+    /*-------------------------------------------------
+    Initialize heap to set up the list of free blocks
+    -------------------------------------------------*/
+    init();
 
     return true;
   }
@@ -184,13 +190,6 @@ namespace Aurora::Memory
     BlockLink_t *pxPreviousBlock;
     BlockLink_t *pxNewBlockLink;
     void *pvReturn = nullptr;
-
-    /* If this is the first call to malloc then the heap will require
-    initialization to setup the list of free blocks. */
-    if ( blockEnd == nullptr )
-    {
-      init();
-    }
 
     /* Check the requested block size is not so large that the top bit is
     set.  The top bit of the block size member of the BlockLink_t structure
@@ -262,17 +261,17 @@ namespace Aurora::Memory
 
           /* Track bytes allocated */
           bytesAllocated += size;
-          LOG_IF_DEBUG( DEBUG_MODULE, "Alloc %d bytes at address 0x%.8X\r\n", pxBlock->size, reinterpret_cast<std::uintptr_t>( pxBlock ) );
+          LOG_IF_DEBUG( DEBUG_MODULE, "Alloc %d bytes at address 0x%.8X\r\n", pxBlock->size,
+                        reinterpret_cast<std::uintptr_t>( pxBlock ) );
 
           if ( freeBytesRemaining < minimumEverFreeBytesRemaining )
           {
             minimumEverFreeBytesRemaining = freeBytesRemaining;
           }
 
-          if constexpr( SIMULATOR )
+          if constexpr ( SIMULATOR )
           {
-            VALGRIND_MEMPOOL_ALLOC( reinterpret_cast<std::uintptr_t>( heapBuffer ),
-                                    reinterpret_cast<std::uintptr_t>( pxBlock ),
+            VALGRIND_MEMPOOL_ALLOC( reinterpret_cast<std::uintptr_t>( heapBuffer ), reinterpret_cast<std::uintptr_t>( pxBlock ),
                                     size );
           }
 
@@ -318,12 +317,12 @@ namespace Aurora::Memory
 
           /* Track allocated bytes */
           bytesFreed += pxLink->size;
-          LOG_IF_DEBUG( DEBUG_MODULE, "Freed %d bytes at address 0x%.8X\r\n", pxLink->size, reinterpret_cast<std::uintptr_t>( pxLink ) );
+          LOG_IF_DEBUG( DEBUG_MODULE, "Freed %d bytes at address 0x%.8X\r\n", pxLink->size,
+                        reinterpret_cast<std::uintptr_t>( pxLink ) );
 
-          if constexpr( SIMULATOR )
+          if constexpr ( SIMULATOR )
           {
-            VALGRIND_MEMPOOL_FREE( reinterpret_cast<std::uintptr_t>( heapBuffer ),
-                                   reinterpret_cast<std::uintptr_t>( pxLink ) );
+            VALGRIND_MEMPOOL_FREE( reinterpret_cast<std::uintptr_t>( heapBuffer ), reinterpret_cast<std::uintptr_t>( pxLink ) );
           }
 
           /* Add this block to the list of free blocks. */
@@ -341,6 +340,20 @@ namespace Aurora::Memory
     LockGuard lck( *mLock.get() );
 
     return freeBytesRemaining;
+  }
+
+
+  size_t Heap::allocated() const
+  {
+    Chimera::Thread::LockGuard lck( *mLock.get() );
+    return bytesAllocated;
+  }
+
+
+  size_t Heap::freed() const
+  {
+    Chimera::Thread::LockGuard lck( *mLock.get() );
+    return bytesFreed;
   }
 
 
@@ -403,6 +416,8 @@ namespace Aurora::Memory
     /* Only one block exists - and it covers the entire usable heap space. */
     minimumEverFreeBytesRemaining = pxFirstFreeBlock->size;
     freeBytesRemaining            = pxFirstFreeBlock->size;
+    bytesAllocated                = 0;
+    bytesFreed                    = 0;
 
     /* Work out the position of the top bit in a size_t variable. */
     blockAllocatedBit = ( ( size_t )1 ) << ( ( sizeof( size_t ) * heapBITS_PER_BYTE ) - 1 );
