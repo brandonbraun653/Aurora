@@ -244,7 +244,7 @@ namespace Aurora::Memory
      */
     T &operator*() const
     {
-      return this->mObjPtr;
+      return *( this->mObjPtr );
     }
 
     /**
@@ -265,7 +265,32 @@ namespace Aurora::Memory
      */
     T *get() const
     {
-      return this->mObjPtr;
+      if( static_cast<bool>( *this ) )
+      {
+        return this->mObjPtr;
+      }
+      else
+      {
+        return nullptr;
+      }
+    }
+
+    /**
+     * @brief Gets the number of valid references to the object
+     *
+     * @return size_t
+     */
+    size_t references() const
+    {
+      if( static_cast<bool>( *this ) )
+      {
+        Chimera::Thread::LockGuard lck( *this->mLock );
+        return *mObjCount;
+      }
+      else
+      {
+        return 0;
+      }
     }
 
     /**
