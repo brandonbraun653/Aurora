@@ -122,27 +122,7 @@ namespace Aurora::Memory
   /*-------------------------------------------------------------------------------
   Heap: Public Functions
   -------------------------------------------------------------------------------*/
-  void Heap::staticReset()
-  {
-    using namespace Chimera::Thread;
-    LockGuard lck( *mLock.get() );
-
-    /*-------------------------------------------------
-    Runtime protection
-    -------------------------------------------------*/
-    if ( !heapBuffer )
-    {
-      return;
-    }
-
-    /*-------------------------------------------------
-    Reset the buffer
-    -------------------------------------------------*/
-    memset( heapBuffer, 0, heapSize );
-  }
-
-
-  bool Heap::assignPool( void *buffer, const size_t size )
+  void Heap::assignMemoryPool( void *const buffer, const size_t size )
   {
     using namespace Chimera::Thread;
 
@@ -151,7 +131,7 @@ namespace Aurora::Memory
     -------------------------------------------------*/
     if ( !buffer || !size )
     {
-      return false;
+      return;
     }
 
     /*-------------------------------------------------
@@ -175,9 +155,7 @@ namespace Aurora::Memory
     /*-------------------------------------------------
     Initialize heap to set up the list of free blocks
     -------------------------------------------------*/
-    init();
-
-    return true;
+    initHeap();
   }
 
 
@@ -260,7 +238,7 @@ namespace Aurora::Memory
           freeBytesRemaining -= pxBlock->size;
 
           /* Track bytes allocated */
-          bytesAllocated += size;
+          bytesAllocated += pxBlock->size;
           LOG_IF_DEBUG( DEBUG_MODULE, "Alloc %d bytes at address 0x%.8X\r\n", pxBlock->size,
                         reinterpret_cast<std::uintptr_t>( pxBlock ) );
 
@@ -288,7 +266,7 @@ namespace Aurora::Memory
   }
 
 
-  void Heap::free( void *pv )
+  void Heap::free( void *const pv )
   {
     using namespace Chimera::Thread;
     LockGuard lck( *mLock.get() );
@@ -372,7 +350,7 @@ namespace Aurora::Memory
   }
 
 
-  void Heap::init()
+  void Heap::initHeap()
   {
     using namespace Chimera::Thread;
 

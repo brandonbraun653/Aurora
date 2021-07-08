@@ -20,75 +20,50 @@
 /* Chimera Includes */
 #include <Chimera/thread>
 
+/* Aurora Includes */
+#include <Aurora/source/memory/heap/heap_intf.hpp>
+
 namespace Aurora::Memory
 {
+  /*-------------------------------------------------------------------------------
+  Structures
+  -------------------------------------------------------------------------------*/
+  struct BlockLink_t
+  {
+    BlockLink_t *next;
+    size_t size;
+  };
+
+  /*-------------------------------------------------------------------------------
+  Classes
+  -------------------------------------------------------------------------------*/
   /**
    *  A heap implementation that is mostly just encapsulation of the FreeRTOS V10.0.0
    *  heap4.c allocation algorithm. The only addition is to allow the user to specify
    *  their own buffer (static or dynamic) to be used as the source memory for the heap.
    */
-  class Heap
+  class Heap : public IHeapAllocator
   {
   public:
     Heap();
     Heap( Heap &&other );
     ~Heap();
 
-    /**
-     *  Resets the entire heap memory to zero
-     *  @return void
-     */
-    void staticReset();
-
-    /**
-     *  Attaches a pre-existing buffer as the source memory for the heap.
-     *
-     *  @warning  The lifetime of this buffer must not expire while an instance
-     *            of this class exists in memory.
-     *
-     *  @param[in]  buffer    The memory pool to use as a heap
-     *  @param[in]  size      How many bytes are in the buffer
-     *  @return bool
-     */
-    bool assignPool( void *buffer, const size_t size );
-
-    /**
-     *  Standard malloc implementation
-     *
-     *  @param[in]  size      The number of bytes to be allocated
-     *  @return void *
-     */
-    void *malloc( size_t size );
-
-    /**
-     *  Standard free implementation
-     *
-     *  @param[in]  pv        The memory to be freed
-     *  @return void
-     */
-    void free( void *pv );
-
-    /**
-     *  Gets the remaining bytes available in the heap
-     *  @return size_t
-     */
-    size_t available() const;
-
-    size_t allocated() const;
-
-    size_t freed() const;
+    /*-------------------------------------------------
+    IHeapAllocator Interface
+    -------------------------------------------------*/
+    void assignMemoryPool( void *const buffer, const size_t size ) final override;
+    void *malloc( const size_t size ) final override;
+    void free( void *const pv ) final override;
+    size_t available() const final override;
+    size_t allocated() const final override;
+    size_t freed() const final override;
 
   private:
     /*------------------------------------------------
     FreeRTOS variables for managing the heap allocations. For descriptions
     of what each actually does, please look at the heap4.c source code.
     ------------------------------------------------*/
-    struct BlockLink_t
-    {
-      BlockLink_t *next;
-      size_t size;
-    };
-
     std::shared_ptr<Chimera::Thread::Mutex> mLock;
 
     uint8_t *heapBuffer;
@@ -106,7 +81,7 @@ namespace Aurora::Memory
     /*------------------------------------------------
     Internal FreeRTOS functions to manage the heap
     ------------------------------------------------*/
-    void init();
+    void initHeap();
     void prvInsertBlockIntoFreeList( BlockLink_t *pxBlockToInsert );
     size_t xPortGetFreeHeapSize();
     size_t xPortGetMinimumEverFreeHeapSize();

@@ -57,10 +57,7 @@ namespace Aurora::Database
     void assignCoreMemory( EntryStore<NUM_ELEM> &store, void *const heap, const size_t size )
     {
       mEntryList.set_pool( store );
-      if ( !mAllocPool.assignPool( heap, size ) )
-      {
-        RT_HARD_ASSERT( false );
-      }
+      mAllocPool.assignMemoryPool( heap, size );
     }
 
     /**

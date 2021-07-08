@@ -63,7 +63,6 @@ namespace Aurora::Database
   {
     this->lock();
     mEntryList.clear();
-    mAllocPool.staticReset();
     this->unlock();
   }
 
