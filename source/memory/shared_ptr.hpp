@@ -40,14 +40,18 @@ namespace Aurora::Memory
    * @tparam T          Object type being managed
    * @tparam BUFSIZE    Allocates buffer of this size, assuming T is a pointer
    */
-  template<typename T, const size_t BUFSIZE = 0>
+  template<typename T>
   class shared_ptr
   {
   public:
     /**
      * @brief Default construct a new Ref Ptr object
      */
-    explicit shared_ptr() : mAllocator( nullptr ), mObjCount( nullptr ), mObjPtr( nullptr ), mLock( nullptr )
+    explicit shared_ptr() : mBufferSize( 0 ), mAllocator( nullptr ), mObjCount( nullptr ), mObjPtr( nullptr ), mLock( nullptr )
+    {
+    }
+
+    explicit shared_ptr( IHeapAllocator *allocator ) : shared_ptr( allocator, 0 )
     {
     }
 
@@ -58,8 +62,8 @@ namespace Aurora::Memory
      *
      * @param allocator   Memory allocator to allocate from
      */
-    explicit shared_ptr( IHeapAllocator *allocator ) :
-        mAllocator( allocator ), mObjCount( nullptr ), mObjPtr( nullptr ), mLock( nullptr )
+    explicit shared_ptr( IHeapAllocator *allocator, const size_t size ) :
+        mBufferSize( size ), mAllocator( allocator ), mObjCount( nullptr ), mObjPtr( nullptr ), mLock( nullptr )
     {
       Chimera::Thread::LockGuard lck( *allocator );
 
@@ -100,12 +104,11 @@ namespace Aurora::Memory
       type is a pointer, assume that pointer will hold
       the remaining bytes.
       -------------------------------------------------*/
-      if constexpr ( std::is_pointer<T>::value && BUFSIZE )
+      if constexpr ( std::is_pointer<T>::value )
       {
         *mObjPtr = pool;
-        memset( *mObjPtr, 0xCC, BUFSIZE );
-
-        pool += BUFSIZE;
+        memset( *mObjPtr, 0xCC, mBufferSize );
+        pool += mBufferSize;
       }
 
       /*-------------------------------------------------
@@ -298,15 +301,16 @@ namespace Aurora::Memory
      *
      * @return constexpr size_t
      */
-    static constexpr size_t size()
+    size_t size() const
     {
-      return sizeof( T ) + sizeof( CountType ) + sizeof( Chimera::Thread::Mutex ) + BUFSIZE;
+      return sizeof( T ) + sizeof( CountType ) + sizeof( Chimera::Thread::Mutex ) + mBufferSize;
     }
 
   protected:
     using CountType = size_t;
 
   private:
+    size_t mBufferSize;
     IHeapAllocator *mAllocator;
     CountType *mObjCount;
     T *mObjPtr;
