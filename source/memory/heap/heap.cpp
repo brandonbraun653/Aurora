@@ -147,10 +147,9 @@ namespace Aurora::Memory
 
     memset( heapBuffer, 0, heapSize );
 
-    if constexpr ( SIMULATOR )
-    {
-      VALGRIND_CREATE_MEMPOOL( reinterpret_cast<std::uintptr_t>( heapBuffer ), heapSize, true );
-    }
+#if defined( SIMULATOR )
+    VALGRIND_CREATE_MEMPOOL( reinterpret_cast<std::uintptr_t>( heapBuffer ), heapSize, true );
+#endif /* SIMULATOR */
 
     /*-------------------------------------------------
     Initialize heap to set up the list of free blocks
@@ -239,7 +238,7 @@ namespace Aurora::Memory
 
           /* Track bytes allocated */
           bytesAllocated += pxBlock->size;
-          LOG_IF_DEBUG( DEBUG_MODULE, "Alloc %d bytes at address 0x%.8X\r\n", pxBlock->size,
+          LOG_DEBUG_IF( DEBUG_MODULE, "Alloc %d bytes at address 0x%.8X\r\n", pxBlock->size,
                         reinterpret_cast<std::uintptr_t>( pxBlock ) );
 
           if ( freeBytesRemaining < minimumEverFreeBytesRemaining )
@@ -247,11 +246,10 @@ namespace Aurora::Memory
             minimumEverFreeBytesRemaining = freeBytesRemaining;
           }
 
-          if constexpr ( SIMULATOR )
-          {
-            VALGRIND_MEMPOOL_ALLOC( reinterpret_cast<std::uintptr_t>( heapBuffer ), reinterpret_cast<std::uintptr_t>( pxBlock ),
-                                    size );
-          }
+#if defined( SIMULATOR )
+          VALGRIND_MEMPOOL_ALLOC( reinterpret_cast<std::uintptr_t>( heapBuffer ), reinterpret_cast<std::uintptr_t>( pxBlock ),
+                                  size );
+#endif /* SIMULATOR */
 
           /* The block is being returned - it is allocated and owned
           by the application and has no "next" block. */
@@ -295,13 +293,12 @@ namespace Aurora::Memory
 
           /* Track allocated bytes */
           bytesFreed += pxLink->size;
-          LOG_IF_DEBUG( DEBUG_MODULE, "Freed %d bytes at address 0x%.8X\r\n", pxLink->size,
+          LOG_DEBUG_IF( DEBUG_MODULE, "Freed %d bytes at address 0x%.8X\r\n", pxLink->size,
                         reinterpret_cast<std::uintptr_t>( pxLink ) );
 
-          if constexpr ( SIMULATOR )
-          {
-            VALGRIND_MEMPOOL_FREE( reinterpret_cast<std::uintptr_t>( heapBuffer ), reinterpret_cast<std::uintptr_t>( pxLink ) );
-          }
+#if defined( SIMULATOR )
+          VALGRIND_MEMPOOL_FREE( reinterpret_cast<std::uintptr_t>( heapBuffer ), reinterpret_cast<std::uintptr_t>( pxLink ) );
+#endif /* SIMULATOR */
 
           /* Add this block to the list of free blocks. */
           freeBytesRemaining += pxLink->size;

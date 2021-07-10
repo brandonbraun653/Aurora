@@ -104,7 +104,7 @@ namespace Aurora::FileSystem::SPIFFS
   -------------------------------------------------------------------------------*/
   static void checkSPIFFSErrors()
   {
-    LOG_IF_ERROR( SPIFFS_errno( &fs ) == SPIFFS_OK, "SPIFFS error: %d\r\n", SPIFFS_errno( &fs ) );
+    LOG_ERROR_IF( SPIFFS_errno( &fs ) != SPIFFS_OK, "SPIFFS error: %d\r\n", SPIFFS_errno( &fs ) );
     SPIFFS_clearerr( &fs );
   }
 

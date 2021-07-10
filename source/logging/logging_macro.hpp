@@ -40,7 +40,7 @@ Logging helper macros
 -------------------------------------------------------------------------------*/
 #define LOG_TRACE( str, ... ) \
   Aurora::Logging::flog( Aurora::Logging::Level::LVL_TRACE, __SHORT_FILE__, __LINE__, str, ##__VA_ARGS__ )
-#define LOG_IF_TRACE( predicate, str, ... ) \
+#define LOG_TRACE_IF( predicate, str, ... ) \
   if ( ( predicate ) )                      \
   {                                         \
     LOG_TRACE( ( str ), ##__VA_ARGS__ );    \
@@ -49,7 +49,7 @@ Logging helper macros
 
 #define LOG_DEBUG( str, ... ) \
   Aurora::Logging::flog( Aurora::Logging::Level::LVL_DEBUG, __SHORT_FILE__, __LINE__, str, ##__VA_ARGS__ )
-#define LOG_IF_DEBUG( predicate, str, ... ) \
+#define LOG_DEBUG_IF( predicate, str, ... ) \
   if ( ( predicate ) )                      \
   {                                         \
     LOG_DEBUG( ( str ), ##__VA_ARGS__ );    \
@@ -58,7 +58,7 @@ Logging helper macros
 
 #define LOG_INFO( str, ... ) \
   Aurora::Logging::flog( Aurora::Logging::Level::LVL_INFO, __SHORT_FILE__, __LINE__, str, ##__VA_ARGS__ )
-#define LOG_IF_INFO( predicate, str, ... ) \
+#define LOG_INFO_IF( predicate, str, ... ) \
   if ( ( predicate ) )                     \
   {                                        \
     LOG_INFO( ( str ), ##__VA_ARGS__ );    \
@@ -67,7 +67,7 @@ Logging helper macros
 
 #define LOG_WARN( str, ... ) \
   Aurora::Logging::flog( Aurora::Logging::Level::LVL_WARN, __SHORT_FILE__, __LINE__, str, ##__VA_ARGS__ )
-#define LOG_IF_WARN( predicate, str, ... ) \
+#define LOG_WARN_IF( predicate, str, ... ) \
   if ( ( predicate ) )                     \
   {                                        \
     LOG_WARN( ( str ), ##__VA_ARGS__ );    \
@@ -76,7 +76,7 @@ Logging helper macros
 
 #define LOG_ERROR( str, ... ) \
   Aurora::Logging::flog( Aurora::Logging::Level::LVL_ERROR, __SHORT_FILE__, __LINE__, str, ##__VA_ARGS__ )
-#define LOG_IF_ERROR( predicate, str, ... ) \
+#define LOG_ERROR_IF( predicate, str, ... ) \
   if ( ( predicate ) )                      \
   {                                         \
     LOG_ERROR( ( str ), ##__VA_ARGS__ );    \
@@ -85,7 +85,7 @@ Logging helper macros
 
 #define LOG_FATAL( str, ... ) \
   Aurora::Logging::flog( Aurora::Logging::Level::LVL_FATAL, __SHORT_FILE__, __LINE__, str, ##__VA_ARGS__ )
-#define LOG_IF_FATAL( predicate, str, ... ) \
+#define LOG_FATAL_IF( predicate, str, ... ) \
   if ( ( predicate ) )                      \
   {                                         \
     LOG_FATAL( ( str ), ##__VA_ARGS__ );    \
