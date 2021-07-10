@@ -142,6 +142,10 @@ namespace Aurora::Memory
     /**
      * @brief Move construct a new Ref Ptr object
      *
+     * @note This must be marked explicit. I don't know if this is due to
+     * poor design of this class or if that's normal, but a networking lib
+     * I use will crash without having a proper move constructor.
+     *
      * @param obj     Dying object being moved
      */
     explicit shared_ptr( shared_ptr<T> &&obj )
