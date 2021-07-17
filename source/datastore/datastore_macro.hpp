@@ -26,7 +26,11 @@
 /* Chimera Includes */
 #include <Chimera/assert>
 #include <Chimera/common>
-#include <Chimera/gpio>
+
+/* Project Includes */
+#if __has_include( "aurora_datastore_types_prj.hpp" )
+#include "aurora_datastore_types_prj.hpp"
+#endif
 
 /**
  *  Helper for declaring an observable data type. The definition of this class must go into
