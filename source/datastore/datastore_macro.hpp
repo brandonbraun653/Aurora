@@ -26,6 +26,7 @@
 /* Chimera Includes */
 #include <Chimera/assert>
 #include <Chimera/common>
+#include <Chimera/gpio>
 
 /**
  *  Helper for declaring an observable data type. The definition of this class must go into
