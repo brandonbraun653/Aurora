@@ -20,7 +20,7 @@
 #include <type_traits>
 
 /* ETL Includes */
-#include <etl/cstring.h>
+#include <etl/string.h>
 
 namespace Aurora::Sensor
 {
