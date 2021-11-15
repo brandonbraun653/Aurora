@@ -317,7 +317,7 @@ namespace Aurora::Logging
     /*-------------------------------------------------
     Format the full message
     -------------------------------------------------*/
-    snprintf( log_buffer, ARRAY_COUNT( log_buffer ), "[%d][%-25.25s:%4d][%-5.5s] -- %s", Chimera::millis(), file,
+    snprintf( log_buffer, ARRAY_COUNT( log_buffer ), "[%ld][%-25.25s:%4ld][%-5.5s] -- %s", Chimera::millis(), file,
               line,  str_level.data(), msg_buffer );
 
     /*-------------------------------------------------

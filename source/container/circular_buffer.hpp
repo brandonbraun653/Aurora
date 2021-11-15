@@ -17,72 +17,41 @@
 #include <cstdint>
 
 /* Chimera Includes */
+#include <Chimera/assert>
 #include <Chimera/common>
 #include <Chimera/thread>
 
 namespace Aurora::Container
 {
   /**
-   *  Generic circular buffer optimized for use in embedded systems where
-   *  dynamically allocated memory is typically frowned upon and access
-   *  inside of ISR contexts are common.
-   *
-   *  This implementation is thread safe with the assumption that bool and
-   *  size_t access on the target system can be considered atomic. Careful
-   *  system architecture will be needed for safe ISR access. To guarantee
-   *  safe access, the ISR signal that could interrupt should be disabled
-   *  while the non-ISR operation is occuring.
+   * Generic circular buffer that does not assume anything about memory allocation
+   * or thread/interrupt safety of memory access. Essentially this class is a manager
+   * of memory given by another context.
    */
   template<typename T>
   class CircularBuffer
   {
   public:
-    /*-------------------------------------------------
-    Initialization
-    -------------------------------------------------*/
-    /**
-     *  Default constructor. Requires calling the init method later.
-     */
-    CircularBuffer() : mFull( false ), mBuffer( nullptr ), mSize( 0 ), mMaxSize( 0 ), mHead( 0 ), mTail( 0 ), mMutex()
+    CircularBuffer() : mFull( false ), mBuffer( nullptr ), mSize( 0 ), mMaxSize( 0 ), mHead( 0 ), mTail( 0 )
     {
     }
 
-    /**
-     *  Default destructor
-     */
     ~CircularBuffer()
     {
     }
 
     /**
-     *  Create a circular buffer from statically allocated memory
+     *  @brief Initialize a circular buffer object
      *
-     *  @param[in]  buffer      Pointer to static allocated memory
-     *  @param[in]  size        Number of elements that the buffer can hold (not byte size)
-     */
-    explicit CircularBuffer( T *const buffer, const size_t size ) :
-        mFull( false ), mBuffer( buffer ), mSize( 0 ), mMaxSize( size ), mHead( 0 ), mTail( 0 ), mMutex()
-    {
-      if ( !buffer || !size )
-      {
-        mBuffer = nullptr;
-        mSize   = 0;
-      }
-    }
-
-    /**
-     *  Initialize a circular buffer object. Typically only used
-     *  when the object was created with the default constructor.
-     *
-     *  @param[in]  buffer      Pointer to static allocated memory
-     *  @param[in]  size        Number of elements that the buffer can hold (not byte size)
+     *  @param buffer   Pointer to static allocated memory
+     *  @param size     Number of elements that the buffer can hold (not byte size)
      *  @return bool
      */
     bool init( T *const buffer, const size_t size )
     {
-      /*-------------------------------------------------
+      /*-----------------------------------------------------------------------
       Input protection
-      -------------------------------------------------*/
+      -----------------------------------------------------------------------*/
       if ( !buffer || !size )
       {
         mBuffer = nullptr;
@@ -90,9 +59,9 @@ namespace Aurora::Container
         return false;
       }
 
-      /*-------------------------------------------------
-      Reset the buffer to default state
-      -------------------------------------------------*/
+      /*-----------------------------------------------------------------------
+      Reset the buffer to the default state
+      -----------------------------------------------------------------------*/
       mBuffer  = buffer;
       mMaxSize = size;
       reset();
@@ -100,45 +69,27 @@ namespace Aurora::Container
     }
 
     /**
-     *  Resets the buffer to the empty state
+     *  @brief Resets the buffer to the empty state
      *  @return void
      */
     void reset()
     {
-      mMutex.lock();
       mHead = 0;
       mSize = 0;
       mTail = 0;
-      mMutex.unlock();
     }
 
     /**
-     *  Checks if the buffer contains zero elements
+     *  @brief Checks if the buffer contains zero elements
      *  @return bool
      */
     bool empty()
-    {
-      mMutex.lock();
-      bool result = emptyFromISR();
-      mMutex.unlock();
-
-      return result;
-    }
-
-    /**
-     *  Checks if the buffer contains zero elements. This function
-     *  should only be called from an ISR due to the empty check
-     *  not being atomic.
-     *
-     *  @return bool
-     */
-    bool emptyFromISR()
     {
       return ( !mFull && ( mHead == mTail ) );
     }
 
     /**
-     *  Checks if the buffer is filled to capacity
+     *  @brief Checks if the buffer is filled to capacity
      *  @return bool
      */
     bool full() const
@@ -147,7 +98,7 @@ namespace Aurora::Container
     }
 
     /**
-     *  Returns the max number of elements the buffer can hold
+     *  @brief Returns the max number of elements the buffer can hold
      *  @return size_t
      */
     size_t capacity() const
@@ -156,7 +107,7 @@ namespace Aurora::Container
     }
 
     /**
-     *  Returns the current number of elements in the buffer
+     *  @brief Returns the current number of elements in the buffer
      *  @return size_t
      */
     size_t size() const
@@ -165,27 +116,12 @@ namespace Aurora::Container
     }
 
     /**
-     *  Pushes data into the buffer, overwriting the oldest element.
+     *  @brief Pushes data into the buffer, overwriting the oldest element.
      *
-     *  @param[in]  data        The element to write
+     *  @param data   The element to write
      *  @return void
      */
     void pushOverwrite( const T &data )
-    {
-      mMutex.lock();
-      pushOverwriteFromISR( data );
-      mMutex.unlock();
-    }
-
-    /**
-     *  Pushes data into the buffer, overwriting the oldest element.
-     *  This function should only be called from an ISR due to the
-     *  lack of mutex protection.
-     *
-     *  @param[in]  data        The element to write
-     *  @return void
-     */
-    void pushOverwriteFromISR( const T &data )
     {
       mBuffer[ mHead ] = data;
 
@@ -203,31 +139,13 @@ namespace Aurora::Container
     }
 
     /**
-     *  Pushes data into the buffer, but first checks if there is
+     *  @brief Pushes data into the buffer, but first checks if there is
      *  enough room to contain it.
      *
-     *  @param[in] data         The element to write
-     *  @return bool            True if the write succeeds, else False
+     *  @param data   The element to write
+     *  @return bool  True if the write succeeds, else False
      */
     bool push( const T &data )
-    {
-      bool result = false;
-
-      mMutex.lock();
-      result = pushFromISR( data );
-      mMutex.unlock();
-      return result;
-    }
-
-    /**
-     *  Pushes data into the buffer, but first checks if there is
-     *  enough room to contain it. This function should only be called
-     *  from an ISR due to the lack of mutex protection.
-     *
-     *  @param[in] data         The element to write
-     *  @return bool            True if the write succeeds, else False
-     */
-    bool pushFromISR( const T &data )
     {
       if ( !mFull )
       {
@@ -243,43 +161,19 @@ namespace Aurora::Container
     }
 
     /**
-     *  Pops the data off the buffer. Should the buffer be empty, will
-     *  return an object that has been default constructed.
+     * @brief Pops the data off the buffer
      *
-     *  @return T
+     * If empty, return an object that has been default constructed.
+     *
+     * @return T
      */
     T pop()
     {
-      /*-------------------------------------------------
-      Pop lock and drop it
-      -------------------------------------------------*/
-      mMutex.lock();
-      T result = popFromISR();
-      mMutex.unlock();
-
-      return result;
-    }
-
-    /**
-     *  Pops the data off the buffer. Should the buffer be empty, will
-     *  return an object that has been default constructed. This function
-     *  should only be called from an ISR due to the lack of mutex protection.
-     *
-     *  @return T
-     */
-    T popFromISR()
-    {
-      /*-------------------------------------------------
-      Return a default contstructed object if empty
-      -------------------------------------------------*/
       if ( empty() )
       {
         return T();
       }
 
-      /*-------------------------------------------------
-      Pull out an object since it must exist
-      -------------------------------------------------*/
       T tmp = mBuffer[ mTail ];
 
       mTail = ( mTail + 1 ) % mMaxSize;
@@ -288,14 +182,72 @@ namespace Aurora::Container
       return tmp;
     }
 
+    /**
+     * @brief Gets the raw memory backing the circular buffer
+     * @return T*
+     */
+    T *data()
+    {
+      return mBuffer;
+    }
+
+    /**
+     * @brief Gets a pointer to the last written element in the buffer
+     *
+     * @return T*
+     */
+    T* back()
+    {
+      /*-----------------------------------------------------------------------
+      Nothing to return if empty
+      -----------------------------------------------------------------------*/
+      if( this->empty() )
+      {
+        return nullptr;
+      }
+
+      /*-----------------------------------------------------------------------
+      Full? Read/write location is the same.
+      -----------------------------------------------------------------------*/
+      if( mFull )
+      {
+        return &mBuffer[ mHead ];
+      }
+
+      /*-----------------------------------------------------------------------
+      Get the index for the last valid write location
+      -----------------------------------------------------------------------*/
+      int    tmp_head  = static_cast<int>( mHead );
+      size_t last_head = static_cast<size_t>( ( ( tmp_head - 1 ) + mMaxSize ) % mMaxSize );
+      RT_HARD_ASSERT( last_head < mMaxSize );
+
+      return &mBuffer[ last_head ];
+    }
+
+    /**
+     * @brief Gets a pointer to the oldest element in the buffer
+     *
+     * @return T*
+     */
+    T* front()
+    {
+      if( !this->empty() )
+      {
+        return &mBuffer[ mTail ];
+      }
+      else
+      {
+        return nullptr;
+      }
+    }
+
   private:
-    bool mFull;
-    T *mBuffer;
-    size_t mSize;
-    size_t mMaxSize;
-    size_t mHead;
-    size_t mTail;
-    Chimera::Thread::RecursiveMutex mMutex;
+    bool   mFull;     /**< Tracks if the buffer is full of elements */
+    T *    mBuffer;   /**< Raw memory buffer storing data */
+    size_t mSize;     /**< Number of elements in the buffer */
+    size_t mMaxSize;  /**< Max number of elements the buffer may hold */
+    size_t mHead;     /**< Write location */
+    size_t mTail;     /**< Read location */
   };
 }  // namespace Aurora::Container
 
