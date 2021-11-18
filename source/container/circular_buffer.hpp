@@ -5,7 +5,7 @@
  *  Description:
  *    Implemenation of a circular buffer
  *
- *  2020 | Brandon Braun | brandonbraun653@gmail.com
+ *  2020-2021 | Brandon Braun | brandonbraun653@gmail.com
  *******************************************************************************/
 
 #pragma once
@@ -204,14 +204,6 @@ namespace Aurora::Container
       if( this->empty() )
       {
         return nullptr;
-      }
-
-      /*-----------------------------------------------------------------------
-      Full? Read/write location is the same.
-      -----------------------------------------------------------------------*/
-      if( mFull )
-      {
-        return &mBuffer[ mHead ];
       }
 
       /*-----------------------------------------------------------------------

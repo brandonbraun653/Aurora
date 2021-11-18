@@ -21,6 +21,7 @@
 /* Chimera Includes */
 #include <Chimera/interrupt>
 #include <Chimera/thread>
+#include <Chimera/utility>
 
 
 namespace Aurora::Container
@@ -28,6 +29,7 @@ namespace Aurora::Container
   /*---------------------------------------------------------------------------
   Forward Declarations
   ---------------------------------------------------------------------------*/
+  template<typename T>
   class StreamBuffer;
 
 
@@ -35,22 +37,62 @@ namespace Aurora::Container
   Classes
   ---------------------------------------------------------------------------*/
   /**
-   * @brief Helper class for managing the lifetime and access permissions of
+   * Helper class for managing the lifetime and access permissions of
    * the underlying memory of a StreamBuffer class.
    */
+  template<typename T>
   class StreamAttr
   {
   public:
-    StreamAttr();
-    ~StreamAttr();
+    StreamAttr() : mQueue( nullptr ), mMutex( nullptr ), mISRSignal( Chimera::Interrupt::SIGNAL_INVALID ), mDynamicMem( false )
+    {
+    }
+
+    ~StreamAttr()
+    {
+    }
 
     /**
      * @brief Dynamically allocate stream memory
      *
-     * @param size    Number of bytes to allocate
+     * @param num_elements    Number of elements to allocate
      * @return bool
      */
-    bool init( const size_t size );
+    bool init( const size_t num_elements )
+    {
+      /*-------------------------------------------------------------------------
+      Allocate the raw memory buffer
+      -------------------------------------------------------------------------*/
+      T *raw_buffer = new T( num_elements );
+      if ( !raw_buffer )
+      {
+        return false;
+      }
+
+      /*-------------------------------------------------------------------------
+      Allocate the circular buffer
+      -------------------------------------------------------------------------*/
+      *mQueue = new CircularBuffer<T>( raw_buffer, num_elements );
+      if ( !( *mQueue ) )
+      {
+        delete raw_buffer;
+        return false;
+      }
+
+      /*-------------------------------------------------------------------------
+      Allocate the mutex
+      -------------------------------------------------------------------------*/
+      *mMutex = new Chimera::Thread::RecursiveMutex();
+      if ( !( *mMutex ) )
+      {
+        delete raw_buffer;
+        delete *mQueue;
+        return false;
+      }
+
+      mDynamicMem = true;
+      return true;
+    }
 
     /**
      * @brief Statically initialize stream memory
@@ -60,18 +102,54 @@ namespace Aurora::Container
      * @param signal  ISR signal to protect against
      * @return bool
      */
-    bool init( CircularBuffer<uint8_t> *const queue, Chimera::Thread::RecursiveMutex *const mtx,
-               const Chimera::Interrupt::Signal_t signal );
+    bool init( CircularBuffer<T> *const queue, Chimera::Thread::RecursiveMutex *const mtx,
+               const Chimera::Interrupt::Signal_t signal )
+    {
+      /*-------------------------------------------------------------------------
+      Input Protection
+      -------------------------------------------------------------------------*/
+      if ( !queue || !mtx )
+      {
+        return false;
+      }
+
+      /*-------------------------------------------------------------------------
+      Assign the data
+      -------------------------------------------------------------------------*/
+      *mQueue     = queue;
+      *mMutex     = mtx;
+      mISRSignal  = signal;
+      mDynamicMem = false;
+      return true;
+    }
 
     /**
      * @brief De-initializes the stream attributes
      */
-    void destroy();
+    void destroy()
+    {
+      /*-------------------------------------------------------------------------
+      Free memory if dynamically allocated
+      -------------------------------------------------------------------------*/
+      if ( mDynamicMem )
+      {
+        delete *mMutex;
+        delete ( *mQueue )->data();
+        delete *mQueue;
+      }
+
+      /*-------------------------------------------------------------------------
+      Reset the data members
+      -------------------------------------------------------------------------*/
+      mQueue     = nullptr;
+      mMutex     = nullptr;
+      mISRSignal = Chimera::Interrupt::SIGNAL_INVALID;
+    }
 
   protected:
-    friend class StreamBuffer;
+    friend class StreamBuffer<T>;
 
-    CircularBuffer<uint8_t> **        mQueue;     /**< Memory manager */
+    CircularBuffer<T> **              mQueue;     /**< Memory manager */
     Chimera::Thread::RecursiveMutex **mMutex;     /**< Thread safety lock */
     Chimera::Interrupt::Signal_t      mISRSignal; /**< Which ISR signal to protect against, if any */
 
@@ -81,84 +159,152 @@ namespace Aurora::Container
      * @return true   Memory was locked
      * @return false  Memory was not locked
      */
-    bool lock();
+    bool lock()
+    {
+      /*-------------------------------------------------------------------------
+      Input Protections
+      -------------------------------------------------------------------------*/
+      if ( !DPTR_EXISTS( mMutex ) )
+      {
+        return false;
+      }
+
+      /*-------------------------------------------------------------------------
+      Perform the thread lock first, then the ISR lock if necessary
+      -------------------------------------------------------------------------*/
+      bool retval = true;
+      ( *mMutex )->lock();
+      if ( mISRSignal != Chimera::Interrupt::SIGNAL_INVALID )
+      {
+        retval = ( Chimera::Status::OK == Chimera::Interrupt::disableISR( mISRSignal ) );
+      }
+
+      return retval;
+    }
 
     /**
      * @brief Unlocks previous lock call
      */
-    void unlock();
+    void unlock()
+    {
+      /*-------------------------------------------------------------------------
+      Input Protections
+      -------------------------------------------------------------------------*/
+      if ( !DPTR_EXISTS( mMutex ) )
+      {
+        return;
+      }
+
+      /*-------------------------------------------------------------------------
+      Do the inverse of lock call. Enable the ISR, then release the lock.
+      -------------------------------------------------------------------------*/
+      if ( mISRSignal != Chimera::Interrupt::SIGNAL_INVALID )
+      {
+        Chimera::Interrupt::enableISR( mISRSignal );
+      }
+
+      ( *mMutex )->unlock();
+    }
 
   private:
     bool mDynamicMem; /**< Memory was dynamically allocated */
   };
 
 
+  /**
+   * Provides a solution for multi-producer, multi-consumer FIFO queues that
+   * must function along side ISR handlers and threads. Usually the callee
+   * doesn't want to manage these kinds of details, so this class helps take
+   * care of it. Essentially this is a wrapper around a circular buffer.
+   */
+  template<typename T>
   class StreamBuffer
   {
   public:
-    StreamBuffer();
-    ~StreamBuffer();
+    StreamBuffer()
+    {
+    }
+
+    ~StreamBuffer()
+    {
+    }
 
     /**
      * @brief Initializes the class
      *
      * @param attr    Attributes to configure with
-     * @return true   Successfully initialized
-     * @return false  Failed to initialize
      */
-    bool init( StreamAttr &attr );
+    void init( StreamAttr<T> &attr )
+    {
+    }
 
     /**
      * @brief Write data into the FIFO stream
      *
      * @param data      Input buffer of data to write
-     * @param size      Bytes to write into the FIFO stream
+     * @param elements  Number of elements to write into the FIFO stream
      * @param safe      If true, protect against ISR & thread access
      * @return size_t   Number of bytes actually written
      */
-    size_t write( const void *const data, const size_t size, const bool safe = false );
+    size_t write( const T *const data, const size_t elements, const bool safe = false )
+    {
+    }
 
     /**
      * @brief Read data from the FIFO stream
      *
      * @param data      Output buffer to write into
-     * @param size      Number of bytes to read from the FIFO stream into the output buffer
+     * @param elements  Number of elements to read from the FIFO stream into the output buffer
      * @param safe      If true, protect against ISR & thread access
      * @return size_t   Number of bytes actually read
      */
-    size_t read( void *const data, const size_t size, const bool safe = false );
+    size_t read( T *const data, const size_t elements, const bool safe = false )
+    {
+    }
 
     /**
      * @brief Checks if the FIFO is empty
      *
+     * @param safe      If true, protect against ISR & thread access
      * @return true   FIFO is empty
      * @return false  FIFO is not empty
      */
-    bool empty();
+    bool empty( const bool safe = false )
+    {
+    }
 
     /**
      * @brief Returns the total number of bytes the FIFO may hold
+     *
+     * @param safe      If true, protect against ISR & thread access
      * @return size_t
      */
-    size_t capacity();
+    size_t capacity( const bool safe = false )
+    {
+    }
 
     /**
      * @brief Returns the remaining number of bytes in the FIFO
+     *
+     * @param safe      If true, protect against ISR & thread access
      * @return size_t
      */
-    size_t available();
+    size_t available( const bool safe = false )
+    {
+    }
 
     /**
      * @brief Returns the total used bytes in the FIFO
+     *
+     * @param safe      If true, protect against ISR & thread access
      * @return size_t
      */
-    size_t size();
-
-  protected:
-    bool assign_memory();
+    size_t size( const bool safe = false )
+    {
+    }
 
   private:
-    StreamAttr mAttr; /**< Configuration attributes */
+    StreamAttr<T> mAttr; /**< Configuration attributes */
   };
 }  // namespace Aurora::Container
 
