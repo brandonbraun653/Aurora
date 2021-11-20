@@ -30,7 +30,7 @@ namespace Aurora::Container
   Forward Declarations
   ---------------------------------------------------------------------------*/
   template<typename T>
-  class StreamBuffer;
+  class MPMCQueue;
 
 
   /*---------------------------------------------------------------------------
@@ -38,17 +38,17 @@ namespace Aurora::Container
   ---------------------------------------------------------------------------*/
   /**
    * Helper class for managing the lifetime and access permissions of
-   * the underlying memory of a StreamBuffer class.
+   * the underlying memory of a MPMCQueue class.
    */
   template<typename T>
-  class StreamAttr
+  class MPMCAttr
   {
   public:
-    StreamAttr() : mQueue( nullptr ), mMutex( nullptr ), mISRSignal( Chimera::Interrupt::SIGNAL_INVALID ), mDynamicMem( false )
+    MPMCAttr() : mQueue( nullptr ), mMutex( nullptr ), mISRSignal( Chimera::Interrupt::SIGNAL_INVALID ), mDynamicMem( false )
     {
     }
 
-    ~StreamAttr()
+    ~MPMCAttr()
     {
     }
 
@@ -146,8 +146,19 @@ namespace Aurora::Container
       mISRSignal = Chimera::Interrupt::SIGNAL_INVALID;
     }
 
+    /**
+     * @brief Checks the validity of the attributes
+     *
+     * @return true
+     * @return false
+     */
+    bool valid()
+    {
+      return DPTR_EXISTS( mQueue ) && DPTR_EXISTS( mMutex );
+    }
+
   protected:
-    friend class StreamBuffer<T>;
+    friend class MPMCQueue<T>;
 
     CircularBuffer<T> **              mQueue;     /**< Memory manager */
     Chimera::Thread::RecursiveMutex **mMutex;     /**< Thread safety lock */
@@ -159,27 +170,19 @@ namespace Aurora::Container
      * @return true   Memory was locked
      * @return false  Memory was not locked
      */
-    bool lock()
+    void lock()
     {
-      /*-------------------------------------------------------------------------
-      Input Protections
-      -------------------------------------------------------------------------*/
-      if ( !DPTR_EXISTS( mMutex ) )
-      {
-        return false;
-      }
+      RT_HARD_ASSERT( DPTR_EXISTS( mMutex ) );
 
       /*-------------------------------------------------------------------------
       Perform the thread lock first, then the ISR lock if necessary
       -------------------------------------------------------------------------*/
-      bool retval = true;
       ( *mMutex )->lock();
       if ( mISRSignal != Chimera::Interrupt::SIGNAL_INVALID )
       {
-        retval = ( Chimera::Status::OK == Chimera::Interrupt::disableISR( mISRSignal ) );
+        auto retval = Chimera::Interrupt::disableISR( mISRSignal );
+        RT_HARD_ASSERT( retval == Chimera::Status::OK );
       }
-
-      return retval;
     }
 
     /**
@@ -187,23 +190,24 @@ namespace Aurora::Container
      */
     void unlock()
     {
-      /*-------------------------------------------------------------------------
-      Input Protections
-      -------------------------------------------------------------------------*/
-      if ( !DPTR_EXISTS( mMutex ) )
-      {
-        return;
-      }
+      RT_HARD_ASSERT( DPTR_EXISTS( mMutex ) );
 
       /*-------------------------------------------------------------------------
       Do the inverse of lock call. Enable the ISR, then release the lock.
       -------------------------------------------------------------------------*/
       if ( mISRSignal != Chimera::Interrupt::SIGNAL_INVALID )
       {
-        Chimera::Interrupt::enableISR( mISRSignal );
+        auto retval = Chimera::Interrupt::enableISR( mISRSignal );
+        RT_HARD_ASSERT( retval == Chimera::Status::OK );
       }
 
       ( *mMutex )->unlock();
+    }
+
+    CircularBuffer<T> *queue()
+    {
+      RT_HARD_ASSERT( DPTR_EXISTS( mQueue ) );
+      return *mQueue;
     }
 
   private:
@@ -218,14 +222,14 @@ namespace Aurora::Container
    * care of it. Essentially this is a wrapper around a circular buffer.
    */
   template<typename T>
-  class StreamBuffer
+  class MPMCQueue
   {
   public:
-    StreamBuffer()
+    MPMCQueue()
     {
     }
 
-    ~StreamBuffer()
+    ~MPMCQueue()
     {
     }
 
@@ -233,9 +237,17 @@ namespace Aurora::Container
      * @brief Initializes the class
      *
      * @param attr    Attributes to configure with
+     * @return bool   Init success
      */
-    void init( StreamAttr<T> &attr )
+    bool init( MPMCAttr<T> &attr )
     {
+      if( attr.valid() )
+      {
+        mAttr = attr;
+        return true;
+      }
+
+      return false;
     }
 
     /**
@@ -246,8 +258,32 @@ namespace Aurora::Container
      * @param safe      If true, protect against ISR & thread access
      * @return size_t   Number of bytes actually written
      */
-    size_t write( const T *const data, const size_t elements, const bool safe = false )
+    size_t write( const T *const data, size_t elements, const bool safe = false )
     {
+      /*-----------------------------------------------------------------------
+      Input Protections
+      -----------------------------------------------------------------------*/
+      if( !data || !elements )
+      {
+        return 0;
+      }
+
+      /*-----------------------------------------------------------------------
+      Write the elements
+      -----------------------------------------------------------------------*/
+      size_t read_idx = 0;
+      bool push_ok = true;
+
+      enter_critical( safe );
+      while ( push_ok && elements && !mAttr.queue()->full() )
+      {
+        push_ok = mAttr.queue()->push( data[ read_idx ] );
+        read_idx++;
+        elements--;
+      }
+      exit_critical( safe );
+
+      return read_idx;
     }
 
     /**
@@ -258,8 +294,31 @@ namespace Aurora::Container
      * @param safe      If true, protect against ISR & thread access
      * @return size_t   Number of bytes actually read
      */
-    size_t read( T *const data, const size_t elements, const bool safe = false )
+    size_t read( T *const data, size_t elements, const bool safe = false )
     {
+      /*-----------------------------------------------------------------------
+      Input Protections
+      -----------------------------------------------------------------------*/
+      if( !data || !elements )
+      {
+        return 0;
+      }
+
+      /*-----------------------------------------------------------------------
+      Grab as many elements as possible
+      -----------------------------------------------------------------------*/
+      size_t write_idx = 0;
+
+      enter_critical( safe );
+      while( elements && !mAttr.queue()->empty())
+      {
+        data[ write_idx ] = mAttr.queue()->pop();
+        write_idx++;
+        elements--;
+      }
+      exit_critical( safe );
+
+      return write_idx;
     }
 
     /**
@@ -271,40 +330,76 @@ namespace Aurora::Container
      */
     bool empty( const bool safe = false )
     {
+      enter_critical( safe );
+      bool result = mAttr.queue()->empty();
+      exit_critical( safe );
+
+      return result;
     }
 
     /**
-     * @brief Returns the total number of bytes the FIFO may hold
+     * @brief Returns the total number of elements the FIFO may hold
      *
      * @param safe      If true, protect against ISR & thread access
      * @return size_t
      */
     size_t capacity( const bool safe = false )
     {
+      enter_critical( safe );
+      size_t result = mAttr.queue()->capacity();
+      exit_critical( safe );
+
+      return result;
     }
 
     /**
-     * @brief Returns the remaining number of bytes in the FIFO
+     * @brief Returns the remaining number of elements in the FIFO
      *
      * @param safe      If true, protect against ISR & thread access
      * @return size_t
      */
     size_t available( const bool safe = false )
     {
+      enter_critical( safe );
+      size_t result = mAttr.queue()->capacity() - mAttr.queue()->size();
+      exit_critical( safe );
+
+      return result;
     }
 
     /**
-     * @brief Returns the total used bytes in the FIFO
+     * @brief Returns the total used elements in the FIFO
      *
      * @param safe      If true, protect against ISR & thread access
      * @return size_t
      */
     size_t size( const bool safe = false )
     {
+      enter_critical( safe );
+      size_t result = mAttr.queue()->size();
+      exit_critical( safe );
+
+      return result;
     }
 
   private:
-    StreamAttr<T> mAttr; /**< Configuration attributes */
+    MPMCAttr<T> mAttr; /**< Configuration attributes */
+
+    inline void enter_critical( bool should_enter )
+    {
+      if( should_enter )
+      {
+        mAttr.lock();
+      }
+    }
+
+    inline void exit_critical( bool should_exit )
+    {
+      if( should_exit )
+      {
+        mAttr.unlock();
+      }
+    }
   };
 }  // namespace Aurora::Container
 

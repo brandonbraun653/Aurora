@@ -13,6 +13,6 @@
 #define AURORA_CONTAINER_INCLUDES
 
 #include <Aurora/source/container/circular_buffer.hpp>
-#include <Aurora/source/container/stream_buffer.hpp>
+#include <Aurora/source/container/mpmc_queue.hpp>
 
 #endif /* !AURORA_CONTAINER_INCLUDES */
