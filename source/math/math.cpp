@@ -68,7 +68,7 @@ namespace Aurora::Math
     const unsigned int S[] = { 1, 2, 4, 8, 16 };
     int i;
 
-    register unsigned int r = 0;  // result of log2(v) will go here
+    unsigned int r = 0;  // result of log2(v) will go here
     for ( i = 4; i >= 0; i-- )    // unroll for speed...
     {
       if ( v & b[ i ] )
@@ -86,7 +86,7 @@ namespace Aurora::Math
   {
     unsigned int v = value;  // 32-bit value to find the log2 of
     static const unsigned int b[] = { 0xAAAAAAAA, 0xCCCCCCCC, 0xF0F0F0F0, 0xFF00FF00, 0xFFFF0000 };
-    register unsigned int r       = ( v & b[ 0 ] ) != 0;
+    unsigned int r       = ( v & b[ 0 ] ) != 0;
     int i;
 
     for ( i = 4; i > 0; i-- )  // unroll for speed...

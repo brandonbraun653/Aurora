@@ -63,32 +63,26 @@ namespace Aurora::Container
       /*-------------------------------------------------------------------------
       Allocate the raw memory buffer
       -------------------------------------------------------------------------*/
-      T *raw_buffer = new T( num_elements );
-      if ( !raw_buffer )
+      if ( num_elements == 0 )
       {
         return false;
       }
+
+      T *raw_buffer = new T[ num_elements ];
+      RT_HARD_ASSERT( raw_buffer );
 
       /*-------------------------------------------------------------------------
       Allocate the circular buffer
       -------------------------------------------------------------------------*/
-      *mQueue = new CircularBuffer<T>( raw_buffer, num_elements );
-      if ( !( *mQueue ) )
-      {
-        delete raw_buffer;
-        return false;
-      }
+      mQueue = new CircularBuffer<T>();
+      RT_HARD_ASSERT( mQueue );
+      RT_HARD_ASSERT( mQueue->init( raw_buffer, num_elements ) );
 
       /*-------------------------------------------------------------------------
       Allocate the mutex
       -------------------------------------------------------------------------*/
-      *mMutex = new Chimera::Thread::RecursiveMutex();
-      if ( !( *mMutex ) )
-      {
-        delete raw_buffer;
-        delete *mQueue;
-        return false;
-      }
+      mMutex = new Chimera::Thread::RecursiveMutex();
+      RT_HARD_ASSERT( mMutex );
 
       mDynamicMem = true;
       return true;
@@ -116,8 +110,8 @@ namespace Aurora::Container
       /*-------------------------------------------------------------------------
       Assign the data
       -------------------------------------------------------------------------*/
-      *mQueue     = queue;
-      *mMutex     = mtx;
+      mQueue      = queue;
+      mMutex      = mtx;
       mISRSignal  = signal;
       mDynamicMem = false;
       return true;
@@ -133,9 +127,9 @@ namespace Aurora::Container
       -------------------------------------------------------------------------*/
       if ( mDynamicMem )
       {
-        delete *mMutex;
-        delete ( *mQueue )->data();
-        delete *mQueue;
+        delete mMutex;
+        delete[] mQueue->data();
+        delete mQueue;
       }
 
       /*-------------------------------------------------------------------------
@@ -154,15 +148,15 @@ namespace Aurora::Container
      */
     bool valid()
     {
-      return DPTR_EXISTS( mQueue ) && DPTR_EXISTS( mMutex );
+      return ( mQueue && mMutex );
     }
 
   protected:
     friend class MPMCQueue<T>;
 
-    CircularBuffer<T> **              mQueue;     /**< Memory manager */
-    Chimera::Thread::RecursiveMutex **mMutex;     /**< Thread safety lock */
-    Chimera::Interrupt::Signal_t      mISRSignal; /**< Which ISR signal to protect against, if any */
+    CircularBuffer<T>               *mQueue;     /**< Memory manager */
+    Chimera::Thread::RecursiveMutex *mMutex;     /**< Thread safety lock */
+    Chimera::Interrupt::Signal_t     mISRSignal; /**< Which ISR signal to protect against, if any */
 
     /**
      * @brief Protects memory access from multithreaded and ISR access
@@ -172,17 +166,13 @@ namespace Aurora::Container
      */
     void lock()
     {
-      RT_HARD_ASSERT( DPTR_EXISTS( mMutex ) );
+      RT_HARD_ASSERT( mMutex );
 
       /*-------------------------------------------------------------------------
       Perform the thread lock first, then the ISR lock if necessary
       -------------------------------------------------------------------------*/
-      ( *mMutex )->lock();
-      if ( mISRSignal != Chimera::Interrupt::SIGNAL_INVALID )
-      {
-        auto retval = Chimera::Interrupt::disableISR( mISRSignal );
-        RT_HARD_ASSERT( retval == Chimera::Status::OK );
-      }
+      mMutex->lock();
+      Chimera::Interrupt::disableISR( mISRSignal );
     }
 
     /**
@@ -190,24 +180,18 @@ namespace Aurora::Container
      */
     void unlock()
     {
-      RT_HARD_ASSERT( DPTR_EXISTS( mMutex ) );
+      RT_HARD_ASSERT( mMutex );
 
       /*-------------------------------------------------------------------------
       Do the inverse of lock call. Enable the ISR, then release the lock.
       -------------------------------------------------------------------------*/
-      if ( mISRSignal != Chimera::Interrupt::SIGNAL_INVALID )
-      {
-        auto retval = Chimera::Interrupt::enableISR( mISRSignal );
-        RT_HARD_ASSERT( retval == Chimera::Status::OK );
-      }
-
-      ( *mMutex )->unlock();
+      Chimera::Interrupt::enableISR( mISRSignal );
+      mMutex->unlock();
     }
 
     CircularBuffer<T> *queue()
     {
-      RT_HARD_ASSERT( DPTR_EXISTS( mQueue ) );
-      return *mQueue;
+      return mQueue;
     }
 
   private:
@@ -241,7 +225,7 @@ namespace Aurora::Container
      */
     bool init( MPMCAttr<T> &attr )
     {
-      if( attr.valid() )
+      if ( attr.valid() )
       {
         mAttr = attr;
         return true;
@@ -256,14 +240,14 @@ namespace Aurora::Container
      * @param data      Input buffer of data to write
      * @param elements  Number of elements to write into the FIFO stream
      * @param safe      If true, protect against ISR & thread access
-     * @return size_t   Number of bytes actually written
+     * @return size_t   Number of elements actually written
      */
-    size_t write( const T *const data, size_t elements, const bool safe = false )
+    size_t push( const T *const data, size_t elements, const bool safe = true )
     {
       /*-----------------------------------------------------------------------
       Input Protections
       -----------------------------------------------------------------------*/
-      if( !data || !elements )
+      if ( !data || !elements )
       {
         return 0;
       }
@@ -272,7 +256,7 @@ namespace Aurora::Container
       Write the elements
       -----------------------------------------------------------------------*/
       size_t read_idx = 0;
-      bool push_ok = true;
+      bool   push_ok  = true;
 
       enter_critical( safe );
       while ( push_ok && elements && !mAttr.queue()->full() )
@@ -292,14 +276,14 @@ namespace Aurora::Container
      * @param data      Output buffer to write into
      * @param elements  Number of elements to read from the FIFO stream into the output buffer
      * @param safe      If true, protect against ISR & thread access
-     * @return size_t   Number of bytes actually read
+     * @return size_t   Number of elements actually read
      */
-    size_t read( T *const data, size_t elements, const bool safe = false )
+    size_t pop( T *const data, size_t elements, const bool safe = true )
     {
       /*-----------------------------------------------------------------------
       Input Protections
       -----------------------------------------------------------------------*/
-      if( !data || !elements )
+      if ( !data || !elements )
       {
         return 0;
       }
@@ -310,7 +294,7 @@ namespace Aurora::Container
       size_t write_idx = 0;
 
       enter_critical( safe );
-      while( elements && !mAttr.queue()->empty())
+      while ( elements && !mAttr.queue()->empty() )
       {
         data[ write_idx ] = mAttr.queue()->pop();
         write_idx++;
@@ -328,10 +312,26 @@ namespace Aurora::Container
      * @return true   FIFO is empty
      * @return false  FIFO is not empty
      */
-    bool empty( const bool safe = false )
+    bool empty( const bool safe = true )
     {
       enter_critical( safe );
       bool result = mAttr.queue()->empty();
+      exit_critical( safe );
+
+      return result;
+    }
+
+    /**
+     * @brief Checks if the FIFO is full
+     *
+     * @param safe    If true, protect against ISR & thread access
+     * @return true
+     * @return false
+     */
+    bool full( const bool safe = true )
+    {
+      enter_critical( safe );
+      bool result = mAttr.queue()->full();
       exit_critical( safe );
 
       return result;
@@ -343,7 +343,7 @@ namespace Aurora::Container
      * @param safe      If true, protect against ISR & thread access
      * @return size_t
      */
-    size_t capacity( const bool safe = false )
+    size_t capacity( const bool safe = true )
     {
       enter_critical( safe );
       size_t result = mAttr.queue()->capacity();
@@ -358,7 +358,7 @@ namespace Aurora::Container
      * @param safe      If true, protect against ISR & thread access
      * @return size_t
      */
-    size_t available( const bool safe = false )
+    size_t available( const bool safe = true )
     {
       enter_critical( safe );
       size_t result = mAttr.queue()->capacity() - mAttr.queue()->size();
@@ -373,7 +373,7 @@ namespace Aurora::Container
      * @param safe      If true, protect against ISR & thread access
      * @return size_t
      */
-    size_t size( const bool safe = false )
+    size_t size( const bool safe = true )
     {
       enter_critical( safe );
       size_t result = mAttr.queue()->size();
@@ -387,7 +387,7 @@ namespace Aurora::Container
 
     inline void enter_critical( bool should_enter )
     {
-      if( should_enter )
+      if ( should_enter )
       {
         mAttr.lock();
       }
@@ -395,7 +395,7 @@ namespace Aurora::Container
 
     inline void exit_critical( bool should_exit )
     {
-      if( should_exit )
+      if ( should_exit )
       {
         mAttr.unlock();
       }
