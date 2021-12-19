@@ -21,8 +21,9 @@
 /*-------------------------------------------------------------------------------
 Public Functions
 -------------------------------------------------------------------------------*/
-int scnprintf( char *buf, size_t size, const char *fmt, ... );
-int vscnprintf( char *buf, size_t size, const char *fmt, va_list args );
+int   scnprintf( char *buf, size_t size, const char *fmt, ... );
+int   vscnprintf( char *buf, size_t size, const char *fmt, va_list args );
+char *safe_strcpy( char *dest, size_t size, const char *src );
 
 namespace Aurora::Utility
 {
