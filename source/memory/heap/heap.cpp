@@ -31,7 +31,12 @@
 #include <FreeRTOS/FreeRTOS.h>
 #include <FreeRTOS/task.h>
 #else  // Assume PC or other non-embedded system
-#define portBYTE_ALIGNMENT 4
+
+#if defined( _EMBEDDED )
+#define portBYTE_ALIGNMENT 4  // Likely 32-bit system
+#else
+#define portBYTE_ALIGNMENT 8  // Likely 64-bit system
+#endif
 
 #if portBYTE_ALIGNMENT == 32
 #define portBYTE_ALIGNMENT_MASK ( 0x001f )
