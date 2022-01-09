@@ -33,16 +33,20 @@
 #endif
 
 /**
- *  Helper for declaring an observable data type. The definition of this class must go into
- *  a separate file.
+ * @brief Helper for declaring an observable data type
+ * @note  The definition of this class must go into a separate file.
  *
- *  @param[in]  Name          Name of the observable data
- *  @param[in]  AccessKey     Key identifier used to access the underlying database
- *  @param[in]  NumObservers  How many observers this observable can support
- *  @param[in]  Rate          How often the update function should be called in milliseconds
- *  @param[in]  Timeout       How long the data can remain valid without an other update
+ * An "observable" is a living object that acts as a proxy for some kind of changing data
+ * in the system. It knows how to grab updates to that data and, upon a change, will notify
+ * all registered observers of the new information.
+ *
+ * @param[in]  Name          Name of the observable data
+ * @param[in]  AccessKey     Key identifier used to access the underlying database
+ * @param[in]  NumObservers  How many observers this observable can support
+ * @param[in]  Rate          How often the update function should be called in milliseconds
+ * @param[in]  Timeout       How long the data can remain valid without an other update
  */
-#define DECLARE_OBSERVABLE( Name, Type, AccessKey, NumObservers, Rate, Timeout )             \
+#define ObservableDeclare( Name, Type, AccessKey, NumObservers, Rate, Timeout )              \
   class ETL_CONCAT( Observable_, Name ) :                                                    \
       public Aurora::Datastore::BaseObservable<Type, AccessKey, NumObservers, Rate, Timeout> \
   {                                                                                          \
@@ -58,10 +62,25 @@
                                                                                              \
   extern ETL_CONCAT( Observable_, Name ) ETL_CONCAT( Param_, Name );
 
+
 /**
- *  Given a friendly observable name, converts it into a pointer
- *  reference of the type created by DECLARE_OBSERVABLE
+ * @brief Helper to generate a reference to the object created by ObservableDeclare
  */
-#define OBSERVABLE_PTR( Name ) ( &ETL_CONCAT( Param_, Name ) )
+#define ObservablePointer( Name ) ( &ETL_CONCAT( Param_, Name ) )
+
+
+/**
+ * @brief Helper for declaring an observer for an observable.
+ * @note The type should match the associated Observable declaration.
+ *
+ * @param Name    Name of the observer
+ * @param Type    Observed data type
+ */
+#define ObserverDeclare( Name, Type )              \
+  class Name : public etl::observer<Type>          \
+  {                                                \
+  public:                                          \
+    void notification( Type data ) final override; \
+  };
 
 #endif /* !AURORA_DATASTORE_MACROS_HPP */
