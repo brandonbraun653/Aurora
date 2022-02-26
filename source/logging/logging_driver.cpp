@@ -24,6 +24,12 @@
 
 namespace Aurora::Logging
 {
+  /*---------------------------------------------------------------------------
+  Constants
+  ---------------------------------------------------------------------------*/
+  static constexpr size_t MSG_BUF_SIZE = 256;
+  static constexpr size_t LOG_BUF_SIZE = 512;
+
   /*-------------------------------------------------------------------------------
   Static Data
   -------------------------------------------------------------------------------*/
@@ -251,33 +257,44 @@ namespace Aurora::Logging
 
   Result flog( const Level lvl, const char *const file, const size_t line, const char *fmt, ... )
   {
-    /*------------------------------------------------
+    /*-------------------------------------------------------------------------
     Input boundary checking
-    ------------------------------------------------*/
+    -------------------------------------------------------------------------*/
     if ( ( lvl < globalLogLevel ) || !file || !fmt )
     {
       return Result::RESULT_FAIL;
     }
 
-    /*-------------------------------------------------
+    /*-------------------------------------------------------------------------
+    Allocate memory to work with
+    -------------------------------------------------------------------------*/
+    char *msg_buffer = new char[MSG_BUF_SIZE];
+    if ( !msg_buffer )
+    {
+      return Result::RESULT_NO_MEM;
+    }
+
+    char *log_buffer = new char[LOG_BUF_SIZE];
+    if( !log_buffer )
+    {
+      delete msg_buffer;
+      return Result::RESULT_NO_MEM;
+    }
+
+    memset( msg_buffer, 0, MSG_BUF_SIZE );
+    memset( log_buffer, 0, LOG_BUF_SIZE );
+
+    /*-------------------------------------------------------------------------
     Format the log string into the message buffer
-    -------------------------------------------------*/
-    char msg_buffer[ 256 ];
+    -------------------------------------------------------------------------*/
     va_list argptr;
     va_start( argptr, fmt );
-    memset( msg_buffer, 0, sizeof( msg_buffer ) );
-    vsnprintf( msg_buffer, ARRAY_COUNT( msg_buffer ), fmt, argptr );
+    vsnprintf( msg_buffer, MSG_BUF_SIZE, fmt, argptr );
     va_end( argptr );
 
-    /*-------------------------------------------------
-    Allocate memory for the log message
-    -------------------------------------------------*/
-    char log_buffer[ 512 ];
-    memset( log_buffer, 0, sizeof( log_buffer ) );
-
-    /*-------------------------------------------------
+    /*-------------------------------------------------------------------------
     Create the logging level
-    -------------------------------------------------*/
+    -------------------------------------------------------------------------*/
     std::string_view str_level = "";
     switch( lvl )
     {
@@ -309,21 +326,19 @@ namespace Aurora::Logging
         return Result::RESULT_INVALID_LEVEL;
     };
 
-    /*-------------------------------------------------
-    Grab the name of the current thread of execution
-    -------------------------------------------------*/
-    //Chimera::Thread::TaskName thread_name = Chimera::Thread::this_thread::get_name();
-
-    /*-------------------------------------------------
+    /*-------------------------------------------------------------------------
     Format the full message
-    -------------------------------------------------*/
-    snprintf( log_buffer, ARRAY_COUNT( log_buffer ), "[%ld][%-25.25s:%4ld][%-5.5s] -- %s", Chimera::millis(), file,
-              line,  str_level.data(), msg_buffer );
+    -------------------------------------------------------------------------*/
+    snprintf( log_buffer, LOG_BUF_SIZE, "[%ld][%s:%ld][%s] -- %s", static_cast<uint32_t>( Chimera::millis() ), file,
+              static_cast<uint32_t>( line ), str_level.data(), msg_buffer );
 
-    /*-------------------------------------------------
+    /*-------------------------------------------------------------------------
     Log through the standard method
-    -------------------------------------------------*/
-    return log( lvl, log_buffer, strlen( log_buffer ) );
+    -------------------------------------------------------------------------*/
+    auto result = log( lvl, log_buffer, strlen( log_buffer ) );
+    delete[] msg_buffer;
+    delete[] log_buffer;
+    return result;
   }
 
 }  // namespace Aurora::Logging
