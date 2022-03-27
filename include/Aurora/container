@@ -5,7 +5,7 @@
  *  Description:
  *    Aurora includes for various container implementations
  *
- *  2020-2021 | Brandon Braun | brandonbraun653@gmail.com
+ *  2020-2022 | Brandon Braun | brandonbraun653@gmail.com
  ********************************************************************************/
 
 #pragma once
@@ -14,5 +14,6 @@
 
 #include <Aurora/source/container/circular_buffer.hpp>
 #include <Aurora/source/container/mpmc_queue.hpp>
+#include <Aurora/source/container/list.hpp>
 
 #endif /* !AURORA_CONTAINER_INCLUDES */
