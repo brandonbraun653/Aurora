@@ -85,6 +85,6 @@ namespace Aurora::Flash::NOR
   Structures
   -------------------------------------------------------------------------------*/
 
-}  // namespace Aurora::NOR
+}  // namespace Aurora::Flash::NOR
 
-#endif  /* !NOR_FLASH_GENERIC_DRIVER_TYPES_HPP */
+#endif /* !NOR_FLASH_GENERIC_DRIVER_TYPES_HPP */

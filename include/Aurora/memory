@@ -5,7 +5,7 @@
  *  Description:
  *    Aurora includes for memory interfacing
  *
- *  2020-2021 | Brandon Braun | brandonbraun653@gmail.com
+ *  2020-2022 | Brandon Braun | brandonbraun653@gmail.com
  ********************************************************************************/
 
 #pragma once
@@ -16,10 +16,17 @@
 #include <Aurora/source/memory/heap/heap.hpp>
 #include <Aurora/source/memory/shared_ptr.hpp>
 
-/*-------------------------------------------------
+/*-----------------------------------------------------------------------------
 NOR Flash Driver
--------------------------------------------------*/
+-----------------------------------------------------------------------------*/
 #include <Aurora/source/memory/flash/nor/nor_generic_driver.hpp>
 #include <Aurora/source/memory/flash/nor/nor_generic_types.hpp>
+
+/*-----------------------------------------------------------------------------
+EEPROM Flash Driver
+-----------------------------------------------------------------------------*/
+#include <Aurora/source/memory/flash/eeprom/eeprom_generic_driver.hpp>
+#include <Aurora/source/memory/flash/eeprom/eeprom_generic_types.hpp>
+#include <Aurora/source/memory/flash/eeprom/eeprom_devices.hpp>
 
 #endif /* !AURORA_MEMORY_INCLUDES */

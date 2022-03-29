@@ -20,6 +20,8 @@
 #include <memory>
 #include <vector>
 
+#include <Aurora/source/util/enum.hpp>
+
 namespace Aurora::Memory
 {
   /*-------------------------------------------------------------------------------
@@ -41,6 +43,7 @@ namespace Aurora::Memory
     ERR_HF_INIT_FAIL,
     ERR_NOT_PAGE_ALIGNED,
     ERR_OK,
+    ERR_FAIL,
     ERR_OUT_OF_MEMORY,
     ERR_OVERRUN,
     ERR_PGM_ALIGNMENT,
@@ -53,6 +56,7 @@ namespace Aurora::Memory
     ERR_UNSUPPORTED,
     ERR_WRITE_PROTECT,
   };
+  ENUM_CLS_BITWISE_OPERATOR( Status, | );
 
   /**
    *  Specifies a particular way to view/describe a section of memory
@@ -61,7 +65,8 @@ namespace Aurora::Memory
   {
     PAGE = 0,
     BLOCK,
-    SECTOR
+    SECTOR,
+    NONE
   };
 
   /**
