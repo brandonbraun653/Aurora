@@ -117,16 +117,16 @@ namespace Aurora::Flash::EEPROM
     {
       for ( size_t idx = 0; idx < length; idx++ )
       {
-        write_data[ 0 ] = address;
+        write_data[ 0 ] = address + idx;
         write_data[ 1 ] = static_cast<const uint8_t *const>( data )[ idx ];
 
-        result |= mDriver->write( mConfig.deviceAddress, write_data, 1 );
+        result |= mDriver->write( mConfig.deviceAddress, write_data, sizeof( write_data ) );
         Chimera::delayMilliseconds( attr->pagePgmDelay );
       }
     }
     else
     {
-      result |= mDriver->write( mConfig.deviceAddress, nullptr, 0 );
+      result |= mDriver->write( mConfig.deviceAddress, &address, 1 );
     }
 
     return ( result == Chimera::Status::OK ) ? Status::ERR_OK : Status::ERR_FAIL;
@@ -168,6 +168,7 @@ namespace Aurora::Flash::EEPROM
     -------------------------------------------------------------------------*/
     /* Setup the read address in-chip */
     this->write( address, nullptr, 0 );
+    Chimera::delayMilliseconds( 1 );
 
     /* Do the continuous read */
     Chimera::Status_t result = mDriver->read( mConfig.deviceAddress, data, length );
