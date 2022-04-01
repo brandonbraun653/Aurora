@@ -70,7 +70,7 @@ int vscnprintf( char *buf, size_t size, const char *fmt, va_list args )
 
   i = vsnprintf( buf, size, fmt, args );
 
-  if ( likely( i < size ) )
+  if ( likely( i < ( int )size ) )
     return i;
   if ( size != 0 )
     return size - 1;
