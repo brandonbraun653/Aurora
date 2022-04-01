@@ -100,33 +100,25 @@ namespace Aurora::Flash::EEPROM
       return Aurora::Memory::Status::ERR_UNSUPPORTED;
     }
 
-    if( ( address + length ) > attr->endAddress )
+    if( !data || !length || ( ( address + length ) > attr->endAddress ) )
     {
       return Aurora::Memory::Status::ERR_BAD_ARG;
     }
 
     /*-------------------------------------------------------------------------
     Do the write. This is a very naive approach that simply delays a fixed
-    amount after each write. Some chips also allow for larger page write blocks
-    but that's too specialized for this generic driver.
+    amount after each write. EEPROM aren't exactly known for performance...
     -------------------------------------------------------------------------*/
     Chimera::Status_t result = Chimera::Status::OK;
     uint8_t write_data[ 2 ];
 
-    if ( data && length )
+    for ( size_t idx = 0; idx < length; idx++ )
     {
-      for ( size_t idx = 0; idx < length; idx++ )
-      {
-        write_data[ 0 ] = address + idx;
-        write_data[ 1 ] = static_cast<const uint8_t *const>( data )[ idx ];
+      write_data[ 0 ] = address + idx;
+      write_data[ 1 ] = static_cast<const uint8_t *const>( data )[ idx ];
 
-        result |= mDriver->write( mConfig.deviceAddress, write_data, sizeof( write_data ) );
-        Chimera::delayMilliseconds( attr->pagePgmDelay );
-      }
-    }
-    else
-    {
-      result |= mDriver->write( mConfig.deviceAddress, &address, 1 );
+      result |= mDriver->write( mConfig.deviceAddress, write_data, sizeof( write_data ) );
+      Chimera::delayMilliseconds( attr->pagePgmDelay );
     }
 
     return ( result == Chimera::Status::OK ) ? Status::ERR_OK : Status::ERR_FAIL;
@@ -167,8 +159,8 @@ namespace Aurora::Flash::EEPROM
     wraparound, which is pretty common.
     -------------------------------------------------------------------------*/
     /* Setup the read address in-chip */
-    this->write( address, nullptr, 0 );
-    Chimera::delayMilliseconds( 1 );
+    mDriver->write( mConfig.deviceAddress, &address, 1 );
+    mDriver->await( Trigger::TRIGGER_TRANSFER_COMPLETE, TIMEOUT_10MS );
 
     /* Do the continuous read */
     Chimera::Status_t result = mDriver->read( mConfig.deviceAddress, data, length );
@@ -252,6 +244,19 @@ namespace Aurora::Flash::EEPROM
   Aurora::Memory::Status Driver::pendEvent( const Aurora::Memory::Event event, const size_t timeout )
   {
     return Aurora::Memory::Status::ERR_UNSUPPORTED;
+  }
+
+
+  Chimera::Status_t Driver::await( const Chimera::Event::Trigger event, const size_t timeout )
+  {
+    return mDriver->await( event, timeout );
+  }
+
+
+  Chimera::Status_t Driver::await( const Chimera::Event::Trigger event, Chimera::Thread::BinarySemaphore &notifier,
+                                     const size_t timeout )
+  {
+    return mDriver->await( event, notifier, timeout );
   }
 
 
