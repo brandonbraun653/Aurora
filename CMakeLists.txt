@@ -67,7 +67,6 @@ gen_intf_lib_variants(
   TARGET
     aurora_core
   LIBRARIES
-    aurora_container
     aurora_math
     aurora_utility
   EXPORT_DIR

@@ -14,6 +14,5 @@
 
 #include <Aurora/source/container/circular_buffer.hpp>
 #include <Aurora/source/container/mpmc_queue.hpp>
-#include <Aurora/source/container/list.hpp>
 
 #endif /* !AURORA_CONTAINER_INCLUDES */
