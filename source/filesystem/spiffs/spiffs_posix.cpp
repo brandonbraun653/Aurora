@@ -63,7 +63,7 @@ namespace Aurora::FileSystem::SPIFFS
 
   static int mount();
   static int unmount();
-  static FileHandle fopen( const char *filename, const char *mode );
+  static FileHandle fopen( const char *filename, const char *mode, const size_t size );
   static int fclose( FileHandle stream );
   static int fflush( FileHandle stream );
   static size_t fread( void *ptr, size_t size, size_t count, FileHandle stream );
@@ -235,7 +235,7 @@ namespace Aurora::FileSystem::SPIFFS
   }
 
 
-  static FileHandle fopen( const char *filename, const char *mode )
+  static FileHandle fopen( const char *filename, const char *mode, const size_t size )
   {
     using namespace Aurora::Logging;
     using namespace Chimera::Thread;

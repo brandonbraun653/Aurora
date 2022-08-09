@@ -5,22 +5,20 @@
  *  Description:
  *    Filesystem implementation redirects into the SPIFFS driver
  *
- *  2021 | Brandon Braun | brandonbraun653@gmail.com
+ *  2021-2022 | Brandon Braun | brandonbraun653@gmail.com
  *******************************************************************************/
 
-/* STL Includes */
-#include <cstdint>
-
-/* Aurora Include */
-#include <Aurora/filesystem_spiffs>
+/*-----------------------------------------------------------------------------
+Includes
+-----------------------------------------------------------------------------*/
+#include <Aurora/filesystem>
 #include <Aurora/logging>
 #include <Aurora/memory>
 #include <Aurora/source/filesystem/file_config.hpp>
 #include <Aurora/source/filesystem/file_driver.hpp>
-
-/* Chimera Includes */
 #include <Chimera/assert>
 #include <Chimera/thread>
+#include <cstdint>
 
 /* SPIFFS Includes */
 #include "spiffs.h"

@@ -12,16 +12,17 @@
 #ifndef AURORA_FILE_SYSTEM_DRIVER_INTERFACES_HPP
 #define AURORA_FILE_SYSTEM_DRIVER_INTERFACES_HPP
 
-/* STL Includes */
-#include <cstdint>
-#include <string_view>
-
-/* Aurora Includes */
+/*-----------------------------------------------------------------------------
+Includes
+-----------------------------------------------------------------------------*/
+#include <Aurora/source/memory/flash/eeprom/eeprom_generic_driver.hpp>
+#include <Aurora/source/memory/flash/eeprom/eeprom_generic_types.hpp>
 #include <Aurora/source/memory/flash/nor/nor_generic_driver.hpp>
 #include <Aurora/source/memory/flash/nor/nor_generic_types.hpp>
-
-/* Chimera Includes */
 #include <Chimera/spi>
+#include <Chimera/i2c>
+#include <cstdint>
+#include <string_view>
 
 
 namespace Aurora::FileSystem
@@ -29,6 +30,28 @@ namespace Aurora::FileSystem
   /*-------------------------------------------------------------------------------
   Project Side Interface
   -------------------------------------------------------------------------------*/
+  namespace EEPROM
+  {
+    /**
+     *  @brief Attaches a specific device to use for the filesystem backend
+     *
+     *  @param address    The address of the device to attach
+     *  @param dev        The device to attach
+     *  @param channel    Which I2C channel to communicate on
+     *  @return bool
+     */
+    bool attachDevice( const uint16_t address, const Aurora::Flash::EEPROM::Chip_t dev, const Chimera::I2C::Channel channel );
+
+    /**
+     * @brief Gets the driver loaded for the current filesystem
+     *
+     * @return Aurora::Flash::EEPROM::Driver*
+     */
+    Aurora::Flash::EEPROM::Driver* getEEPROMDriver();
+
+  }  // namespace EEPROM
+
+
   namespace LFS
   {
     /**
@@ -72,21 +95,6 @@ namespace Aurora::FileSystem
     std::string_view err2str( const int error );
 
   }  // namespace LFS
-
-
-  namespace YAFFS
-  {
-    /**
-     *  Attaches a generic memory device to the opaque pointer contained in the
-     *  LittleFS configuration structure. This allows the read/write/erase hooks
-     *  to act on the proper device at runtime.
-     *
-     *  @param[in]  dev       The device to attach
-     *  @param[in]  cfg       LittleFS configuration structure
-     *  @return bool
-     */
-    bool attachDevice( const Aurora::Flash::NOR::Chip_t dev, const Chimera::SPI::Channel channel );
-  }  // namespace YAFFS
 
 
   namespace SPIFFS

@@ -5,16 +5,14 @@
  *  Description:
  *    Implementation of a binary file overlay to the Aurora core filesystem.
  *
- *  2021 | Brandon Braun | brandonbraun653@gmail.com
+ *  2021-2022 | Brandon Braun | brandonbraun653@gmail.com
  *******************************************************************************/
 
-/* Aurora Includes */
+/*-----------------------------------------------------------------------------
+Includes
+-----------------------------------------------------------------------------*/
 #include <Aurora/filesystem>
-
-/* Chimera Includes */
 #include <Chimera/common>
-
-/* ETL Includes */
 #include <etl/crc32.h>
 
 namespace Aurora::FileSystem
@@ -40,9 +38,9 @@ namespace Aurora::FileSystem
   }
 
 
-  bool BinaryFile::create( const std::string_view &filename )
+  bool BinaryFile::create( const std::string_view &filename, const size_t size )
   {
-    mFileHandle = fopen( filename.data(), "w" );
+    mFileHandle = fopen( filename.data(), "w", size );
     fclose( mFileHandle );
 
     return fIsValid( mFileHandle );

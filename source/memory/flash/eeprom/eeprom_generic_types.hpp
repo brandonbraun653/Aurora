@@ -47,7 +47,7 @@ namespace Aurora::Flash::EEPROM
   ---------------------------------------------------------------------------*/
   struct DeviceConfig
   {
-    Chip                  whichChip;     /**< Which chip this is */
+    Chip_t                whichChip;     /**< Which chip this is */
     uint16_t              deviceAddress; /**< Address of the chip */
     Chimera::I2C::Channel i2cChannel;    /**< I2C channel the chip is on */
 

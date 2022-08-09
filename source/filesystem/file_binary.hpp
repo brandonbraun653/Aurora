@@ -5,29 +5,30 @@
  *  Description:
  *    High level interface to data stored as a binary file
  *
- *  2021 | Brandon Braun | brandonbraun653@gmail.com
+ *  2021-2022 | Brandon Braun | brandonbraun653@gmail.com
  *******************************************************************************/
 
 #pragma once
 #ifndef AURORA_BINARY_FILES_HPP
 #define AURORA_BINARY_FILES_HPP
 
-/* STL Includes */
+/*-----------------------------------------------------------------------------
+Includes
+-----------------------------------------------------------------------------*/
+#include <Aurora/source/filesystem/file_types.hpp>
 #include <cstdint>
 #include <cstring>
 #include <string_view>
-
-/* Aurora Includes */
-#include <Aurora/source/filesystem/file_types.hpp>
 
 namespace Aurora::FileSystem
 {
   /**
    * @brief Context managed file interface to binary data
    *
-   * Stores raw binary data to disk using a structured format such that it's easy
-   * to detect any errors. The class expects the entire file to be read/written
-   * on any IO operation due to the minimalist nature of the underlying filesystem.
+   * Stores raw binary data to disk using a structured format such that it's easy to detect any errors.
+   * Expects the entire file to be read/written on any IO operation due to the minimalist nature of the
+   * underlying filesystem. Tracking a R/W offset is not supported, mainly due to how infrequently that
+   * use case is needed and the complexity of maintaining it.
    */
   class BinaryFile
   {
@@ -44,21 +45,18 @@ namespace Aurora::FileSystem
       ERR_SIZING,       /**< There was a sizing issue in a read/write command */
     };
 
-    /*-------------------------------------------------
-    Public API
-    -------------------------------------------------*/
     BinaryFile();
     ~BinaryFile();
 
     /**
      * @brief Creates an empty file
-     * If the file already exists, it will be destroyed.
+     * @note If the file already exists, it will be destroyed.
      *
      * @param filename      Name of the file to create
      * @return true         File created successfully
      * @return false        File was not created
      */
-    bool create( const std::string_view &filename );
+    bool create( const std::string_view &filename, const size_t size = 0 );
 
     /**
      * @brief Opens the specified file
@@ -72,7 +70,7 @@ namespace Aurora::FileSystem
 
     /**
      * @brief Closes the file
-     * If already closed, does nothing.
+     * @note If already closed, does nothing.
      */
     void close();
 

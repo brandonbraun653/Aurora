@@ -5,26 +5,28 @@
  *  Description:
  *    File system types
  *
- *  2021 | Brandon Braun | brandonbraun653@gmail.com
+ *  2021-2022 | Brandon Braun | brandonbraun653@gmail.com
  *******************************************************************************/
 
 #pragma once
 #ifndef AURORA_FILE_SYSTEM_TYPES_HPP
 #define AURORA_FILE_SYSTEM_TYPES_HPP
 
-/* STL Includes */
+/*-----------------------------------------------------------------------------
+Includes
+-----------------------------------------------------------------------------*/
 #include <cstddef>
 
 namespace Aurora::FileSystem
 {
-  /*-------------------------------------------------------------------------------
-  Aliases
-  -------------------------------------------------------------------------------*/
-  #if defined( SIMULATOR )
+/*-------------------------------------------------------------------------------
+Aliases
+-------------------------------------------------------------------------------*/
+#if defined( SIMULATOR )
   using FileHandle = void *;
-  #else
+#else
   using FileHandle = int;
-  #endif
+#endif
 
   /*-------------------------------------------------------------------------------
   Enumerations
@@ -32,8 +34,8 @@ namespace Aurora::FileSystem
   enum BackendType : size_t
   {
     DRIVER_LITTLE_FS, /**< Little FS embedded driver */
-    DRIVER_YAFFS2,    /**< Yet-Another-FAT-File-System (YAFFS) */
     DRIVER_SPIFFS,    /**< SPI Flash FileSystem */
+    DRIVER_EEFS,      /**< EEPROM FileSystem */
     DRIVER_OS,        /**< Compiled OS target file system, aka C++17 filesystem library */
 
     DRIVER_NUM_OPTIONS,
@@ -50,11 +52,15 @@ namespace Aurora::FileSystem
   /*-------------------------------------------------------------------------------
   Structures
   -------------------------------------------------------------------------------*/
+  /**
+   * @brief Convenience container for registering a file system driver
+   * @note See documentation in file_intf.hpp for more details on function behavior
+   */
   struct Interface
   {
     int ( *mount )();
     int ( *unmount )();
-    FileHandle ( *fopen )( const char *filename, const char *mode );
+    FileHandle ( *fopen )( const char *filename, const char *mode, const size_t size );
     int ( *fclose )( FileHandle stream );
     int ( *fflush )( FileHandle stream );
     size_t ( *fread )( void *ptr, size_t size, size_t count, FileHandle stream );
@@ -65,4 +71,4 @@ namespace Aurora::FileSystem
   };
 }  // namespace Aurora::FileSystem
 
-#endif  /* !AURORA_FILE_SYSTEM_TYPES_HPP */
+#endif /* !AURORA_FILE_SYSTEM_TYPES_HPP */

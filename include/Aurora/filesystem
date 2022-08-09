@@ -5,7 +5,7 @@
  *  Description:
  *    Aurora includes for various file system implementations
  *
- *  2021 | Brandon Braun | brandonbraun653@gmail.com
+ *  2021-2022 | Brandon Braun | brandonbraun653@gmail.com
  ********************************************************************************/
 
 #pragma once
@@ -16,9 +16,14 @@
 #include <filesystem>
 #endif
 
+#include <Aurora/source/filesystem/eeprom/fs_eeprom_driver.hpp>
 #include <Aurora/source/filesystem/file_binary.hpp>
 #include <Aurora/source/filesystem/file_config.hpp>
+#include <Aurora/source/filesystem/file_driver.hpp>
 #include <Aurora/source/filesystem/file_intf.hpp>
 #include <Aurora/source/filesystem/file_types.hpp>
+#include <Aurora/source/filesystem/generic/generic_driver.hpp>
+#include <Aurora/source/filesystem/littlefs/lfs_driver.hpp>
+#include <Aurora/source/filesystem/spiffs/spiffs_driver.hpp>
 
 #endif /* !AURORA_FILESYSTEM_INCLUDES */

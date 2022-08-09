@@ -14,12 +14,26 @@ gen_static_lib_variants(
   EXPORT_DIR
     "${PROJECT_BINARY_DIR}/Aurora"
 )
-# Little FS Target
+# STD Target
 gen_static_lib_variants(
   TARGET
     aurora_filesystem_generic_driver
   SOURCES
     generic/generic_driver.cpp
+  PRV_LIBRARIES
+    aurora_intf_inc
+    chimera_intf_inc
+  EXPORT_DIR
+    "${PROJECT_BINARY_DIR}/Aurora"
+)
+
+# EEFS Target
+gen_static_lib_variants(
+  TARGET
+    aurora_filesystem_eefs_driver
+  SOURCES
+    eeprom/fs_eeprom_driver.cpp
+    eeprom/fs_eeprom_posix.cpp
   PRV_LIBRARIES
     aurora_intf_inc
     chimera_intf_inc
@@ -55,18 +69,3 @@ gen_static_lib_variants(
   EXPORT_DIR
     "${PROJECT_BINARY_DIR}/Aurora"
 )
-
-# YAFFS Target
-gen_static_lib_variants(
-  TARGET
-    aurora_filesystem_yaffs_driver
-  SOURCES
-    yaffs/yaffs2_driver.cpp
-  PRV_LIBRARIES
-    aurora_intf_inc
-    chimera_intf_inc
-    yaffs_intf_inc
-  EXPORT_DIR
-    "${PROJECT_BINARY_DIR}/Aurora"
-)
-
