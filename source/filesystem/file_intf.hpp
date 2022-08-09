@@ -25,14 +25,13 @@ namespace Aurora::FileSystem
   Public Functions
   -------------------------------------------------------------------------------*/
   /**
-   *  Configures the file system to use the appropriate driver. This
-   *  assumes that any driver specific data has already been passed
-   *  to it and the system is in a state that is ready for initialization.
+   * @brief Poor man's polymorphism to attach the correct FS driver.
    *
-   *  @param[in]  type        Which filesystem driver to use
-   *  @return bool
+   * @param intf      Which filesystem driver to use
+   * @return true
+   * @return false
    */
-  bool configureDriver( const BackendType type );
+  void attachImplementation( const Interface *const intf );
 
   /**
    *  Mounts the file system

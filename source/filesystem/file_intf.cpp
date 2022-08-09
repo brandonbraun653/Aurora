@@ -24,34 +24,9 @@ namespace Aurora::FileSystem
   /*-------------------------------------------------------------------------------
   Public Functions
   -------------------------------------------------------------------------------*/
-  bool configureDriver( const BackendType type )
+  void attachImplementation( const Interface *const intf )
   {
-    // TODO: Come back later and turn this into a registration function
-    switch ( type )
-    {
-      #if defined( EMBEDDED )
-      case BackendType::DRIVER_SPIFFS:
-        impl = &SPIFFS::implementation;
-        break;
-
-      case BackendType::DRIVER_EEFS:
-        impl = &EEPROM::implementation;
-        break;
-      #endif  /* EMBEDDED */
-
-      #if defined( SIMULATOR )
-      case BackendType::DRIVER_OS:
-        impl = &Generic::implementation;
-        break;
-      #endif  /* SIMULATOR */
-
-      default:
-        impl = nullptr;
-        return false;
-        break;
-    }
-
-    return true;
+    impl = intf;
   }
 
 

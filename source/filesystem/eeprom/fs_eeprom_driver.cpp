@@ -32,8 +32,7 @@ namespace Aurora::FileSystem::EEPROM
     /*-------------------------------------------------------------------------
     Ensure the device is supported by the driver
     -------------------------------------------------------------------------*/
-    auto props = Aurora::Flash::EEPROM::getProperties( dev );
-    RT_DBG_ASSERT( props );
+    RT_DBG_ASSERT( Aurora::Flash::EEPROM::getProperties( dev ) );
     sDevice = dev;
 
     /*-------------------------------------------------------------------------
