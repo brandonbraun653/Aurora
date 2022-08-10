@@ -15,12 +15,13 @@
 /*-----------------------------------------------------------------------------
 Includes
 -----------------------------------------------------------------------------*/
+#include <Aurora/source/filesystem/eeprom/fs_eeprom_types.hpp>
 #include <Aurora/source/memory/flash/eeprom/eeprom_generic_driver.hpp>
 #include <Aurora/source/memory/flash/eeprom/eeprom_generic_types.hpp>
 #include <Aurora/source/memory/flash/nor/nor_generic_driver.hpp>
 #include <Aurora/source/memory/flash/nor/nor_generic_types.hpp>
-#include <Chimera/spi>
 #include <Chimera/i2c>
+#include <Chimera/spi>
 #include <cstdint>
 #include <string_view>
 
@@ -32,15 +33,21 @@ namespace Aurora::FileSystem
   -------------------------------------------------------------------------------*/
   namespace EEPROM
   {
+    struct FSConfig
+    {
+      uint16_t                      address;  /**< The address of the device to attach */
+      Aurora::Flash::EEPROM::Chip_t device;   /**< The device to attach */
+      Chimera::I2C::Channel         channel;  /**< Which I2C channel to communicate on */
+      iMBR                         *mbrCache; /**< Working memory for the MBR cache */
+    };
+
     /**
      *  @brief Attaches a specific device to use for the filesystem backend
      *
-     *  @param address    The address of the device to attach
-     *  @param dev        The device to attach
-     *  @param channel    Which I2C channel to communicate on
+     *  @param config   Data to configure the EEPROM filesystem
      *  @return bool
      */
-    bool attachDevice( const uint16_t address, const Aurora::Flash::EEPROM::Chip_t dev, const Chimera::I2C::Channel channel );
+    bool configure( const FSConfig &config );
 
     /**
      * @brief Gets the driver loaded for the current filesystem
@@ -48,6 +55,13 @@ namespace Aurora::FileSystem
      * @return Aurora::Flash::EEPROM::Driver*
      */
     Aurora::Flash::EEPROM::Driver* getEEPROMDriver();
+
+    /**
+     * @brief Gets the configuration object for the current filesystem
+     *
+     * @return const FSConfig&
+     */
+    const FSConfig &getConfiguration();
 
   }  // namespace EEPROM
 

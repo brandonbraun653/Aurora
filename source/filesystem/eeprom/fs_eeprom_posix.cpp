@@ -12,6 +12,7 @@
 Includes
 -----------------------------------------------------------------------------*/
 #include <Aurora/filesystem>
+#include <Aurora/logging>
 #include <Aurora/memory>
 #include <Chimera/common>
 
@@ -30,6 +31,12 @@ namespace Aurora::FileSystem::EEPROM
   static int fseek( FileHandle stream, size_t offset, size_t origin );
   static size_t ftell( FileHandle stream );
   static void frewind( FileHandle stream );
+
+
+  /*---------------------------------------------------------------------------
+  Static Data
+  ---------------------------------------------------------------------------*/
+  static Manager sManager; /**< Manager for the sole EEPROM file system */
 
 
   /*-----------------------------------------------------------------------------
@@ -51,13 +58,28 @@ namespace Aurora::FileSystem::EEPROM
   -----------------------------------------------------------------------------*/
   static int mount()
   {
+    sManager.configure( getEEPROMDriver(), getConfiguration().mbrCache );
 
+    if ( !sManager.mount() )
+    {
+      LOG_WARN( "EEPROM filesystem not initialized. Creating root partition.\r\n" );
+      sManager.softReset();
+
+      if ( !sManager.mount() )
+      {
+        LOG_ERROR( "Root partition failed to create\r\n" );
+        return -1;
+      }
+    }
+
+    return 0;
   }
 
 
   static int unmount()
   {
-
+    sManager.unmount();
+    return 0;
   }
 
 
