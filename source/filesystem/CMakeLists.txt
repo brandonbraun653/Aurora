@@ -34,6 +34,7 @@ gen_static_lib_variants(
   SOURCES
     eeprom/fs_eeprom_driver.cpp
     eeprom/fs_eeprom_posix.cpp
+    eeprom/fs_eeprom_types.cpp
   PRV_LIBRARIES
     aurora_intf_inc
     chimera_intf_inc

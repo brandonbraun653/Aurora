@@ -12,6 +12,7 @@
 Includes
 -----------------------------------------------------------------------------*/
 #include <Aurora/filesystem>
+#include <Aurora/logging>
 #include <Aurora/memory>
 #include <Chimera/common>
 
@@ -83,28 +84,49 @@ namespace Aurora::FileSystem::EEPROM
 
   bool Manager::mount()
   {
-    // Read in data from NVM into the MBR cache, then validate it.
-    // Focus on how to reduce the number of virtual calls. Can I somehow call the child class
-    // from the parent so I can keep the fun business logic in the parent and the data spec in
-    // the child?
+    if( refreshMBRCache() && mMBRCache->isValid() )
+    {
+      return true;
+    }
 
+    LOG_ERROR( "Failed to mount. MBR could not be validated.\r\n" );
     return false;
   }
 
 
   void Manager::unmount()
   {
+    mMBRCache->reset();
   }
 
 
   int Manager::softReset()
   {
+    /*-------------------------------------------------------------------------
+    Reset the MBR cache, then write it back to NVM. Results in an "empty" MBR
+    but all the original data from files in the previous MBR will be preserved.
+    -------------------------------------------------------------------------*/
+    mMBRCache->reset();
+    auto sts = mNVMDriver->write( mMBRCache->getStartOffset(), mMBRCache->cacheData(), mMBRCache->cacheSize() );
+    if ( sts != Aurora::Memory::Status::ERR_OK )
+    {
+      LOG_ERROR( "Failed to write cleared MBR to NVM\r\n" );
+      return -1;
+    }
+
     return 0;
   }
 
 
   bool Manager::refreshMBRCache()
   {
+    auto sts = mNVMDriver->read( mMBRCache->getStartOffset(), mMBRCache->cacheData(), mMBRCache->cacheSize() );
+    if ( sts != Aurora::Memory::Status::ERR_OK )
+    {
+      LOG_ERROR( "Failed to read MBR from NVM\r\n" );
+      return false;
+    }
+
     return true;
   }
 

@@ -18,6 +18,7 @@ Includes
 #include <cstdint>
 #include <Aurora/source/filesystem/file_types.hpp>
 #include <Chimera/common>
+#include <Chimera/assert>
 
 namespace Aurora::FileSystem::EEPROM
 {
@@ -60,6 +61,26 @@ namespace Aurora::FileSystem::EEPROM
   };
   static_assert( sizeof( MBREntry ) == 8, "MBREntry size is not correct" );
 
+  /**
+   * @brief Header information to prepend the master boot record
+   */
+  __packed_struct MBRHeader
+  {
+    uint32_t crc;       /**< CRC of the entire MBR structure */
+    uint8_t  max_files; /**< The maximum number of files that can be stored */
+    uint8_t  _pad[ 3 ]; /**< Padding to align the data to a 4-byte boundary */
+
+    /*-------------------------------------------------------------------
+    Public Functions
+    -------------------------------------------------------------------*/
+    void reset()
+    {
+      crc       = 0;
+      max_files = 0;
+      memset( _pad, 0, sizeof( _pad ) );
+    }
+  };
+  static_assert( sizeof( MBREntry ) % 4 == 0, "MBREntry size is not aligned to a 4-byte boundary" );
 
   /**
    * @brief Header that begins every EEPROM file system file
@@ -67,8 +88,8 @@ namespace Aurora::FileSystem::EEPROM
    */
   __packed_struct FileHeader
   {
-    uint32_t crc;       /**< CRC of the file data and this header */
-    uint16_t size;      /**< Size of the file in bytes */
+    uint32_t crc;  /**< CRC of the file data and this header */
+    uint16_t size; /**< Size of the file in bytes */
   };
 
 
@@ -85,31 +106,86 @@ namespace Aurora::FileSystem::EEPROM
 
     /**
      * @brief Gets the absolute address of the start of the MBR data in NVM
-     *
      * @return size_t
      */
     virtual size_t getStartOffset() const = 0;
 
     /**
-     * @brief Retrieves maximum supported files in this file system
+     * @brief Gets a pointer to the MBR header in RAM
+     * @return MBRHeader*
+     */
+    virtual MBRHeader *getHeader() const = 0;
+
+    /**
+     * @brief Gets the MBR entry at a given offset
      *
+     * @param index   Which entry to get
+     * @return MBREntry*
+     */
+    inline MBREntry *getEntry( const size_t index ) const
+    {
+      RT_DBG_ASSERT( index < getHeader()->max_files );
+      auto entry_start = reinterpret_cast<uint8_t *>( getHeader() ) + sizeof( MBRHeader );
+
+      return reinterpret_cast<MBREntry *>( entry_start ) + index;
+    }
+
+    /**
+     * @brief Calculates the effective size of the MBR in bytes
      * @return size_t
      */
-    virtual size_t getEntryLimit() const = 0;
+    inline size_t cacheSize() const
+    {
+      return sizeof( MBRHeader ) + sizeof( MBREntry ) * getHeader()->max_files;
+    }
+
+    /**
+     * @brief Gets a pointer to the entire MBR cache in RAM
+     * @return void*
+     */
+    inline void *cacheData() const
+    {
+      return reinterpret_cast<void *>( getHeader() );
+    }
+
+    /**
+     * @brief Retrieves maximum supported files in this file system
+     * @return size_t
+     */
+    inline size_t entryLimit() const
+    {
+      return getHeader()->max_files;
+    }
 
     /**
      * @brief Determines the total number of files currently present
-     *
      * @return size_t
      */
-    virtual size_t getEntryCount() const = 0;
+    size_t entryCount() const;
+
+    /**
+     * @brief Checks the MBR for validity
+     * @return bool
+     */
+    bool isValid() const;
+
+    /**
+     * @brief Resets the RAM cached version of the MBR to default values
+     */
+    void reset();
+
+    /**
+     * @brief Computes the CRC-32 of the current MBR data
+     * @return uint32_t
+     */
+    uint32_t calculateCRC() const;
   };
 
 
   /**
    * @brief Master Boot Record for the EEPROM file system
    *
-   * This structure is stored at the beginning of the EEPROM. It is  used to determine if the file
+   * This structure is stored at the beginning of the EEPROM. It is used to determine if the file
    * system is initialized and if it is, where the available "files" are stored.
    *
    * @tparam _NUM_FILES    The number of files that can be stored
@@ -121,31 +197,22 @@ namespace Aurora::FileSystem::EEPROM
   public:
     enum
     {
-      NUM_FILES = _NUM_FILES,
+      NUM_FILES    = _NUM_FILES,
       START_OFFSET = _START_OFFSET
     };
+
+    MBRCache() : mbr( { .header = { .crc = 0, .max_files = _NUM_FILES, ._pad = {} }, .files = {} } )
+    {
+    }
 
     size_t getStartOffset() const override
     {
       return START_OFFSET;
     }
 
-    size_t getEntryLimit() const override
+    MBRHeader *getHeader() const override
     {
-      return NUM_FILES;
-    }
-
-    size_t getEntryCount() const override
-    {
-      size_t count = 0;
-      for ( size_t i = 0; i < NUM_FILES; i++ )
-      {
-        if ( !mbr.files[ i ].isReset() )
-        {
-          count++;
-        }
-      }
-      return count;
+      return &mbr.header;
     }
 
   private:
@@ -154,15 +221,14 @@ namespace Aurora::FileSystem::EEPROM
      */
     __packed_struct NVMData
     {
-      uint32_t crc;                 /**< CRC of the entire MBR structure */
-      uint8_t  max_files;           /**< The maximum number of files that can be stored */
-      uint8_t  _pad[ 3 ];           /**< Padding to align the data to a 4-byte boundary */
-      MBREntry files[ _NUM_FILES ]; /**< Array of file entries */
-    }
-    mbr; /**< The actual data stored in the EEPROM */
+      MBRHeader header;              /**< Header for the MBR */
+      MBREntry  files[ _NUM_FILES ]; /**< Array of file entries */
+    };
+
+    mutable NVMData mbr; /**< The actual data stored in the EEPROM */
   };
 
 
 }  // namespace Aurora::FileSystem::EEPROM
 
-#endif  /* !AURORA_EEPROM_FS_TYPES_HPP */
+#endif /* !AURORA_EEPROM_FS_TYPES_HPP */
