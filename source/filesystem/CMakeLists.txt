@@ -27,21 +27,6 @@ gen_static_lib_variants(
     "${PROJECT_BINARY_DIR}/Aurora"
 )
 
-# EEFS Target
-gen_static_lib_variants(
-  TARGET
-    aurora_filesystem_eefs_driver
-  SOURCES
-    eeprom/fs_eeprom_driver.cpp
-    eeprom/fs_eeprom_posix.cpp
-    eeprom/fs_eeprom_types.cpp
-  PRV_LIBRARIES
-    aurora_intf_inc
-    chimera_intf_inc
-  EXPORT_DIR
-    "${PROJECT_BINARY_DIR}/Aurora"
-)
-
 # Little FS Target
 gen_static_lib_variants(
   TARGET

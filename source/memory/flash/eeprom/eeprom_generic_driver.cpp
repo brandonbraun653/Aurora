@@ -158,12 +158,15 @@ namespace Aurora::Flash::EEPROM
     Do a random word read. Assumes the EEPROM supports continuous reads with
     wraparound, which is pretty common.
     -------------------------------------------------------------------------*/
+    Chimera::Status_t result = Chimera::Status::OK;
+
     /* Setup the read address in-chip */
-    mDriver->write( mConfig.deviceAddress, &address, 1 );
-    mDriver->await( Trigger::TRIGGER_TRANSFER_COMPLETE, TIMEOUT_10MS );
+    result |= mDriver->write( mConfig.deviceAddress, &address, 1 );
+    result |= mDriver->await( Trigger::TRIGGER_TRANSFER_COMPLETE, TIMEOUT_10MS );
 
     /* Do the continuous read */
-    Chimera::Status_t result = mDriver->read( mConfig.deviceAddress, data, length );
+    result |= mDriver->read( mConfig.deviceAddress, data, length );
+    result |= mDriver->await( Trigger::TRIGGER_TRANSFER_COMPLETE, ( length * TIMEOUT_10MS ) );
 
     return ( result == Chimera::Status::OK ) ? Status::ERR_OK : Status::ERR_FAIL;
   }
