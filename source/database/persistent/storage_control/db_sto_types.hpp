@@ -1,33 +1,42 @@
 /******************************************************************************
  *  File Name:
- *    db_sto_api.hpp
+ *    db_sto_types.hpp
  *
  *  Description:
- *    Storage controller interface
+ *    Storage types for NVM
  *
  *  2022 | Brandon Braun | brandonbraun653@protonmail.com
  *****************************************************************************/
 
 #pragma once
-#ifndef AURORA_STORAGE_CONTROL_INTERFACE_HPP
-#define AURORA_STORAGE_CONTROL_INTERFACE_HPP
+#ifndef AURORA_DATABASE_STORAGE_TYPES_HPP
+#define AURORA_DATABASE_STORAGE_TYPES_HPP
 
 /*-----------------------------------------------------------------------------
 Includes
 -----------------------------------------------------------------------------*/
-
+#include <etl/crc.h>
 
 namespace Aurora::Database::Persistent
 {
-
   /*---------------------------------------------------------------------------
   Classes
   ---------------------------------------------------------------------------*/
-  class IStorageController
+  template<class Base>
+  class SerializedData
   {
   public:
-    virtual ~IStorageController() = default;
+
+  };
+
+
+  class NVMEntry : SerializedData<NVMEntry>
+  {
+    // Unique Header (32-bit? Mnemonic)
+    // CRC (variable size?)
+    // Key
+    // Data
   };
 }  // namespace Aurora::Database::Persistent
 
-#endif  /* !AURORA_STORAGE_CONTROL_INTERFACE_HPP */
+#endif  /* !AURORA_DATABASE_STORAGE_TYPES_HPP */

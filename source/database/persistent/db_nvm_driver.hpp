@@ -15,13 +15,43 @@
 /*-----------------------------------------------------------------------------
 Includes
 -----------------------------------------------------------------------------*/
-
+#include <Aurora/source/database/db_shared_types.hpp>
+#include <Aurora/source/database/persistent/db_nvm_types.hpp>
+#include <Aurora/source/database/persistent/memory_access/db_mem_api.hpp>
+#include <Aurora/source/database/persistent/storage_control/db_sto_api.hpp>
+#include <etl/list.h>
 
 namespace Aurora::Database::Persistent
 {
   /*---------------------------------------------------------------------------
-  Enumerations
+  Structures
   ---------------------------------------------------------------------------*/
+  struct DBConfig
+  {
+    etl::ilist<Key>    keyList;           /**< Keys allowed in implementation */
+    IMemoryController  memoryController;  /**< User memory controller */
+    IStorageController storageController; /**< User storage controller */
+  };
+
+  /*---------------------------------------------------------------------------
+  Classes
+  ---------------------------------------------------------------------------*/
+  class DBStore
+  {
+  public:
+    DBStore();
+    ~DBStore();
+
+    /**
+     * @brief Initializes the controller with the given configuration
+     *
+     * @param cfg   Configuration to use
+     */
+    void open( const DBConfig &cfg );
+
+  private:
+    DBConfig mCfg;
+  };
 }  // namespace Aurora::DB
 
 #endif  /* !AURORA_DATABASE_NVM_HPP */

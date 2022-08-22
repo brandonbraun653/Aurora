@@ -31,15 +31,14 @@ namespace Aurora::Database::Persistent
    * Using the etl::span type to act as a view into array like memory without
    * actually having to store or pass around that data.
    */
-  using Storage_t = etl::variant<uint8_t, uint16_t, uint32_t, uint64_t, float, double, etl::span<uint8_t>>;
+  using Storage_t = etl::variant<bool, uint8_t, uint16_t, uint32_t, uint64_t, float, double, etl::span<uint8_t>>;
 
   /*---------------------------------------------------------------------------
   Enumerations
   ---------------------------------------------------------------------------*/
-  enum class StorageStrategy : uint8_t
+  enum ReturnCode : int
   {
-    IN_PLACE,
-    ROLLING,
+    ERR_INVALID_KEY = -1,
   };
 }  // namespace Aurora::Database::Persistent
 
