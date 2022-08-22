@@ -19,13 +19,13 @@
 /* Aurora Includes */
 #include <Aurora/source/memory/generic/generic_intf.hpp>
 #include <Aurora/source/memory/heap/heap.hpp>
-#include <Aurora/source/database/database_types.hpp>
+#include <Aurora/source/database/volatile/database_types.hpp>
 
 /* Chimera Includes */
 #include <Chimera/assert>
 #include <Chimera/thread>
 
-namespace Aurora::Database
+namespace Aurora::Database::Volatile
 {
   /*-------------------------------------------------------------------------------
   Forward Declarations

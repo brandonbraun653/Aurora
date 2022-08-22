@@ -21,7 +21,7 @@
 #include <etl/observer.h>
 
 /* Aurora Includes */
-#include <Aurora/source/database/database_intf.hpp>
+#include <Aurora/source/database/volatile/database_intf.hpp>
 
 namespace Aurora::Datastore
 {
@@ -147,8 +147,8 @@ namespace Aurora::Datastore
 
   protected:
     friend Aurora::Datastore::Manager;
-    virtual void assignDatabase( Database::RAM *const database ){};
-    virtual Aurora::Database::RAM *getDatabase()
+    virtual void assignDatabase( Database::Volatile::RAM *const database ){};
+    virtual Aurora::Database::Volatile::RAM *getDatabase()
     {
       return nullptr;
     };
@@ -223,13 +223,13 @@ namespace Aurora::Datastore
     /*-------------------------------------------------------------------------------
     Protected Functions
     -------------------------------------------------------------------------------*/
-    void assignDatabase( Aurora::Database::RAM *const database ) final override
+    void assignDatabase( Aurora::Database::Volatile::RAM *const database ) final override
     {
       RT_HARD_ASSERT( database );
       mDB = database;
     }
 
-    Aurora::Database::RAM *getDatabase() final override
+    Aurora::Database::Volatile::RAM *getDatabase() final override
     {
       return mDB;
     }
@@ -241,7 +241,7 @@ namespace Aurora::Datastore
     }
 
   private:
-    Aurora::Database::RAM *mDB;
+    Aurora::Database::Volatile::RAM *mDB;
     const Database::Key mKey;
     const size_t mRate;
     const size_t mTimeout;

@@ -20,7 +20,7 @@
 
 /* Aurora Includes */
 #include <Aurora/source/datastore/datastore_intf.hpp>
-#include <Aurora/source/database/database_types.hpp>
+#include <Aurora/source/database/volatile/database_types.hpp>
 
 
 namespace Aurora::Datastore

@@ -5,7 +5,7 @@
  *  Description:
  *    Compile and runtime database config options
  *
- *  2021 | Brandon Braun | brandonbraun653@gmail.com
+ *  2021-2022 | Brandon Braun | brandonbraun653@gmail.com
  *******************************************************************************/
 
 #pragma once
@@ -20,7 +20,7 @@
 #include <cstddef>
 #include <cstdint>
 
-namespace Aurora::Database
+namespace Aurora::Database::Volatile
 {
 
   static constexpr size_t MAX_FILE_NAME_LENGTH = 32;  /**< Maximum characters, including null termination */

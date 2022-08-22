@@ -20,7 +20,7 @@
 #include <etl/macros.h>
 
 /* Aurora Includes */
-#include <Aurora/source/database/database_intf.hpp>
+#include <Aurora/source/database/volatile/database_intf.hpp>
 #include <Aurora/source/datastore/datastore_types.hpp>
 
 /* Chimera Includes */

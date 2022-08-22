@@ -4,7 +4,7 @@ gen_static_lib_variants(
   TARGET
     aurora_database
   SOURCES
-    database_driver.cpp
+    volatile/database_driver.cpp
   PRV_LIBRARIES
     aurora_intf_inc
     chimera_intf_inc

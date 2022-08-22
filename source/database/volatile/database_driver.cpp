@@ -5,7 +5,7 @@
  *  Description:
  *    Database driver implementation
  *
- *  2021 | Brandon Braun | brandonbraun653@gmail.com
+ *  2021-2022 | Brandon Braun | brandonbraun653@gmail.com
  *******************************************************************************/
 
 /* Aurora Includes */
@@ -14,7 +14,7 @@
 /* ETL Includes */
 #include <etl/crc32.h>
 
-namespace Aurora::Database
+namespace Aurora::Database::Volatile
 {
   /*-------------------------------------------------------------------------------
   Static Functions

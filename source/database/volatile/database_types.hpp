@@ -5,7 +5,7 @@
  *  Description:
  *    Types used in the database
  *
- *  2021 | Brandon Braun | brandonbraun653@gmail.com
+ *  2021-2022 | Brandon Braun | brandonbraun653@gmail.com
  *******************************************************************************/
 
 #pragma once
@@ -23,20 +23,16 @@
 #include <etl/delegate_service.h>
 
 /*Aurora Includes */
-#include <Aurora/source/database/database_config.hpp>
+#include <Aurora/source/database/db_shared_types.hpp>
+#include <Aurora/source/database/volatile/database_config.hpp>
 
 
-namespace Aurora::Database
+namespace Aurora::Database::Volatile
 {
   /*-------------------------------------------------------------------------------
   Forward Declarations
   -------------------------------------------------------------------------------*/
   struct Entry;
-
-  /*-------------------------------------------------------------------------------
-  Aliases
-  -------------------------------------------------------------------------------*/
-  using Key = size_t;
 
   /*-------------------------------------------------------------------------------
   Enumerations

@@ -45,7 +45,7 @@ namespace Aurora::Datastore
   }
 
 
-  bool Manager::registerObservable( IObservableAttr *const observable, Database::RAM *const database )
+  bool Manager::registerObservable( IObservableAttr *const observable, Database::Volatile::RAM *const database )
   {
     this->lock();
 
