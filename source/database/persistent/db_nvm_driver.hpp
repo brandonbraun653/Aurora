@@ -46,8 +46,15 @@ namespace Aurora::Database::Persistent
      * @brief Initializes the controller with the given configuration
      *
      * @param cfg   Configuration to use
+     * @return Zero if ready, another number if not
      */
-    void open( const DBConfig &cfg );
+    int open( const DBConfig &cfg );
+
+    int close();
+
+    int read( const Key key, Storage_t &value );
+
+    int write( const Key key, const Storage_t &value );
 
   private:
     DBConfig mCfg;

@@ -15,7 +15,7 @@
 /*-----------------------------------------------------------------------------
 Includes
 -----------------------------------------------------------------------------*/
-
+#include <Aurora/source/database/persistent/db_nvm_types.hpp>
 
 namespace Aurora::Database::Persistent
 {
