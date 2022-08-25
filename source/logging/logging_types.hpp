@@ -5,7 +5,7 @@
  *  Description:
  *    Logger types
  *
- *  2019-2021 | Brandon Braun | brandonbraun653@gmail.com
+ *  2019-2022 | Brandon Braun | brandonbraun653@gmail.com
  ********************************************************************************/
 
 #pragma once
@@ -27,7 +27,7 @@ namespace Aurora::Logging
   /*-------------------------------------------------------------------------------
   Aliases
   -------------------------------------------------------------------------------*/
-  using SinkHandle = std::shared_ptr<SinkInterface>;
+  using SinkHandle = SinkInterface*;
 
 
   /*---------------------------------------------------------------------------

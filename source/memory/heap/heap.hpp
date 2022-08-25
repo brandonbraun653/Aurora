@@ -64,7 +64,7 @@ namespace Aurora::Memory
     FreeRTOS variables for managing the heap allocations. For descriptions
     of what each actually does, please look at the heap4.c source code.
     ------------------------------------------------*/
-    std::shared_ptr<Chimera::Thread::Mutex> mLock;
+    Chimera::Thread::Mutex* mLock;
 
     uint8_t *heapBuffer;
     size_t heapSize;

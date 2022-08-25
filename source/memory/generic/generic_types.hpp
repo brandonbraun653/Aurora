@@ -84,8 +84,6 @@ namespace Aurora::Memory
   /*-------------------------------------------------------------------------------
   Aliases
   -------------------------------------------------------------------------------*/
-  using IGenericDevice_sPtr = std::shared_ptr<IGenericDevice>;
-
   using ByteOffset_t = size_t;
   using SysAddress_t = size_t;
   using ChunkIndex_t = size_t;

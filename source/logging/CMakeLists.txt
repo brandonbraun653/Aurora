@@ -5,6 +5,7 @@ gen_static_lib_variants(
   aurora_logging
   SOURCES
     logging_driver.cpp
+    logging_nanoprintf.c
     sinks/sink_cout.cpp
     sinks/sink_file.cpp
     sinks/sink_jlink.cpp

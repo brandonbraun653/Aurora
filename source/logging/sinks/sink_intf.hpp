@@ -29,6 +29,17 @@
 
 namespace Aurora::Logging
 {
+  /*---------------------------------------------------------------------------
+  Structures
+  ---------------------------------------------------------------------------*/
+  struct SinkAPI
+  {
+    void * context;           /**< Optional data for the sink to hook */
+    Result ( *open )( void );
+
+  };
+
+
   /*-------------------------------------------------------------------------------
   Classes
   -------------------------------------------------------------------------------*/
@@ -152,7 +163,7 @@ namespace Aurora::Logging
       /*------------------------------------------------
       Until custom formatters are available, simply dump the thread name in there
       ------------------------------------------------*/
-      int bytesWritten = snprintf( mLogBuffer.data(), mLogBuffer.size(), "[%s] -- ", mName.data() );
+      int bytesWritten = npf_snprintf( mLogBuffer.data(), mLogBuffer.size(), "[%s] -- ", mName.data() );
 
       if ( bytesWritten < 0 )
       {
@@ -164,7 +175,7 @@ namespace Aurora::Logging
       Attach the user's message, or what will fit anyways
       ------------------------------------------------*/
       #pragma GCC diagnostic ignored "-Wformat-security"
-      snprintf( mLogBuffer.data() + bytesWritten, mLogBuffer.size() - bytesWritten, str, args... );
+      npf_snprintf( mLogBuffer.data() + bytesWritten, mLogBuffer.size() - bytesWritten, str, args... );
       result = log( lvl, mLogBuffer.data(), strlen( mLogBuffer.data() ) );
 
       this->unlock();

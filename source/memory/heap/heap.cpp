@@ -84,7 +84,7 @@ namespace Aurora::Memory
   Heap::Heap()
   {
     // TODO: Allocate this within the assigned heap memory
-    mLock                         = std::make_shared<Chimera::Thread::Mutex>();
+    mLock                         = new Chimera::Thread::Mutex();
     heapBuffer                    = nullptr;
     heapSize                      = 0;
     blockStructSize               = ( sizeof( BlockLink_t ) + ( portBYTE_ALIGNMENT - 1 ) ) & ~( portBYTE_ALIGNMENT_MASK );
@@ -142,7 +142,7 @@ namespace Aurora::Memory
     /*-------------------------------------------------
     Attach the buffer
     -------------------------------------------------*/
-    LockGuard lck( *mLock.get() );
+    LockGuard lck( *mLock );
 
     heapBuffer         = reinterpret_cast<uint8_t *>( buffer );
     heapSize           = size;
@@ -166,7 +166,7 @@ namespace Aurora::Memory
   void *Heap::malloc( size_t size )
   {
     using namespace Chimera::Thread;
-    LockGuard lck( *mLock.get() );
+    LockGuard lck( *mLock );
 
     BlockLink_t *pxBlock;
     BlockLink_t *pxPreviousBlock;
@@ -272,7 +272,7 @@ namespace Aurora::Memory
   void Heap::free( void *const pv )
   {
     using namespace Chimera::Thread;
-    LockGuard lck( *mLock.get() );
+    LockGuard lck( *mLock );
 
     uint8_t *puc = ( uint8_t * )pv;
     BlockLink_t *pxLink;
@@ -317,7 +317,7 @@ namespace Aurora::Memory
   size_t Heap::available() const
   {
     using namespace Chimera::Thread;
-    LockGuard lck( *mLock.get() );
+    LockGuard lck( *mLock );
 
     return freeBytesRemaining;
   }
@@ -325,14 +325,14 @@ namespace Aurora::Memory
 
   size_t Heap::allocated() const
   {
-    Chimera::Thread::LockGuard lck( *mLock.get() );
+    Chimera::Thread::LockGuard lck( *mLock );
     return bytesAllocated;
   }
 
 
   size_t Heap::freed() const
   {
-    Chimera::Thread::LockGuard lck( *mLock.get() );
+    Chimera::Thread::LockGuard lck( *mLock );
     return bytesFreed;
   }
 

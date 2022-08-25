@@ -5,21 +5,19 @@
  *  Description:
  *    Logging implementation
  *
- *  2019-2021 | Brandon Braun | brandonbraun653@gmail.com
+ *  2019-2022 | Brandon Braun | brandonbraun653@gmail.com
  ********************************************************************************/
 
-/* C++ Includes */
+/*-----------------------------------------------------------------------------
+Includes
+-----------------------------------------------------------------------------*/
 #include <array>
 #include <cstdarg>
 #include <cstdint>
 #include <cstdio>
 #include <limits>
 #include <string>
-
-/* Chimera Includes */
 #include <Chimera/thread>
-
-/* Aurora Includes */
 #include <Aurora/logging>
 
 namespace Aurora::Logging
@@ -146,9 +144,7 @@ namespace Aurora::Logging
       auto index = getSinkOffsetIndex( sink );
       if ( index < sinkRegistry.size() )
       {
-        result = sinkRegistry[ index ]->close();
-
-        sinkRegistry[ index ].reset();
+        sinkRegistry[ index ]->close();
         sinkRegistry[ index ] = nullptr;
         result                = Result::RESULT_SUCCESS;
       }
@@ -159,7 +155,6 @@ namespace Aurora::Logging
           if ( sinkRegistry[ i ] )
           {
             sinkRegistry[ i ]->close();
-            sinkRegistry[ i ].reset();
             sinkRegistry[ i ] = nullptr;
           }
         }
@@ -289,7 +284,7 @@ namespace Aurora::Logging
     -------------------------------------------------------------------------*/
     va_list argptr;
     va_start( argptr, fmt );
-    vsnprintf( msg_buffer, MSG_BUF_SIZE, fmt, argptr );
+    npf_vsnprintf( msg_buffer, MSG_BUF_SIZE, fmt, argptr );
     va_end( argptr );
 
     /*-------------------------------------------------------------------------
@@ -329,8 +324,8 @@ namespace Aurora::Logging
     /*-------------------------------------------------------------------------
     Format the full message
     -------------------------------------------------------------------------*/
-    snprintf( log_buffer, LOG_BUF_SIZE, "[%ld][%s:%ld][%s] -- %s", static_cast<uint32_t>( Chimera::millis() ), file,
-              static_cast<uint32_t>( line ), str_level.data(), msg_buffer );
+    npf_snprintf( log_buffer, LOG_BUF_SIZE, "[%ld][%s:%ld][%s] -- %s", static_cast<uint32_t>( Chimera::millis() ), file,
+                  static_cast<uint32_t>( line ), str_level.data(), msg_buffer );
 
     /*-------------------------------------------------------------------------
     Log through the standard method

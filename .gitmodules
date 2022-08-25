@@ -19,3 +19,6 @@
 [submodule "lib/spiffs"]
 	path = lib/spiffs
 	url = https://github.com/brandonbraun653/spiffs.git
+[submodule "lib/nanoprintf"]
+	path = lib/nanoprintf
+	url = https://github.com/charlesnicholson/nanoprintf.git
