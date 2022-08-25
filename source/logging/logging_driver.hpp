@@ -12,15 +12,15 @@
 #ifndef AURORA_LOGGING_DRIVER_HPP
 #define AURORA_LOGGING_DRIVER_HPP
 
-/* C++ Includes */
+/*-----------------------------------------------------------------------------
+Includes
+-----------------------------------------------------------------------------*/
+#include <Aurora/source/logging/logging_config.hpp>
+#include <Aurora/source/logging/logging_types.hpp>
 #include <array>
 #include <cstdlib>
 #include <cstring>
 #include <string>
-
-/* Aurora Includes */
-#include <Aurora/source/logging/logging_config.hpp>
-#include <Aurora/source/logging/logging_types.hpp>
 
 namespace Aurora::Logging
 {
@@ -39,7 +39,7 @@ namespace Aurora::Logging
    *  to registered sinks
    *
    *  @param[in]  level      The global log level to be set
-   *  @return SinkHandleType
+   *  @return SinkHandle_rPtrType
    */
   Result setGlobalLogLevel( const Level level );
 
@@ -47,9 +47,9 @@ namespace Aurora::Logging
    *  Registers a sink with the back end driver
    *
    *  @param[in]  sink      The sink to be registered
-   *  @return SinkHandleType
+   *  @return SinkHandle_rPtrType
    */
-  Result registerSink( SinkHandle &sink, const Config options = CFG_NONE );
+  Result registerSink( SinkHandle_rPtr &sink, const Config options = CFG_NONE );
 
   /**
    *  Removes the associated sink.
@@ -59,7 +59,7 @@ namespace Aurora::Logging
    *  @param[in]  sink      The sink that should be removed
    *  @return ResultType
    */
-  Result removeSink( SinkHandle &sink );
+  Result removeSink( SinkHandle_rPtr &sink );
 
   /**
    *  Sets the default global logger instance
@@ -67,14 +67,14 @@ namespace Aurora::Logging
    *  @param[in]  sink      The sink to become the root
    *  @return Result
    */
-  Result setRootSink( SinkHandle &sink );
+  Result setRootSink( SinkHandle_rPtr &sink );
 
   /**
    *  Gets the default global logger instance
    *
-   *  @return SinkHandle
+   *  @return SinkHandle_rPtr
    */
-  SinkHandle getRootSink();
+  SinkHandle_rPtr getRootSink();
 
   /**
    *  Attempts to log to every registered sink. Each sink determines if the message

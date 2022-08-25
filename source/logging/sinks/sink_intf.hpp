@@ -29,29 +29,18 @@
 
 namespace Aurora::Logging
 {
-  /*---------------------------------------------------------------------------
-  Structures
-  ---------------------------------------------------------------------------*/
-  struct SinkAPI
-  {
-    void * context;           /**< Optional data for the sink to hook */
-    Result ( *open )( void );
-
-  };
-
-
   /*-------------------------------------------------------------------------------
   Classes
   -------------------------------------------------------------------------------*/
   class SinkInterface : public Chimera::Thread::Lockable<SinkInterface>
   {
   public:
-    SinkInterface()
+    bool enabled;
+    Level logLevel;
+    std::string_view name;
+
+    SinkInterface() : enabled( false ), logLevel( Level::LVL_MAX ), name( "" )
     {
-      mSinkEnabled  = false;
-      mLoggingLevel = Level::LVL_MAX;
-      mName         = "";
-      mLogBuffer.fill( 0 );
     }
 
     virtual ~SinkInterface() = default;
@@ -76,121 +65,8 @@ namespace Aurora::Logging
      */
     virtual Result log( const Level level, const void *const message, const size_t length ) = 0;
 
-    /**
-     *  Enables the sink so logs can be processed
-     */
-    void enable()
-    {
-      mSinkEnabled = true;
-    }
-
-    /**
-     *  Disables the sink so logs cannot be processed
-     */
-    void disable()
-    {
-      mSinkEnabled = false;
-    }
-
-    /**
-     *  Checks if the sink is enabled
-     *  @return bool
-     */
-    bool isEnabled()
-    {
-      return mSinkEnabled;
-    }
-
-    /**
-     *  Sets the minimum log level threshold. This level, plus any higher priority
-     *  levels, will be logged with the sink.
-     *
-     *  @param[in]  level   The minimum log level for this sink
-     *  @return ResultType
-     */
-    void setLogLevel( const Level level )
-    {
-      mLoggingLevel = level;
-    }
-
-    /**
-     *  Gets the log level currently assigned to the sink
-     *
-     *  @return Level
-     */
-    Level getLogLevel()
-    {
-      return mLoggingLevel;
-    }
-
-    /**
-     *  Assigns a name to the sink
-     *
-     *  @warning  This naming should be unique
-     *
-     *  @param[in]  name    The name to be assigned
-     *  @return Result
-     */
-    Result setName( const std::string_view &name )
-    {
-      mName = name;
-      return Result::RESULT_SUCCESS;
-    }
-
-    /**
-     *  Gets the name of the sink
-     *
-     *  @return std::string_view
-     */
-    std::string_view getName()
-    {
-      return mName;
-    }
-
-    /**
-     *
-     */
-    template<typename... Args>
-    Result flog( const Level lvl, const char *str, Args const &... args )
-    {
-      /*-------------------------------------------------
-      Note to future me: If 'this' is null, you haven't
-      initialized the sink yet.
-      -------------------------------------------------*/
-      auto result = Result::RESULT_SUCCESS;
-      this->lock();
-
-      /*------------------------------------------------
-      Until custom formatters are available, simply dump the thread name in there
-      ------------------------------------------------*/
-      int bytesWritten = npf_snprintf( mLogBuffer.data(), mLogBuffer.size(), "[%s] -- ", mName.data() );
-
-      if ( bytesWritten < 0 )
-      {
-        this->unlock();
-        return Result::RESULT_FAIL;
-      }
-
-      /*------------------------------------------------
-      Attach the user's message, or what will fit anyways
-      ------------------------------------------------*/
-      #pragma GCC diagnostic ignored "-Wformat-security"
-      npf_snprintf( mLogBuffer.data() + bytesWritten, mLogBuffer.size() - bytesWritten, str, args... );
-      result = log( lvl, mLogBuffer.data(), strlen( mLogBuffer.data() ) );
-
-      this->unlock();
-
-      return result;
-    }
-
   private:
     friend Chimera::Thread::Lockable<SinkInterface>;
-
-
-    Level mLoggingLevel;
-    bool mSinkEnabled;
-    std::string_view mName;
-    std::array<char, ULOG_MAX_SNPRINTF_BUFFER_LENGTH> mLogBuffer;
   };
 
 }  // namespace Aurora::Logging

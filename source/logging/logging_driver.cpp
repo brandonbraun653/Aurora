@@ -33,10 +33,10 @@ namespace Aurora::Logging
   -------------------------------------------------------------------------------*/
   static bool uLogInitialized      = false;
   static Level globalLogLevel      = Level::LVL_MIN;
-  static SinkHandle globalRootSink = nullptr;
+  static SinkHandle_rPtr globalRootSink = nullptr;
   static size_t defaultLockTimeout = 100;
   static Chimera::Thread::RecursiveTimedMutex threadLock;
-  static std::array<SinkHandle, ULOG_MAX_REGISTERABLE_SINKS> sinkRegistry;
+  static std::array<SinkHandle_rPtr, ULOG_MAX_REGISTERABLE_SINKS> sinkRegistry;
 
 
   /*-------------------------------------------------------------------------------
@@ -48,7 +48,7 @@ namespace Aurora::Logging
    *  @param[in]  sinkHandle  The handle to search for
    *  @return size_t
    */
-  static size_t getSinkOffsetIndex( const SinkHandle &sinkHandle );
+  static size_t getSinkOffsetIndex( const SinkHandle_rPtr &sinkHandle );
 
 
   /*-------------------------------------------------------------------------------
@@ -75,7 +75,7 @@ namespace Aurora::Logging
   }
 
 
-  Result registerSink( SinkHandle &sink, const Config options )
+  Result registerSink( SinkHandle_rPtr &sink, const Config options )
   {
     constexpr size_t invalidIndex = std::numeric_limits<size_t>::max();
 
@@ -134,7 +134,7 @@ namespace Aurora::Logging
   }
 
 
-  Result removeSink( SinkHandle &sink )
+  Result removeSink( SinkHandle_rPtr &sink )
   {
     Result result = Result::RESULT_LOCKED;
     Chimera::Thread::TimedLockGuard x( threadLock );
@@ -167,7 +167,7 @@ namespace Aurora::Logging
   }
 
 
-  Result setRootSink( SinkHandle &sink )
+  Result setRootSink( SinkHandle_rPtr &sink )
   {
     Result result = Result::RESULT_LOCKED;
     Chimera::Thread::TimedLockGuard x( threadLock );
@@ -182,13 +182,13 @@ namespace Aurora::Logging
   }
 
 
-  SinkHandle getRootSink()
+  SinkHandle_rPtr getRootSink()
   {
     return globalRootSink;
   }
 
 
-  size_t getSinkOffsetIndex( const SinkHandle &sinkHandle )
+  size_t getSinkOffsetIndex( const SinkHandle_rPtr &sinkHandle )
   {
     /*------------------------------------------------
     Figure out the real addresses and boundary limit them
@@ -240,7 +240,7 @@ namespace Aurora::Logging
     ------------------------------------------------*/
     for ( size_t i = 0; i < sinkRegistry.size(); i++ )
     {
-      if ( sinkRegistry[ i ] && ( sinkRegistry[ i ]->getLogLevel() >= globalLogLevel ) )
+      if ( sinkRegistry[ i ] && ( sinkRegistry[ i ]->logLevel >= globalLogLevel ) )
       {
         sinkRegistry[ i ]->log( level, message, length );
       }
