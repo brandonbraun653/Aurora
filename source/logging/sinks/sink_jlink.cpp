@@ -77,7 +77,7 @@ namespace Aurora::Logging
     /*------------------------------------------------
     Make sure we can actually log the data
     ------------------------------------------------*/
-    if ( level < getLogLevel() )
+    if ( level < logLevel )
     {
       return Result::RESULT_INVALID_LEVEL;
     }
