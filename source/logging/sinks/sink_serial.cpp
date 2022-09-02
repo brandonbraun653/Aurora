@@ -5,13 +5,13 @@
  *  Description:
  *    Implements a serial based sink for the uLogger interface.
  *
- *  2019-2021 | Brandon Braun | brandonbraun653@gmail.com
+ *  2019-2022 | Brandon Braun | brandonbraun653@gmail.com
  ********************************************************************************/
 
-/* Aurora Includes */
+/*-----------------------------------------------------------------------------
+Includes
+-----------------------------------------------------------------------------*/
 #include <Aurora/logging>
-
-/* Chimera Includes */
 #include <Chimera/event>
 #include <Chimera/serial>
 #include <Chimera/thread>
@@ -76,7 +76,7 @@ namespace Aurora::Logging
   {
     Result sinkResult = Result::RESULT_SUCCESS;
 
-    if ( sink->end() != Chimera::Status::OK )
+    if ( sink->close() != Chimera::Status::OK )
     {
       sinkResult = Result::RESULT_FAIL;
     }
@@ -120,20 +120,14 @@ namespace Aurora::Logging
     Write the data and block the current thread execution
     until the transfer is complete.
     ------------------------------------------------*/
-    auto hwResult = Chimera::Status::OK;
-    auto ulResult = Result::RESULT_SUCCESS;
-
-    sink->lock();
-    hwResult |= sink->write( message, length );
-    hwResult |= sink->await( Chimera::Event::Trigger::TRIGGER_WRITE_COMPLETE, TIMEOUT_BLOCK );
-    sink->unlock();
-
-    if ( hwResult != Chimera::Status::OK )
+    if ( sink->write( message, length ) == Chimera::Status::OK )
     {
-      ulResult = Result::RESULT_FAIL;
+      return Result::RESULT_SUCCESS;
     }
-
-    return ulResult;
+    else
+    {
+      return Result::RESULT_FAIL;
+    }
   }
 
 }  // namespace Aurora::Logging
