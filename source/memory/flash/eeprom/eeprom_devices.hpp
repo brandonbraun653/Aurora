@@ -39,6 +39,21 @@ namespace Aurora::Flash::EEPROM
       .blockEraseDelay = 0,
       .chipEraseDelay  = 0,
       .eventPoll       = nullptr },
+    // 24LC128
+    { .writeChunk      = Aurora::Memory::Chunk::PAGE,
+      .readChunk       = Aurora::Memory::Chunk::PAGE,
+      .eraseChunk      = Aurora::Memory::Chunk::PAGE,
+      .jedec           = 0,
+      .pageSize        = 1,
+      .blockSize       = 0,
+      .sectorSize      = 0,
+      .startAddress    = 0,
+      .endAddress      = 16 * 1024,
+      .startUpDelay    = 0,
+      .pagePgmDelay    = 5 * Chimera::Thread::TIMEOUT_1MS,
+      .blockEraseDelay = 0,
+      .chipEraseDelay  = 0,
+      .eventPoll       = nullptr },
   };
 }  // namespace Aurora::Flash::EEPROM
 

@@ -161,7 +161,14 @@ namespace Aurora::Flash::EEPROM
     Chimera::Status_t result = Chimera::Status::OK;
 
     /* Setup the read address in-chip */
-    result |= mDriver->write( mConfig.deviceAddress, &address, 1 );
+    if( attr->endAddress <= 256 )
+    {
+      result |= mDriver->write( mConfig.deviceAddress, &address, 1 );
+    }
+    else if( attr->endAddress <= ( 65 * 1024 ) )
+    {
+
+    }
     result |= mDriver->await( Trigger::TRIGGER_TRANSFER_COMPLETE, TIMEOUT_10MS );
 
     /* Do the continuous read */
