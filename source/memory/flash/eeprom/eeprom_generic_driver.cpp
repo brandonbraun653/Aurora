@@ -110,14 +110,31 @@ namespace Aurora::Flash::EEPROM
     amount after each write. EEPROM aren't exactly known for performance...
     -------------------------------------------------------------------------*/
     Chimera::Status_t result = Chimera::Status::OK;
-    uint8_t write_data[ 2 ];
+    uint8_t write_size = 0;
+    uint8_t write_data[ 3 ];
 
     for ( size_t idx = 0; idx < length; idx++ )
     {
-      write_data[ 0 ] = address + idx;
-      write_data[ 1 ] = static_cast<const uint8_t *const>( data )[ idx ];
+      if( attr->endAddress <= 256 )
+      {
+        write_size      = 2;
+        write_data[ 0 ] = address + idx;
+        write_data[ 1 ] = static_cast<const uint8_t *const>( data )[ idx ];
+      }
+      else if( attr->endAddress <= ( 65 * 1024 ) )
+      {
+        write_size      = 3;
+        write_data[ 0 ] = ( ( ( address + idx ) >> 8 ) & 0xFF );  // High byte
+        write_data[ 1 ] = ( ( ( address + idx ) >> 0 ) & 0xFF );  // Low byte
+        write_data[ 2 ] = static_cast<const uint8_t *const>( data )[ idx ];
+      }
+      else
+      {
+        // Need to implement larger address access scheme
+        RT_HARD_ASSERT( false );
+      }
 
-      result |= mDriver->write( mConfig.deviceAddress, write_data, sizeof( write_data ) );
+      result |= mDriver->write( mConfig.deviceAddress, write_data, write_size );
       Chimera::delayMilliseconds( attr->pagePgmDelay );
     }
 
@@ -167,8 +184,14 @@ namespace Aurora::Flash::EEPROM
     }
     else if( attr->endAddress <= ( 65 * 1024 ) )
     {
-
+      result |= mDriver->write( mConfig.deviceAddress, &address, 2 );
     }
+    else
+    {
+      // Need to implement larger address access scheme
+      RT_HARD_ASSERT( false );
+    }
+
     result |= mDriver->await( Trigger::TRIGGER_TRANSFER_COMPLETE, TIMEOUT_10MS );
 
     /* Do the continuous read */
