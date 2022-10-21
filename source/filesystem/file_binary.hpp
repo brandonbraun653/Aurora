@@ -129,7 +129,7 @@ namespace Aurora::FileSystem
 
   private:
     bool mIsOpen;
-    FileHandle mFileHandle;
+    FileId mFileId;
     ECode mError;
   };
 }  // namespace Aurora::FileSystem

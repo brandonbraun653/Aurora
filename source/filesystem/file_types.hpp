@@ -19,55 +19,75 @@ Includes
 
 namespace Aurora::FileSystem
 {
-/*-------------------------------------------------------------------------------
-Aliases
--------------------------------------------------------------------------------*/
-#if defined( SIMULATOR )
-  using FileHandle = void *;
-#else
-  using FileHandle = int;
-#endif
+  /*---------------------------------------------------------------------------
+  Aliases
+  ---------------------------------------------------------------------------*/
+  using VolumeId = int;   /**< Identifier for a specific volume */
+  using FileId   = int;   /**< Identifier for a specific file */
 
-  /*-------------------------------------------------------------------------------
+  /*---------------------------------------------------------------------------
   Enumerations
-  -------------------------------------------------------------------------------*/
-  enum BackendType : size_t
+  ---------------------------------------------------------------------------*/
+  enum AccessFlags : uint32_t
   {
-    DRIVER_LITTLE_FS, /**< Little FS embedded driver */
-    DRIVER_SPIFFS,    /**< SPI Flash FileSystem */
-    DRIVER_EEFS,      /**< EEPROM FileSystem */
-    DRIVER_OS,        /**< Compiled OS target file system, aka C++17 filesystem library */
-
-    DRIVER_NUM_OPTIONS,
-    DRIVER_UNKNOWN
+    O_RDONLY  = ( 1u << 0 ),
+    O_WRONLY  = ( 1u << 1 ),
+    O_RDWR    = ( 1u << 2 ),
+    O_APPEND  = ( 1u << 3 ),
+    O_CREAT   = ( 1u << 4 ),
+    O_EXCL    = ( 1u << 5 ),
+    O_TRUNC   = ( 1u << 6 )
   };
 
-  enum IODirection : size_t
-  {
-    IO_READ,  /**< Reads data */
-    IO_WRITE, /**< Overwrites all data */
-  };
-
-
-  /*-------------------------------------------------------------------------------
+  /*---------------------------------------------------------------------------
   Structures
-  -------------------------------------------------------------------------------*/
+  ---------------------------------------------------------------------------*/
   /**
-   * @brief Convenience container for registering a file system driver
-   * @note See documentation in file_intf.hpp for more details on function behavior
+   * @brief Function pointers implemented by all filesystem drivers
+   *
+   * By implementing these functions, a wide variety of filesystem types can
+   * be supported. There are quite a few variations out there ranging from
+   * full blown computers to highly restricted embedded systems that just need
+   * the simple ability to access a file to log some data. Ideally this will
+   * be abstract enough to port across this range of system types.
    */
   struct Interface
   {
-    int ( *mount )();
+    /*-------------------------------------------------------------------------
+    Interface Specific Control Functions
+    -------------------------------------------------------------------------*/
+    /**
+     * @brief Powers up the filesystem interface.
+     * @return 0 if OK, negative otherwise
+     */
+    int ( *initialize )();
+
+    /**
+     * @brief Perform implementation specific aspects of mounting
+     *
+     * @param drive   Unique drive string assigned by the high level driver
+     * @return 0 if OK, negative otherwise
+     */
+    int ( *mount )( const std::string_view &drive );
+
+    /**
+     * @brief Tears down implementation specific aspects of the drive
+     *
+     * @return 0 if OK, negative otherwise
+     */
     int ( *unmount )();
-    FileHandle ( *fopen )( const char *filename, const char *mode, const size_t size );
-    int ( *fclose )( FileHandle stream );
-    int ( *fflush )( FileHandle stream );
-    size_t ( *fread )( void *ptr, size_t size, size_t count, FileHandle stream );
-    size_t ( *fwrite )( const void *ptr, size_t size, size_t count, FileHandle stream );
-    int ( *fseek )( FileHandle stream, size_t offset, size_t origin );
-    size_t ( *ftell )( FileHandle stream );
-    void ( *frewind )( FileHandle stream );
+
+    /*-------------------------------------------------------------------------
+    Standard Filesystem Interface
+    -------------------------------------------------------------------------*/
+    int ( *fopen )( const char *filename, const AccessFlags mode, FileId &file );
+    int ( *fclose )( const FileId stream );
+    int ( *fflush )( const FileId stream );
+    size_t ( *fread )( void *const ptr, const size_t size, const size_t count, const FileId stream );
+    size_t ( *fwrite )( const void *const ptr, const size_t size, const size_t count, const FileId stream );
+    int ( *fseek )( const FileId stream, const size_t offset, const size_t origin );
+    size_t ( *ftell )( const FileId stream );
+    void ( *frewind )( const FileId stream );
   };
 }  // namespace Aurora::FileSystem
 

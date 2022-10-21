@@ -31,49 +31,49 @@ namespace Aurora::FileSystem::Generic
   }
 
 
-  static FileHandle fopen( const char *filename, const char *mode )
+  static FileId fopen( const char *filename, const char *mode )
   {
-    return reinterpret_cast<FileHandle>( ::fopen( filename, mode ) );
+    return reinterpret_cast<FileId>( ::fopen( filename, mode ) );
   }
 
 
-  static int fclose( FileHandle stream )
+  static int fclose( FileId stream )
   {
     return ::fclose( reinterpret_cast<FILE *>( stream ) );
   }
 
 
-  static int fflush( FileHandle stream )
+  static int fflush( FileId stream )
   {
     return ::fflush( reinterpret_cast<FILE *>( stream ) );
   }
 
 
-  static size_t fread( void *ptr, size_t size, size_t count, FileHandle stream )
+  static size_t fread( void *ptr, size_t size, size_t count, FileId stream )
   {
     return ::fread( ptr, size, count, reinterpret_cast<FILE *>( stream ) );
   }
 
 
-  static size_t fwrite( const void *ptr, size_t size, size_t count, FileHandle stream )
+  static size_t fwrite( const void *ptr, size_t size, size_t count, FileId stream )
   {
     return ::fwrite( ptr, size, count, reinterpret_cast<FILE *>( stream ) );
   }
 
 
-  static int fseek( FileHandle stream, size_t offset, size_t origin )
+  static int fseek( FileId stream, size_t offset, size_t origin )
   {
     return ::fseek( reinterpret_cast<FILE *>( stream ), offset, origin );
   }
 
 
-  static size_t ftell( FileHandle stream )
+  static size_t ftell( FileId stream )
   {
     return ::ftell( reinterpret_cast<FILE *>( stream ) );
   }
 
 
-  static void frewind( FileHandle stream )
+  static void frewind( FileId stream )
   {
     ::rewind( reinterpret_cast<FILE *>( stream ) );
   }

@@ -63,14 +63,14 @@ namespace Aurora::FileSystem::SPIFFS
 
   static int mount();
   static int unmount();
-  static FileHandle fopen( const char *filename, const char *mode, const size_t size );
-  static int fclose( FileHandle stream );
-  static int fflush( FileHandle stream );
-  static size_t fread( void *ptr, size_t size, size_t count, FileHandle stream );
-  static size_t fwrite( const void *ptr, size_t size, size_t count, FileHandle stream );
-  static int fseek( FileHandle stream, size_t offset, size_t origin );
-  static size_t ftell( FileHandle stream );
-  static void frewind( FileHandle stream );
+  static FileId fopen( const char *filename, const char *mode, const size_t size );
+  static int fclose( FileId stream );
+  static int fflush( FileId stream );
+  static size_t fread( void *ptr, size_t size, size_t count, FileId stream );
+  static size_t fwrite( const void *ptr, size_t size, size_t count, FileId stream );
+  static int fseek( FileId stream, size_t offset, size_t origin );
+  static size_t ftell( FileId stream );
+  static void frewind( FileId stream );
 
 
   /*-------------------------------------------------------------------------------
@@ -235,7 +235,7 @@ namespace Aurora::FileSystem::SPIFFS
   }
 
 
-  static FileHandle fopen( const char *filename, const char *mode, const size_t size )
+  static FileId fopen( const char *filename, const char *mode, const size_t size )
   {
     using namespace Aurora::Logging;
     using namespace Chimera::Thread;
@@ -245,7 +245,7 @@ namespace Aurora::FileSystem::SPIFFS
     -------------------------------------------------*/
     if ( !SPIFFS_mounted( &fs ) )
     {
-      return std::numeric_limits<FileHandle>::max();
+      return std::numeric_limits<FileId>::max();
     }
 
     LockGuard<RecursiveMutex> lk( s_file_mtx );
@@ -264,7 +264,7 @@ namespace Aurora::FileSystem::SPIFFS
     -------------------------------------------------*/
     if ( s_open_files.full() )
     {
-      return std::numeric_limits<FileHandle>::max();
+      return std::numeric_limits<FileId>::max();
     }
 
     /*-------------------------------------------------
@@ -289,7 +289,7 @@ namespace Aurora::FileSystem::SPIFFS
     /*-------------------------------------------------
     Try to open the file
     -------------------------------------------------*/
-    FileHandle ret_val = -1;
+    FileId ret_val = -1;
 
     s_open_files.insert( { filename, -1 } );
     iter = s_open_files.find( filename );
@@ -310,7 +310,7 @@ namespace Aurora::FileSystem::SPIFFS
   }
 
 
-  static int fclose( FileHandle stream )
+  static int fclose( FileId stream )
   {
     using namespace Aurora::Logging;
     using namespace Chimera::Thread;
@@ -348,7 +348,7 @@ namespace Aurora::FileSystem::SPIFFS
   }
 
 
-  static int fflush( FileHandle stream )
+  static int fflush( FileId stream )
   {
     /*-------------------------------------------------
     Mount protection
@@ -365,14 +365,14 @@ namespace Aurora::FileSystem::SPIFFS
   }
 
 
-  static size_t fread( void *ptr, size_t size, size_t count, FileHandle stream )
+  static size_t fread( void *ptr, size_t size, size_t count, FileId stream )
   {
     /*-------------------------------------------------
     Mount protection
     -------------------------------------------------*/
     if ( !SPIFFS_mounted( &fs ) )
     {
-      return std::numeric_limits<FileHandle>::max();
+      return std::numeric_limits<FileId>::max();
     }
 
     int read_amount = SPIFFS_read( &fs, stream, ptr, size * count );
@@ -382,14 +382,14 @@ namespace Aurora::FileSystem::SPIFFS
   }
 
 
-  static size_t fwrite( const void *ptr, size_t size, size_t count, FileHandle stream )
+  static size_t fwrite( const void *ptr, size_t size, size_t count, FileId stream )
   {
     /*-------------------------------------------------
     Mount protection
     -------------------------------------------------*/
     if ( !SPIFFS_mounted( &fs ) )
     {
-      return std::numeric_limits<FileHandle>::max();
+      return std::numeric_limits<FileId>::max();
     }
 
     int write_amount = SPIFFS_write( &fs, stream, const_cast<void *>( ptr ), size * count );
@@ -399,7 +399,7 @@ namespace Aurora::FileSystem::SPIFFS
   }
 
 
-  static int fseek( FileHandle stream, size_t offset, size_t origin )
+  static int fseek( FileId stream, size_t offset, size_t origin )
   {
     /*-------------------------------------------------
     Mount protection
@@ -416,14 +416,14 @@ namespace Aurora::FileSystem::SPIFFS
   }
 
 
-  static size_t ftell( FileHandle stream )
+  static size_t ftell( FileId stream )
   {
     /*-------------------------------------------------
     Mount protection
     -------------------------------------------------*/
     if ( !SPIFFS_mounted( &fs ) )
     {
-      return std::numeric_limits<FileHandle>::max();
+      return std::numeric_limits<FileId>::max();
     }
 
     auto pos = SPIFFS_tell( &fs, stream );
@@ -433,7 +433,7 @@ namespace Aurora::FileSystem::SPIFFS
   }
 
 
-  static void frewind( FileHandle stream )
+  static void frewind( FileId stream )
   {
     /*-------------------------------------------------
     Mount protection

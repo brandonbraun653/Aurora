@@ -50,7 +50,7 @@ namespace Aurora::FileSystem
   }
 
 
-  bool fIsValid( FileHandle &stream )
+  bool fIsValid( FileId &stream )
   {
     #if defined( SIMULATOR )
     return stream != nullptr;
@@ -62,56 +62,56 @@ namespace Aurora::FileSystem
   /*-------------------------------------------------------------------------------
   STDIO Interface
   -------------------------------------------------------------------------------*/
-  FileHandle fopen( const char *filename, const char *mode, const size_t size )
+  FileId fopen( const char *filename, const char *mode, const size_t size )
   {
     RT_DBG_ASSERT( impl && impl->fopen );
     return impl->fopen( filename, mode, size );
   }
 
 
-  int fclose( FileHandle stream )
+  int fclose( FileId stream )
   {
     RT_DBG_ASSERT( impl && impl->fclose && stream );
     return impl->fclose( stream );
   }
 
 
-  int fflush( FileHandle stream )
+  int fflush( FileId stream )
   {
     RT_DBG_ASSERT( impl && impl->fflush && stream  );
     return impl->fflush( stream );
   }
 
 
-  size_t fread( void *ptr, size_t size, size_t count, FileHandle stream )
+  size_t fread( void *ptr, size_t size, size_t count, FileId stream )
   {
     RT_DBG_ASSERT( impl && impl->fread && stream  );
     return impl->fread( ptr, size, count, stream );
   }
 
 
-  size_t fwrite( const void *ptr, size_t size, size_t count, FileHandle stream )
+  size_t fwrite( const void *ptr, size_t size, size_t count, FileId stream )
   {
     RT_DBG_ASSERT( impl && impl->fwrite && stream  );
     return impl->fwrite( ptr, size, count, stream );
   }
 
 
-  int fseek( FileHandle stream, size_t offset, size_t origin )
+  int fseek( FileId stream, size_t offset, size_t origin )
   {
     RT_DBG_ASSERT( impl && impl->fseek && stream  );
     return impl->fseek( stream, offset, origin );
   }
 
 
-  size_t ftell( FileHandle stream )
+  size_t ftell( FileId stream )
   {
     RT_DBG_ASSERT( impl && impl->ftell && stream );
     return impl->ftell( stream );
   }
 
 
-  void frewind( FileHandle stream )
+  void frewind( FileId stream )
   {
     RT_DBG_ASSERT( impl && impl->frewind && stream );
     impl->frewind( stream );

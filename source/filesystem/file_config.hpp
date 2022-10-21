@@ -24,17 +24,6 @@
 
 namespace Aurora::FileSystem
 {
-  /*-------------------------------------------------------------------------------
-  Configuration Constants: These need to be duplicated in a user configuration file
-  -------------------------------------------------------------------------------*/
-  /**
-   *  What the default file system implemenation will hook into.
-   */
-  #if defined( EMBEDDED )
-  static constexpr BackendType DEFAULT_FILESYSTEM = BackendType::DRIVER_SPIFFS;
-  #else
-  static constexpr BackendType DEFAULT_FILESYSTEM = BackendType::DRIVER_OS;
-  #endif
 }  // namespace Aurora::FileSystem
 
 #endif /* AURORA_USER_FILESYSTEM_CONFIG */

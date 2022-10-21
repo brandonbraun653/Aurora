@@ -25,9 +25,9 @@ namespace Aurora::FileSystem
     mError = this->ERR_OK;
 
     #if defined( SIMULATOR )
-    mFileHandle = nullptr;
+    mFileId = nullptr;
     #else
-    mFileHandle = 0;
+    mFileId = 0;
     #endif
   }
 
@@ -40,17 +40,17 @@ namespace Aurora::FileSystem
 
   bool BinaryFile::create( const std::string_view &filename, const size_t size )
   {
-    mFileHandle = fopen( filename.data(), "w", size );
-    fclose( mFileHandle );
+    mFileId = fopen( filename.data(), "w", size );
+    fclose( mFileId );
 
-    return fIsValid( mFileHandle );
+    return fIsValid( mFileId );
   }
 
 
   bool BinaryFile::open( const std::string_view &filename, const std::string_view &mode )
   {
-    mFileHandle = fopen( filename.data(), mode.data() );
-    mIsOpen     = fIsValid( mFileHandle );
+    mFileId = fopen( filename.data(), mode.data() );
+    mIsOpen     = fIsValid( mFileId );
 
     return mIsOpen;
   }
@@ -58,10 +58,10 @@ namespace Aurora::FileSystem
 
   void BinaryFile::close()
   {
-    if ( mIsOpen && fIsValid( mFileHandle ) )
+    if ( mIsOpen && fIsValid( mFileId ) )
     {
-      fclose( mFileHandle );
-      mFileHandle = {};
+      fclose( mFileId );
+      mFileId = {};
       mIsOpen     = false;
     }
   }
@@ -83,7 +83,7 @@ namespace Aurora::FileSystem
     -------------------------------------------------*/
     BinaryFile::LogStruct meta;
 
-    auto metaReadSize = fread( &meta, 1, sizeof( BinaryFile::LogStruct ), mFileHandle );
+    auto metaReadSize = fread( &meta, 1, sizeof( BinaryFile::LogStruct ), mFileId );
     if ( metaReadSize != sizeof( BinaryFile::LogStruct ) )
     {
       mError = this->ERR_READ_FAIL;
@@ -99,7 +99,7 @@ namespace Aurora::FileSystem
     /*-------------------------------------------------
     Read the file data into the user's buffer
     -------------------------------------------------*/
-    auto dataReadSize = fread( buffer, 1, size, mFileHandle );
+    auto dataReadSize = fread( buffer, 1, size, mFileId );
     if ( dataReadSize != size )
     {
       mError = this->ERR_READ_FAIL;
@@ -173,14 +173,14 @@ namespace Aurora::FileSystem
     /*-------------------------------------------------
     Write the structure to file first, then the data
     -------------------------------------------------*/
-    auto entryWriteSize = fwrite( &entry, 1, sizeof( entry ), mFileHandle );
+    auto entryWriteSize = fwrite( &entry, 1, sizeof( entry ), mFileId );
     if ( entryWriteSize != sizeof( entry ) )
     {
       mError = this->ERR_WRITE_FAIL;
       return false;
     }
 
-    auto dataWriteSize = fwrite( buffer, 1, size, mFileHandle );
+    auto dataWriteSize = fwrite( buffer, 1, size, mFileId );
     if ( dataWriteSize != size )
     {
       mError = this->ERR_WRITE_FAIL;
