@@ -62,7 +62,7 @@ namespace Aurora::Logging
     /*------------------------------------------------
     Check to see if we should even write
     ------------------------------------------------*/
-    if ( !isEnabled() || ( level < getLogLevel() ) || !message || !length )
+    if ( !enabled || ( level < logLevel ) || !message || !length )
     {
       return Result::RESULT_FAIL;
     }
