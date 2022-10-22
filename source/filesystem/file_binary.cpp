@@ -20,15 +20,8 @@ namespace Aurora::FileSystem
   /*-------------------------------------------------------------------------------
   Binary File
   -------------------------------------------------------------------------------*/
-  BinaryFile::BinaryFile() : mIsOpen( false )
+  BinaryFile::BinaryFile() : mIsOpen( false ), mError( ERR_OK ), mFileId( -1 )
   {
-    mError = this->ERR_OK;
-
-    #if defined( SIMULATOR )
-    mFileId = nullptr;
-    #else
-    mFileId = 0;
-    #endif
   }
 
 
@@ -38,31 +31,19 @@ namespace Aurora::FileSystem
   }
 
 
-  bool BinaryFile::create( const std::string_view &filename, const size_t size )
+  bool BinaryFile::open( const std::string_view &filename, const AccessFlags mode )
   {
-    mFileId = fopen( filename.data(), "w", size );
-    fclose( mFileId );
-
-    return fIsValid( mFileId );
-  }
-
-
-  bool BinaryFile::open( const std::string_view &filename, const std::string_view &mode )
-  {
-    mFileId = fopen( filename.data(), mode.data() );
-    mIsOpen     = fIsValid( mFileId );
-
-    return mIsOpen;
+    return fopen( filename.data(), mode, mFileId ) == 0;
   }
 
 
   void BinaryFile::close()
   {
-    if ( mIsOpen && fIsValid( mFileId ) )
+    if ( mIsOpen )
     {
       fclose( mFileId );
       mFileId = {};
-      mIsOpen     = false;
+      mIsOpen = false;
     }
   }
 

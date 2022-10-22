@@ -49,16 +49,6 @@ namespace Aurora::FileSystem
     ~BinaryFile();
 
     /**
-     * @brief Creates an empty file
-     * @note If the file already exists, it will be destroyed.
-     *
-     * @param filename      Name of the file to create
-     * @return true         File created successfully
-     * @return false        File was not created
-     */
-    bool create( const std::string_view &filename, const size_t size = 0 );
-
-    /**
      * @brief Opens the specified file
      *
      * @param filename      Name of the file to open
@@ -66,7 +56,7 @@ namespace Aurora::FileSystem
      * @return true         File successfully opened
      * @return false        An error occurred, see getError()
      */
-    bool open( const std::string_view &filename, const std::string_view &mode );
+    bool open( const std::string_view &filename, const AccessFlags mode );
 
     /**
      * @brief Closes the file

@@ -32,13 +32,21 @@ namespace Aurora::FileSystem
   Public Functions
   ---------------------------------------------------------------------------*/
   /**
+   * @brief Initialize system level module aspects of the filesystem manager
+   *
+   * Call this function once during boot up of the system to ensure the
+   * memory associated with the filesystem manager is ready for use.
+   */
+  void initialize();
+
+  /**
    * @brief Registers a drive with the filesystem manager
    *
    * @param drive     The drive letter to mount against
    * @param intf      Which filesystem driver to use
    * @return A volume ID >= 0 if successful, negative otherwise
    */
-  VolumeId mount( const std::string_view &drive, const Interface *const intf );
+  VolumeId mount( const std::string_view &drive, Interface &&intf );
 
   /**
    * @brief Unmounts a previously mounted volume
