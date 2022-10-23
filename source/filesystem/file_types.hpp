@@ -20,6 +20,14 @@ Includes
 namespace Aurora::FileSystem
 {
   /*---------------------------------------------------------------------------
+  Constants
+  ---------------------------------------------------------------------------*/
+  static constexpr size_t MAX_VOLUMES          = 5;
+  static constexpr size_t MAX_OPEN_FILES       = 5;
+  static constexpr size_t MAX_FILE_NAME_LEN    = 32;
+  static constexpr size_t MAX_DRIVE_PREFIX_LEN = 8;
+
+  /*---------------------------------------------------------------------------
   Aliases
   ---------------------------------------------------------------------------*/
   using VolumeId = int;   /**< Identifier for a specific volume */

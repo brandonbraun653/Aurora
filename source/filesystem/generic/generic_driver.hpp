@@ -5,25 +5,29 @@
  *  Description:
  *    Generic OS interface definition
  *
- *  2021 | Brandon Braun | brandonbraun653@gmail.com
+ *  2021-2022 | Brandon Braun | brandonbraun653@gmail.com
  *******************************************************************************/
 
 #pragma once
 #ifndef AURORA_FILESYSTEM_GENERIC_OS_HPP
 #define AURORA_FILESYSTEM_GENERIC_OS_HPP
 
-/* STL Includes */
+/*-----------------------------------------------------------------------------
+Includes
+-----------------------------------------------------------------------------*/
 #include <cstdint>
-
-/* Aurora Includes */
 #include <Aurora/source/filesystem/file_types.hpp>
 
 namespace Aurora::FileSystem::Generic
 {
-  /*-------------------------------------------------------------------------------
-  Public Data
-  -------------------------------------------------------------------------------*/
-  extern const Interface implementation;
+  /*---------------------------------------------------------------------------
+  Public Functions
+  ---------------------------------------------------------------------------*/
+  /**
+   * @brief Get the implementation of the generic filesystem
+   * @return Interface
+   */
+  Interface getInterface();
 
 }  // namespace Aurora::FileSystem::Generic
 
