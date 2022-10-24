@@ -17,6 +17,10 @@ gen_static_lib_variants(
     lfs/lfs_util.c
     lfs/lfs.c
     lfs/bd/lfs_rambd.c
+
+  PRV_DEFINES
+    LFS_NO_ASSERT
+
   PRV_LIBRARIES
     aurora_intf_inc
     chimera_intf_inc

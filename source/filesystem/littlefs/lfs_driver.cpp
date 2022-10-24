@@ -25,6 +25,7 @@ Includes
 
 #if defined( SIMULATOR )
 #include <assert.h>
+#include <cstdio>
 #include <fstream>
 #include <iostream>
 #endif
@@ -114,25 +115,120 @@ namespace Aurora::FileSystem::LFS
 #if defined( SIMULATOR )
   static int lfs_safe_read( const struct lfs_config *c, lfs_block_t block, lfs_off_t off, void *buffer, lfs_size_t size )
   {
-    return -1;
+    RT_HARD_ASSERT( c->context );
+    Volume *vol = reinterpret_cast<Volume *>( c->context );
+
+    /*-------------------------------------------------------------------------
+    Calculate the absolute offset required to read from
+    -------------------------------------------------------------------------*/
+    size_t address = 0;
+    if( !Aurora::Flash::NOR::block2Address( vol->flash.deviceType(), block, &address ) )
+    {
+      return LFS_ERR_INVAL;
+    }
+
+    address += off;
+
+    /*-------------------------------------------------------------------------
+    Read from the file
+    -------------------------------------------------------------------------*/
+    FILE* file = ::fopen( vol->_dataFile.c_str(), "rb" );
+    assert( file );
+
+    ::fseek( file, address, SEEK_SET );
+    assert( ::ftell( file ) == address );
+
+    size_t bytes_read = ::fread( buffer, 1, size, file );
+    ::fclose( file );
+
+    if( bytes_read != size )
+    {
+      printf( "Error reading from file: %d", ::ferror( file ) );
+      return LFS_ERR_IO;
+    }
+
+    return LFS_ERR_OK;
   }
 
 
   static int lfs_safe_prog( const struct lfs_config *c, lfs_block_t block, lfs_off_t off, const void *buffer, lfs_size_t size )
   {
-    return -1;
+    RT_HARD_ASSERT( c->context );
+    Volume *vol = reinterpret_cast<Volume *>( c->context );
+
+    /*-------------------------------------------------------------------------
+    Calculate the absolute offset required to read from
+    -------------------------------------------------------------------------*/
+    size_t address = 0;
+    if( !Aurora::Flash::NOR::block2Address( vol->flash.deviceType(), block, &address ) )
+    {
+      return LFS_ERR_INVAL;
+    }
+
+    address += off;
+
+    /*-------------------------------------------------------------------------
+    Write the file
+    -------------------------------------------------------------------------*/
+    FILE* file = ::fopen( vol->_dataFile.c_str(), "rb+" );
+    ::fseek( file, address, SEEK_SET );
+
+    size_t bytes_written = ::fwrite( buffer, 1, size, file );
+
+    ::fflush( file );
+    ::fclose( file );
+
+    if( bytes_written != size )
+    {
+      return LFS_ERR_IO;
+    }
+
+    return LFS_ERR_OK;
   }
 
 
   static int lfs_safe_erase( const struct lfs_config *c, lfs_block_t block )
   {
-    return -1;
+    RT_HARD_ASSERT( c->context );
+    Volume *vol = reinterpret_cast<Volume *>( c->context );
+
+    /*-------------------------------------------------------------------------
+    Calculate the absolute offset required to read from
+    -------------------------------------------------------------------------*/
+    size_t address = 0;
+    if( !Aurora::Flash::NOR::block2Address( vol->flash.deviceType(), block, &address ) )
+    {
+      return LFS_ERR_INVAL;
+    }
+
+    /*-------------------------------------------------------------------------
+    Open the file
+    -------------------------------------------------------------------------*/
+    FILE* file = ::fopen( vol->_dataFile.c_str(), "rb+" );
+    ::fseek( file, address, SEEK_SET );
+
+    const uint8_t data = 0xFF;
+    size_t bytes_written = 0;
+    for( size_t x = 0; x < c->block_size; x++ )
+    {
+      bytes_written += ::fwrite( &data, 1, sizeof( data ), file );
+    }
+
+    ::fflush( file );
+    ::fclose( file );
+
+    if( bytes_written != c->block_size )
+    {
+      return LFS_ERR_IO;
+    }
+
+    return LFS_ERR_OK;
   }
 
 
   static int lfs_safe_sync( const struct lfs_config *c )
   {
-    return -1;
+    return LFS_ERR_OK;
   }
 
 #else /* EMBEDDED */
@@ -281,15 +377,24 @@ namespace Aurora::FileSystem::LFS
     Ensure the backing file exists with the expected properties
     -------------------------------------------------------------------------*/
 #if defined( SIMULATOR )
+    bool create = true;
     auto props = Aurora::Flash::NOR::getProperties( vol->flash.deviceType() );
     assert( props );
 
     if( std::filesystem::exists( vol->_dataFile ) )
     {
-      const size_t file_size = std::filesystem::file_size( vol->_dataFile );
-      assert( file_size == props->endAddress );
+      const size_t size = std::filesystem::file_size( vol->_dataFile );
+      if( props->endAddress != size )
+      {
+        std::filesystem::remove( vol->_dataFile );
+      }
+      else
+      {
+        create = false;
+      }
     }
-    else
+
+    if( create )
     {
       /*-----------------------------------------------------------------------
       Create the parent directories
