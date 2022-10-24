@@ -46,7 +46,7 @@ namespace Aurora::FileSystem
    * @param intf      Which filesystem driver to use
    * @return A volume ID >= 0 if successful, negative otherwise
    */
-  VolumeId mount( const std::string_view &drive, Interface &&intf );
+  VolumeId mount( const std::string_view &drive, Interface &intf );
 
   /**
    * @brief Unmounts a previously mounted volume
@@ -123,7 +123,7 @@ namespace Aurora::FileSystem
    * @param origin    Starting location offset is applied to
    * @return int      0 if all ok, negative otherwise
    */
-  int fseek( const FileId stream, const size_t offset, const size_t origin );
+  int fseek( const FileId stream, const size_t offset, const WhenceFlags whence );
 
   /**
    * @brief Gets the current file position indicator

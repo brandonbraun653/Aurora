@@ -23,7 +23,6 @@ namespace Aurora::FileSystem::Generic
   ---------------------------------------------------------------------------*/
   static std::map<FileId, FILE *>        s_file_desc_map;
   static std::map<uint32_t, std::string> s_mode_map;
-  static FileId                          s_next_file_id;
 
   /*---------------------------------------------------------------------------
   Static Functions
@@ -40,18 +39,21 @@ namespace Aurora::FileSystem::Generic
     Add the supported mode flag translations
     -------------------------------------------------------------------------*/
     s_mode_map.insert( std::pair( ( O_RDONLY ), "r" ) );
-    s_mode_map.insert( std::pair( ( O_WRONLY ), "w" ) );
+    s_mode_map.insert( std::pair( ( O_WRONLY | O_CREAT ), "w" ) );
+    s_mode_map.insert( std::pair( ( O_APPEND | O_EXCL ), "w+" ) );
+    s_mode_map.insert( std::pair( ( O_WRONLY | O_EXCL ), "a" ) );
+
     return 0;
   }
 
 
-  static int mount( const std::string_view &drive )
+  static int mount( const VolumeId drive, void *context )
   {
     return 0;
   }
 
 
-  static int unmount()
+  static int unmount( const VolumeId drive )
   {
     while ( !s_file_desc_map.empty() )
     {
@@ -64,14 +66,13 @@ namespace Aurora::FileSystem::Generic
   }
 
 
-  static int fopen( const char *filename, const AccessFlags mode, FileId &file )
+  static int fopen( const char *filename, const AccessFlags mode, const FileId file, const VolumeId vol )
   {
     auto mode_string = s_mode_map.at( mode );
 
     FILE *f = ::fopen( filename, mode_string.data() );
-    s_file_desc_map.insert( std::pair( s_next_file_id, f ) );
+    s_file_desc_map.insert( std::pair( file, f ) );
 
-    file = s_next_file_id++;
     return 0;
   }
 
@@ -133,12 +134,12 @@ namespace Aurora::FileSystem::Generic
   }
 
 
-  static int fseek( FileId stream, size_t offset, size_t origin )
+  static int fseek( FileId stream, size_t offset, const WhenceFlags whence )
   {
     auto iter = s_file_desc_map.find( stream );
     if ( iter != s_file_desc_map.end() )
     {
-      return ::fseek( iter->second, offset, origin );
+      return ::fseek( iter->second, offset, whence );
     }
     else
     {
@@ -176,17 +177,19 @@ namespace Aurora::FileSystem::Generic
   Interface getInterface()
   {
     Interface intf;
+    intf.clear();
 
-    intf.mount   = ::Aurora::FileSystem::Generic::mount;
-    intf.unmount = ::Aurora::FileSystem::Generic::unmount;
-    intf.fopen   = ::Aurora::FileSystem::Generic::fopen;
-    intf.fclose  = ::Aurora::FileSystem::Generic::fclose;
-    intf.fflush  = ::Aurora::FileSystem::Generic::fflush;
-    intf.fread   = ::Aurora::FileSystem::Generic::fread;
-    intf.fwrite  = ::Aurora::FileSystem::Generic::fwrite;
-    intf.fseek   = ::Aurora::FileSystem::Generic::fseek;
-    intf.ftell   = ::Aurora::FileSystem::Generic::ftell;
-    intf.frewind = ::Aurora::FileSystem::Generic::frewind;
+    intf.initialize = ::Aurora::FileSystem::Generic::initialize;
+    intf.mount      = ::Aurora::FileSystem::Generic::mount;
+    intf.unmount    = ::Aurora::FileSystem::Generic::unmount;
+    intf.fopen      = ::Aurora::FileSystem::Generic::fopen;
+    intf.fclose     = ::Aurora::FileSystem::Generic::fclose;
+    intf.fflush     = ::Aurora::FileSystem::Generic::fflush;
+    intf.fread      = ::Aurora::FileSystem::Generic::fread;
+    intf.fwrite     = ::Aurora::FileSystem::Generic::fwrite;
+    intf.fseek      = ::Aurora::FileSystem::Generic::fseek;
+    intf.ftell      = ::Aurora::FileSystem::Generic::ftell;
+    intf.frewind    = ::Aurora::FileSystem::Generic::frewind;
 
     return intf;
   }

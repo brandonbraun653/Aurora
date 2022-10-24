@@ -37,6 +37,7 @@ gen_static_lib_variants(
     aurora_intf_inc
     chimera_intf_inc
     lfs_intf_inc
+    aurora_filesystem_lfs_core
   EXPORT_DIR
     "${PROJECT_BINARY_DIR}/Aurora"
 )

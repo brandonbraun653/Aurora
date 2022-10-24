@@ -18,7 +18,6 @@
 
 #include <Aurora/source/filesystem/file_binary.hpp>
 #include <Aurora/source/filesystem/file_config.hpp>
-#include <Aurora/source/filesystem/file_driver.hpp>
 #include <Aurora/source/filesystem/file_intf.hpp>
 #include <Aurora/source/filesystem/file_types.hpp>
 #include <Aurora/source/filesystem/generic/generic_driver.hpp>
