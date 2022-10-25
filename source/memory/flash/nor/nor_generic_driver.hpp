@@ -127,6 +127,15 @@ namespace Aurora::Flash::NOR
     void transfer( const void *const cmd, void *const output, const size_t size );
 
     /**
+     * @brief Manually assigns a chip select line for internal control
+     *
+     * @param port    GPIO port the CS is on
+     * @param pin     GPIO pin mapped to the CS
+     * @return bool
+     */
+    bool assignChipSelect( const Chimera::GPIO::Port port, const Chimera::GPIO::Pin pin );
+
+    /**
      * @brief Gets the configured device type
      *
      * @return Chip_t
@@ -140,12 +149,11 @@ namespace Aurora::Flash::NOR
     Chip_t mChip;                                    /**< Memory chip in use */
     Chimera::SPI::Channel mSPIChannel;               /**< SPI driver channel */
     Chimera::SPI::Driver_rPtr mSPI;                  /**< SPI driver instance */
+    Chimera::GPIO::Driver_rPtr mCS;                  /**< Chip select GPIO driver instance */
     std::array<uint8_t, CFI::MAX_CMD_LEN> cmdBuffer; /**< Buffer for holding a command sequence */
 
-    /*-------------------------------------------------
-    Private Functions
-    -------------------------------------------------*/
     void issueWriteEnable();
+    void setChipSelect( const Chimera::GPIO::State state );
   };
 }  // namespace Aurora::NOR
 

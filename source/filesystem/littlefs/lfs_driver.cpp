@@ -234,114 +234,90 @@ namespace Aurora::FileSystem::LFS
 #else /* EMBEDDED */
   static int lfs_safe_read( const struct lfs_config *c, lfs_block_t block, lfs_off_t off, void *buffer, lfs_size_t size )
   {
-    using namespace Aurora::Memory;
+    RT_HARD_ASSERT( c->context );
+    Volume *vol = reinterpret_cast<Volume *>( c->context );
 
-    /*-------------------------------------------------
-    Input protection
-    -------------------------------------------------*/
-    if ( !c )
-    {
-      return LFS_ERR_INVAL;
-    }
-
-    /*-------------------------------------------------
-    Figure out the real address & invoke the device driver
-    -------------------------------------------------*/
-    sNORFlash.lock();
+    /*-------------------------------------------------------------------------
+    Invoke the flash read
+    -------------------------------------------------------------------------*/
+    vol->flash.lock();
 
     auto error = LFS_ERR_OK;
-    if ( Status::ERR_OK != sNORFlash.read( block, off, buffer, size ) )
+    if ( Aurora::Memory::Status::ERR_OK != vol->flash.read( block, off, buffer, size ) )
     {
       error = LFS_ERR_IO;
     }
 
-    sNORFlash.unlock();
+    vol->flash.unlock();
     return error;
   }
 
 
   static int lfs_safe_prog( const struct lfs_config *c, lfs_block_t block, lfs_off_t off, const void *buffer, lfs_size_t size )
   {
-    using namespace Aurora::Memory;
+    RT_HARD_ASSERT( c->context );
+    Volume *vol = reinterpret_cast<Volume *>( c->context );
 
-    /*-------------------------------------------------
-    Input protection
-    -------------------------------------------------*/
-    if ( !c )
-    {
-      return LFS_ERR_INVAL;
-    }
+    auto props = Aurora::Flash::NOR::getProperties( vol->flash.deviceType() );
 
-    /*-------------------------------------------------
-    Figure out the real address & invoke the device driver
-    -------------------------------------------------*/
-    sNORFlash.lock();
+    /*-------------------------------------------------------------------------
+    Invoke the device driver
+    -------------------------------------------------------------------------*/
+    vol->flash.lock();
 
     auto error = LFS_ERR_OK;
-    if ( ( Status::ERR_OK != sNORFlash.write( block, off, buffer, size ) )
-         || ( Status::ERR_OK != sNORFlash.pendEvent( Event::MEM_WRITE_COMPLETE, sNORProps->pagePgmDelay ) ) )
+    if ( ( Aurora::Memory::Status::ERR_OK != vol->flash.write( block, off, buffer, size ) )
+      || ( Aurora::Memory::Status::ERR_OK != vol->flash.pendEvent( Aurora::Memory::Event::MEM_WRITE_COMPLETE, props->pagePgmDelay ) ) )
     {
       error = LFS_ERR_IO;
     }
 
-    sNORFlash.unlock();
+    vol->flash.unlock();
     return error;
   }
 
 
   static int lfs_safe_erase( const struct lfs_config *c, lfs_block_t block )
   {
-    using namespace Aurora::Memory;
+    RT_HARD_ASSERT( c->context );
+    Volume *vol = reinterpret_cast<Volume *>( c->context );
 
-    /*-------------------------------------------------
-    Input protection
-    -------------------------------------------------*/
-    if ( !c )
-    {
-      return LFS_ERR_INVAL;
-    }
+    auto props = Aurora::Flash::NOR::getProperties( vol->flash.deviceType() );
 
-    /*-------------------------------------------------
+    /*-------------------------------------------------------------------------
     Invoke the device driver
-    -------------------------------------------------*/
-    sNORFlash.lock();
+    -------------------------------------------------------------------------*/
+    vol->flash.lock();
 
     auto error = LFS_ERR_OK;
-    if ( ( Status::ERR_OK != sNORFlash.erase( block ) )
-         || ( Status::ERR_OK != sNORFlash.pendEvent( Event::MEM_ERASE_COMPLETE, sNORProps->blockEraseDelay ) ) )
+    if ( ( Aurora::Memory::Status::ERR_OK != vol->flash.erase( block ) )
+      || ( Aurora::Memory::Status::ERR_OK != vol->flash.pendEvent( Aurora::Memory::Event::MEM_ERASE_COMPLETE, props->blockEraseDelay ) ) )
     {
       error = LFS_ERR_IO;
     }
 
-    sNORFlash.unlock();
+    vol->flash.unlock();
     return error;
   }
 
 
   static int lfs_safe_sync( const struct lfs_config *c )
   {
-    using namespace Aurora::Memory;
+    RT_HARD_ASSERT( c->context );
+    Volume *vol = reinterpret_cast<Volume *>( c->context );
 
-    /*-------------------------------------------------
-    Input protection
-    -------------------------------------------------*/
-    if ( !c )
-    {
-      return LFS_ERR_INVAL;
-    }
-
-    /*-------------------------------------------------
+    /*-------------------------------------------------------------------------
     Invoke the device driver
-    -------------------------------------------------*/
-    sNORFlash.lock();
+    -------------------------------------------------------------------------*/
+    vol->flash.lock();
 
     auto error = LFS_ERR_OK;
-    if ( auto sts = sNORFlash.flush(); sts != Status::ERR_OK )
+    if ( Aurora::Memory::Status::ERR_OK != vol->flash.flush() )
     {
       error = LFS_ERR_IO;
     }
 
-    sNORFlash.unlock();
+    vol->flash.unlock();
     return error;
   }
 
