@@ -44,6 +44,7 @@ namespace Aurora::Logging
   enum class Result : size_t
   {
     RESULT_SUCCESS,
+    RESULT_IGNORE,
     RESULT_FAIL,
     RESULT_FAIL_MSG_TOO_LONG,
     RESULT_FAIL_BAD_SINK,
