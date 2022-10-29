@@ -44,9 +44,11 @@ namespace Aurora::FileSystem::LFS
   ---------------------------------------------------------------------------*/
   struct File
   {
-    FileId     fileDesc;
-    Volume *   pVolume;
-    lfs_file_t lfsFile;
+    FileId          fileDesc;
+    Volume *        pVolume;
+    lfs_file_t      lfsFile;
+    lfs_file_config lfsCfg;
+    uint8_t         lfsCfgBuff[ 64 ];
 
     bool operator<( const File &rhs ) const
     {
@@ -58,6 +60,8 @@ namespace Aurora::FileSystem::LFS
       fileDesc = -1;
       pVolume  = nullptr;
       memset( &lfsFile, 0, sizeof( lfsFile ) );
+      memset( &lfsCfg, 0, sizeof( lfsCfg ) );
+      memset( lfsCfgBuff, 0, sizeof( lfsCfgBuff ) );
     }
   };
 
@@ -494,18 +498,30 @@ namespace Aurora::FileSystem::LFS
     }
 
     /*-------------------------------------------------------------------------
-    Open the new file
+    Allocate the file in the vector. LFS needs file control data to be static.
     -------------------------------------------------------------------------*/
     File new_file;
     new_file.clear();
+    new_file.fileDesc = stream;
+    new_file.pVolume  = volume;
 
-    int err = lfs_file_open( &( volume->fs ), &new_file.lfsFile, filename, flags );
-    if( err == LFS_ERR_OK )
+    s_files.push_back( new_file );
+    etl::shell_sort( s_files.begin(), s_files.end() );
+
+    file = get_file( stream );
+    RT_DBG_ASSERT( file );
+
+    /* Per documentation, this buffer needs at minimum "cache_size" bytes */
+    file->lfsCfg.buffer = file->lfsCfgBuff;
+    RT_HARD_ASSERT( sizeof( file->lfsCfgBuff ) >= volume->cfg.cache_size );
+
+    /*-------------------------------------------------------------------------
+    Open the new file
+    -------------------------------------------------------------------------*/
+    int err = lfs_file_opencfg( &( volume->fs ), &file->lfsFile, filename, flags, &file->lfsCfg );
+    if( err != LFS_ERR_OK )
     {
-      new_file.fileDesc = stream;
-      new_file.pVolume  = volume;
-
-      s_files.push_back( new_file );
+      s_files.erase( file );
       etl::shell_sort( s_files.begin(), s_files.end() );
     }
 
@@ -671,6 +687,29 @@ namespace Aurora::FileSystem::LFS
   }
 
 
+  static size_t fsize( const FileId stream )
+  {
+    /*-------------------------------------------------------------------------
+    Look up the file in the registry
+    -------------------------------------------------------------------------*/
+    File *file = get_file( stream );
+    if ( !file )
+    {
+      return 0;
+    }
+
+    /*-------------------------------------------------------------------------
+    Perform the LFS operation
+    -------------------------------------------------------------------------*/
+    lfs_off_t size = lfs_file_size( &( file->pVolume->fs ), &( file->lfsFile ) );
+    if ( size >= 0 )
+    {
+      return static_cast<size_t>( size );
+    }
+
+    return 0;
+  }
+
   /*---------------------------------------------------------------------------
   Public Functions
   ---------------------------------------------------------------------------*/
@@ -690,6 +729,7 @@ namespace Aurora::FileSystem::LFS
     intf.fseek      = ::Aurora::FileSystem::LFS::fseek;
     intf.ftell      = ::Aurora::FileSystem::LFS::ftell;
     intf.frewind    = ::Aurora::FileSystem::LFS::frewind;
+    intf.fsize      = ::Aurora::FileSystem::LFS::fsize;
 
     return intf;
   }

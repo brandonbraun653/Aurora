@@ -126,6 +126,7 @@ namespace Aurora::FileSystem
     int ( *fseek )( const FileId stream, const size_t offset, const WhenceFlags whence );
     size_t ( *ftell )( const FileId stream );
     void ( *frewind )( const FileId stream );
+    size_t ( *fsize )( const FileId stream );
 
     void clear()
     {
@@ -140,6 +141,7 @@ namespace Aurora::FileSystem
       fseek      = nullptr;
       ftell      = nullptr;
       frewind    = nullptr;
+      fsize      = nullptr;
     }
   };
 }  // namespace Aurora::FileSystem

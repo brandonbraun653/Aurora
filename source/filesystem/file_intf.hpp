@@ -140,6 +140,14 @@ namespace Aurora::FileSystem
    */
   void frewind( const FileId stream );
 
+  /**
+   * @brief Gets the size of the file in bytes
+   *
+   * @param stream    Stream to act on
+   * @return size_t
+   */
+  size_t fsize( const FileId stream );
+
 }  // namespace Aurora::FileSystem
 
 #endif /* !AURORA_FILESYSTEM_INTERFACE_HPP */

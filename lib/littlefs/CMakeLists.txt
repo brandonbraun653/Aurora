@@ -19,7 +19,8 @@ gen_static_lib_variants(
     lfs/bd/lfs_rambd.c
 
   PRV_DEFINES
-    LFS_NO_ASSERT
+    #LFS_NO_ASSERT
+    LFS_NO_MALLOC
 
   PRV_LIBRARIES
     aurora_intf_inc

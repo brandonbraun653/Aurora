@@ -416,4 +416,15 @@ namespace Aurora::FileSystem
     impl->frewind( stream );
   }
 
+
+  size_t fsize( const FileId stream )
+  {
+    auto impl = get_interface( stream );
+    if ( !impl )
+    {
+      return 0 ;
+    }
+
+    impl->fsize( stream );
+  }
 }  // namespace Aurora::FileSystem
