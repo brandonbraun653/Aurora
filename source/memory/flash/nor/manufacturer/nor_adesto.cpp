@@ -5,18 +5,16 @@
  *  Description:
  *    Adesto description information
  *
- *  2021 | Brandon Braun | brandonbraun653@gmail.com
+ *  2021-2022 | Brandon Braun | brandonbraun653@gmail.com
  *******************************************************************************/
 
-/* STL Includes */
-#include <cstdint>
-
-/* Aurora Includes */
+/*-----------------------------------------------------------------------------
+Includes
+-----------------------------------------------------------------------------*/
 #include <Aurora/memory>
 #include <Aurora/source/memory/flash/nor/manufacturer/nor_adesto.hpp>
-
-/* Chimera Includes */
 #include <Chimera/thread>
+#include <cstdint>
 
 namespace Aurora::Flash::NOR::Adesto
 {
@@ -48,7 +46,7 @@ namespace Aurora::Flash::NOR::Adesto
   /*-------------------------------------------------------------------------------
   Static Functions
   -------------------------------------------------------------------------------*/
-  static uint16_t readStatusRegister_AT25SF081( const Chimera::SPI::Channel channel )
+  static uint16_t readStatusRegister_AT25SF081( Chimera::SPI::Driver_rPtr driver )
   {
     /*-------------------------------------------------
     Status Register Read Commands
@@ -66,51 +64,45 @@ namespace Aurora::Flash::NOR::Adesto
     /*-------------------------------------------------
     Initialize the command sequence
     -------------------------------------------------*/
-    uint16_t result = 0;
+    uint16_t               result = 0;
     std::array<uint8_t, 5> cmdBuffer;
     std::array<uint8_t, 5> rxBuffer;
     cmdBuffer.fill( 0 );
     rxBuffer.fill( 0 );
 
     /*-------------------------------------------------
-    Ensure the SPI driver/channel exists
-    -------------------------------------------------*/
-    auto spi = Chimera::SPI::getDriver( channel );
-    if( !spi )
-    {
-      return 0xCCCC;
-    }
-
-    /*-------------------------------------------------
     Perform the SPI transaction
     -------------------------------------------------*/
-    spi->lock();
+    RT_DBG_ASSERT( driver );
+    Chimera::Thread::LockGuard _spilock( *driver );
+    auto                       txnResult = Chimera::Status::OK;
 
     // Read out byte 1
     cmdBuffer[ 0 ] = READ_SR_BYTE1;
-    spi->setChipSelect( Chimera::GPIO::State::LOW );
-    spi->readWriteBytes( cmdBuffer.data(), rxBuffer.data(), READ_SR_BYTE1_OPS_LEN );
-    spi->await( Chimera::Event::Trigger::TRIGGER_TRANSFER_COMPLETE, Chimera::Thread::TIMEOUT_BLOCK );
-    spi->setChipSelect( Chimera::GPIO::State::HIGH );
+    txnResult |= driver->setChipSelectControlMode( Chimera::SPI::CSMode::MANUAL );
+    txnResult |= driver->setChipSelect( Chimera::GPIO::State::LOW );
+    txnResult |= driver->readWriteBytes( cmdBuffer.data(), rxBuffer.data(), READ_SR_BYTE1_OPS_LEN );
+    txnResult |= driver->await( Chimera::Event::Trigger::TRIGGER_TRANSFER_COMPLETE, Chimera::Thread::TIMEOUT_BLOCK );
+    txnResult |= driver->setChipSelect( Chimera::GPIO::State::HIGH );
 
     result |= rxBuffer[ 1 ];
 
     // Read out byte 2
     cmdBuffer[ 0 ] = READ_SR_BYTE2;
     cmdBuffer[ 1 ] = 0;
-    spi->setChipSelect( Chimera::GPIO::State::LOW );
-    spi->readWriteBytes( cmdBuffer.data(), rxBuffer.data(), READ_SR_BYTE2_OPS_LEN );
-    spi->await( Chimera::Event::Trigger::TRIGGER_TRANSFER_COMPLETE, Chimera::Thread::TIMEOUT_BLOCK );
-    spi->setChipSelect( Chimera::GPIO::State::HIGH );
+
+    txnResult |= driver->setChipSelect( Chimera::GPIO::State::LOW );
+    txnResult |= driver->readWriteBytes( cmdBuffer.data(), rxBuffer.data(), READ_SR_BYTE2_OPS_LEN );
+    txnResult |= driver->await( Chimera::Event::Trigger::TRIGGER_TRANSFER_COMPLETE, Chimera::Thread::TIMEOUT_BLOCK );
+    txnResult |= driver->setChipSelect( Chimera::GPIO::State::HIGH );
 
     result |= ( rxBuffer[ 1 ] << 8 );
 
-    spi->unlock();
-
+    RT_DBG_ASSERT( txnResult == Chimera::Status::OK );
     return result;
   }
 
-  static Aurora::Memory::Status pollEvent_AT25SF081( const Chimera::SPI::Channel ch, const Aurora::Memory::Event event,
+  static Aurora::Memory::Status pollEvent_AT25SF081( Chimera::SPI::Driver_rPtr driver, const Aurora::Memory::Event event,
                                                      const size_t timeout )
   {
     /*-------------------------------------------------
@@ -124,7 +116,7 @@ namespace Aurora::Flash::NOR::Adesto
     Decide the bits used to indicate events occurred.
     -------------------------------------------------*/
     uint16_t eventBitMask = 0;  // Indicates bits to look at
-    size_t pollDelay      = 0;  // How long to wait between checks
+    size_t   pollDelay    = 0;  // How long to wait between checks
 
     switch ( event )
     {
@@ -147,8 +139,8 @@ namespace Aurora::Flash::NOR::Adesto
 
     See Table 10-1 of device datasheet.
     -------------------------------------------------*/
-    uint16_t statusRegister = readStatusRegister_AT25SF081( ch );
-    const size_t startTime  = Chimera::millis();
+    uint16_t     statusRegister = readStatusRegister_AT25SF081( driver );
+    const size_t startTime      = Chimera::millis();
 
     while ( statusRegister & eventBitMask )
     {
@@ -169,7 +161,7 @@ namespace Aurora::Flash::NOR::Adesto
       /*-------------------------------------------------
       Poll the latest info
       -------------------------------------------------*/
-      statusRegister = readStatusRegister_AT25SF081( ch );
+      statusRegister = readStatusRegister_AT25SF081( driver );
     };
 
     return Aurora::Memory::Status::ERR_OK;
@@ -178,15 +170,15 @@ namespace Aurora::Flash::NOR::Adesto
   /*-------------------------------------------------------------------------------
   Public Functions
   -------------------------------------------------------------------------------*/
-  Aurora::Memory::Status pollEvent( const uint8_t channel, const uint8_t device, const Aurora::Memory::Event event,
+  Aurora::Memory::Status pollEvent( void *driver, const uint8_t device, const Aurora::Memory::Event event,
                                     const size_t timeout )
   {
     /*-------------------------------------------------
     For the NOR flash generic driver, channel is always
     SPI and the device is always Chip_t.
     -------------------------------------------------*/
-    const Chimera::SPI::Channel spiChannel = static_cast<Chimera::SPI::Channel>( channel );
-    const Chip_t chip                      = static_cast<Chip_t>( device );
+    auto spi  = static_cast<Chimera::SPI::Driver_rPtr>( driver );
+    auto chip = static_cast<Chip_t>( device );
 
     /*-------------------------------------------------
     Input Protection
@@ -202,7 +194,7 @@ namespace Aurora::Flash::NOR::Adesto
     switch ( chip )
     {
       case Chip::AT25SF081:
-        return pollEvent_AT25SF081( spiChannel, event, timeout );
+        return pollEvent_AT25SF081( spi, event, timeout );
         break;
 
       default:

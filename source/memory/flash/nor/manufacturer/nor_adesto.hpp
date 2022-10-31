@@ -5,19 +5,19 @@
  *  Description:
  *    Memory descriptions for the Adesto manufacturer
  *
- *  2021 | Brandon Braun | brandonbraun653@gmail.com
+ *  2021-2022 | Brandon Braun | brandonbraun653@gmail.com
  *******************************************************************************/
 
 #pragma once
 #ifndef NOR_FLASH_ADESTO_HPP
 #define NOR_FLASH_ADESTO_HPP
 
-/* STL Includes */
-#include <cstdint>
-
-/* Aurora Includes */
+/*-----------------------------------------------------------------------------
+Includes
+-----------------------------------------------------------------------------*/
 #include <Aurora/source/memory/flash/nor/nor_generic_types.hpp>
 #include <Aurora/source/memory/generic/generic_types.hpp>
+#include <cstdint>
 
 namespace Aurora::Flash::NOR::Adesto
 {
@@ -70,7 +70,7 @@ namespace Aurora::Flash::NOR::Adesto
    *  Adesto specific polling for an Read/Write/Erase event flag
    *  @see EventPollFunc
    */
-  Aurora::Memory::Status pollEvent( const uint8_t channel, const uint8_t device, const Aurora::Memory::Event event, const size_t timeout );
+  Aurora::Memory::Status pollEvent( void *driver, const uint8_t device, const Aurora::Memory::Event event, const size_t timeout );
 
 }  // namespace Aurora::Flash::NOR::Adesto
 

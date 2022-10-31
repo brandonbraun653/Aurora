@@ -40,15 +40,23 @@ namespace Aurora::FileSystem::LFS
   static_assert( EnumValue( F_SEEK_END ) == LFS_SEEK_END );
 
   /*---------------------------------------------------------------------------
+  Aliases
+  ---------------------------------------------------------------------------*/
+  namespace AM = Aurora::Memory;
+
+  /*---------------------------------------------------------------------------
   Structures
   ---------------------------------------------------------------------------*/
+  /**
+   * @brief Internal representation of an LFS file.
+   */
   struct File
   {
-    FileId          fileDesc;
-    Volume *        pVolume;
-    lfs_file_t      lfsFile;
-    lfs_file_config lfsCfg;
-    uint8_t         lfsCfgBuff[ 64 ];
+    FileId          fileDesc;         /**< Descriptor assigned to this file */
+    Volume         *pVolume;          /**< Parent volume file belongs to */
+    lfs_file_t      lfsFile;          /**< LFS file control block */
+    lfs_file_config lfsCfg;           /**< LFS config data due to not allowing malloc */
+    uint8_t         lfsCfgBuff[ 64 ]; /**< Static buffer for config structure */
 
     bool operator<( const File &rhs ) const
     {
@@ -63,6 +71,28 @@ namespace Aurora::FileSystem::LFS
       memset( &lfsCfg, 0, sizeof( lfsCfg ) );
       memset( lfsCfgBuff, 0, sizeof( lfsCfgBuff ) );
     }
+  };
+
+  /*---------------------------------------------------------------------------
+  Constants
+  ---------------------------------------------------------------------------*/
+  static const etl::string_view                         s_lfs_unknown_err = "Unknown error";
+  static const etl::flat_map<int, etl::string_view, 15> s_lfs_err_to_str  = {
+    { LFS_ERR_OK, "No error" },                // No error
+    { LFS_ERR_IO, "Device IO error" },         // Error during device operation
+    { LFS_ERR_CORRUPT, "Corrupted" },          // Corrupted
+    { LFS_ERR_NOENT, "No dir entry" },         // No directory entry
+    { LFS_ERR_EXIST, "Entry exists" },         // Entry already exists
+    { LFS_ERR_NOTDIR, "Entry not a dir" },     // Entry is not a dir
+    { LFS_ERR_ISDIR, "Entry is dir" },         // Entry is a dir
+    { LFS_ERR_NOTEMPTY, "Dir not empty" },     // Dir is not empty
+    { LFS_ERR_BADF, "Bad file number" },       // Bad file number
+    { LFS_ERR_FBIG, "File too large" },        // File too large
+    { LFS_ERR_INVAL, "Invalid param" },        // Invalid parameter
+    { LFS_ERR_NOSPC, "No space on device" },   // No space left on device
+    { LFS_ERR_NOMEM, "No memory" },            // No more memory available
+    { LFS_ERR_NOATTR, "No attr available" },   // No data/attr available
+    { LFS_ERR_NAMETOOLONG, "Name too long" },  // File name too long
   };
 
   /*---------------------------------------------------------------------------
@@ -85,9 +115,9 @@ namespace Aurora::FileSystem::LFS
    */
   static Volume *get_volume( VolumeId id )
   {
-    for( Volume* iter : s_volumes )
+    for ( Volume *iter : s_volumes )
     {
-      if( iter->_volumeID == id )
+      if ( iter->_volumeID == id )
       {
         return iter;
       }
@@ -104,15 +134,29 @@ namespace Aurora::FileSystem::LFS
    */
   static File *get_file( FileId stream )
   {
-    for( File &f : s_files )
+    for ( File &f : s_files )
     {
-      if( f.fileDesc == stream )
+      if ( f.fileDesc == stream )
       {
         return &f;
       }
     }
 
     return nullptr;
+  }
+
+
+  static etl::string_view get_error_str( const int error )
+  {
+    auto iter = s_lfs_err_to_str.find( error );
+    if ( iter != s_lfs_err_to_str.end() )
+    {
+      return iter->second;
+    }
+    else
+    {
+      return s_lfs_unknown_err;
+    }
   }
 
 
@@ -126,7 +170,7 @@ namespace Aurora::FileSystem::LFS
     Calculate the absolute offset required to read from
     -------------------------------------------------------------------------*/
     size_t address = 0;
-    if( !Aurora::Flash::NOR::block2Address( vol->flash.deviceType(), block, &address ) )
+    if ( !Aurora::Flash::NOR::block2Address( vol->flash.deviceType(), block, &address ) )
     {
       return LFS_ERR_INVAL;
     }
@@ -136,7 +180,7 @@ namespace Aurora::FileSystem::LFS
     /*-------------------------------------------------------------------------
     Read from the file
     -------------------------------------------------------------------------*/
-    FILE* file = ::fopen( vol->_dataFile.c_str(), "rb" );
+    FILE *file = ::fopen( vol->_dataFile.c_str(), "rb" );
     assert( file );
 
     ::fseek( file, address, SEEK_SET );
@@ -145,7 +189,7 @@ namespace Aurora::FileSystem::LFS
     size_t bytes_read = ::fread( buffer, 1, size, file );
     ::fclose( file );
 
-    if( bytes_read != size )
+    if ( bytes_read != size )
     {
       printf( "Error reading from file: %d", ::ferror( file ) );
       return LFS_ERR_IO;
@@ -164,7 +208,7 @@ namespace Aurora::FileSystem::LFS
     Calculate the absolute offset required to read from
     -------------------------------------------------------------------------*/
     size_t address = 0;
-    if( !Aurora::Flash::NOR::block2Address( vol->flash.deviceType(), block, &address ) )
+    if ( !Aurora::Flash::NOR::block2Address( vol->flash.deviceType(), block, &address ) )
     {
       return LFS_ERR_INVAL;
     }
@@ -174,7 +218,7 @@ namespace Aurora::FileSystem::LFS
     /*-------------------------------------------------------------------------
     Write the file
     -------------------------------------------------------------------------*/
-    FILE* file = ::fopen( vol->_dataFile.c_str(), "rb+" );
+    FILE *file = ::fopen( vol->_dataFile.c_str(), "rb+" );
     ::fseek( file, address, SEEK_SET );
 
     size_t bytes_written = ::fwrite( buffer, 1, size, file );
@@ -182,7 +226,7 @@ namespace Aurora::FileSystem::LFS
     ::fflush( file );
     ::fclose( file );
 
-    if( bytes_written != size )
+    if ( bytes_written != size )
     {
       return LFS_ERR_IO;
     }
@@ -200,7 +244,7 @@ namespace Aurora::FileSystem::LFS
     Calculate the absolute offset required to read from
     -------------------------------------------------------------------------*/
     size_t address = 0;
-    if( !Aurora::Flash::NOR::block2Address( vol->flash.deviceType(), block, &address ) )
+    if ( !Aurora::Flash::NOR::block2Address( vol->flash.deviceType(), block, &address ) )
     {
       return LFS_ERR_INVAL;
     }
@@ -208,12 +252,12 @@ namespace Aurora::FileSystem::LFS
     /*-------------------------------------------------------------------------
     Open the file
     -------------------------------------------------------------------------*/
-    FILE* file = ::fopen( vol->_dataFile.c_str(), "rb+" );
+    FILE *file = ::fopen( vol->_dataFile.c_str(), "rb+" );
     ::fseek( file, address, SEEK_SET );
 
-    const uint8_t data = 0xFF;
-    size_t bytes_written = 0;
-    for( size_t x = 0; x < c->block_size; x++ )
+    const uint8_t data          = 0xFF;
+    size_t        bytes_written = 0;
+    for ( size_t x = 0; x < c->block_size; x++ )
     {
       bytes_written += ::fwrite( &data, 1, sizeof( data ), file );
     }
@@ -221,7 +265,7 @@ namespace Aurora::FileSystem::LFS
     ::fflush( file );
     ::fclose( file );
 
-    if( bytes_written != c->block_size )
+    if ( bytes_written != c->block_size )
     {
       return LFS_ERR_IO;
     }
@@ -238,91 +282,115 @@ namespace Aurora::FileSystem::LFS
 #else /* EMBEDDED */
   static int lfs_safe_read( const struct lfs_config *c, lfs_block_t block, lfs_off_t off, void *buffer, lfs_size_t size )
   {
-    RT_HARD_ASSERT( c->context );
+    /*-------------------------------------------------------------------------
+    Get some information from the context pointer
+    -------------------------------------------------------------------------*/
+    RT_DBG_ASSERT( c->context );
     Volume *vol = reinterpret_cast<Volume *>( c->context );
 
     /*-------------------------------------------------------------------------
     Invoke the flash read
     -------------------------------------------------------------------------*/
-    vol->flash.lock();
+    Chimera::Thread::LockGuard _lck( vol->flash );
 
-    auto error = LFS_ERR_OK;
-    if ( Aurora::Memory::Status::ERR_OK != vol->flash.read( block, off, buffer, size ) )
+    auto lfs_err   = LFS_ERR_IO;
+    auto flash_err = vol->flash.read( block, off, buffer, size );
+
+    if ( flash_err == AM::Status::ERR_OK )
     {
-      error = LFS_ERR_IO;
+      lfs_err = LFS_ERR_OK;
     }
 
-    vol->flash.unlock();
-    return error;
+    LOG_TRACE_IF( flash_err != AM::Status::ERR_OK, "NOR read error: %d\r\n", flash_err );
+    return lfs_err;
   }
 
 
   static int lfs_safe_prog( const struct lfs_config *c, lfs_block_t block, lfs_off_t off, const void *buffer, lfs_size_t size )
   {
-    RT_HARD_ASSERT( c->context );
-    Volume *vol = reinterpret_cast<Volume *>( c->context );
-
-    auto props = Aurora::Flash::NOR::getProperties( vol->flash.deviceType() );
+    /*-------------------------------------------------------------------------
+    Get some information from the context pointer
+    -------------------------------------------------------------------------*/
+    RT_DBG_ASSERT( c->context );
+    Volume *vol   = reinterpret_cast<Volume *>( c->context );
+    auto    props = Aurora::Flash::NOR::getProperties( vol->flash.deviceType() );
 
     /*-------------------------------------------------------------------------
     Invoke the device driver
     -------------------------------------------------------------------------*/
-    vol->flash.lock();
+    Chimera::Thread::LockGuard _lck( vol->flash );
 
-    auto error = LFS_ERR_OK;
-    if ( ( Aurora::Memory::Status::ERR_OK != vol->flash.write( block, off, buffer, size ) )
-      || ( Aurora::Memory::Status::ERR_OK != vol->flash.pendEvent( Aurora::Memory::Event::MEM_WRITE_COMPLETE, props->pagePgmDelay ) ) )
+    auto lfs_err   = LFS_ERR_IO;
+    auto flash_err = vol->flash.write( block, off, buffer, size );
+
+    if ( flash_err == AM::Status::ERR_OK )
     {
-      error = LFS_ERR_IO;
+      flash_err = vol->flash.pendEvent( AM::Event::MEM_WRITE_COMPLETE, props->pagePgmDelay );
+      if ( flash_err == AM::Status::ERR_OK )
+      {
+        lfs_err = LFS_ERR_OK;
+      }
     }
 
-    vol->flash.unlock();
-    return error;
+    LOG_TRACE_IF( flash_err != AM::Status::ERR_OK, "NOR write error: %d\r\n", flash_err );
+    return lfs_err;
   }
 
 
   static int lfs_safe_erase( const struct lfs_config *c, lfs_block_t block )
   {
-    RT_HARD_ASSERT( c->context );
+    /*-------------------------------------------------------------------------
+    Get some information from the context pointer
+    -------------------------------------------------------------------------*/
+    RT_DBG_ASSERT( c->context );
     Volume *vol = reinterpret_cast<Volume *>( c->context );
-
     auto props = Aurora::Flash::NOR::getProperties( vol->flash.deviceType() );
 
     /*-------------------------------------------------------------------------
     Invoke the device driver
     -------------------------------------------------------------------------*/
-    vol->flash.lock();
+    Chimera::Thread::LockGuard _lck( vol->flash );
 
-    auto error = LFS_ERR_OK;
-    if ( ( Aurora::Memory::Status::ERR_OK != vol->flash.erase( block ) )
-      || ( Aurora::Memory::Status::ERR_OK != vol->flash.pendEvent( Aurora::Memory::Event::MEM_ERASE_COMPLETE, props->blockEraseDelay ) ) )
+    auto lfs_err   = LFS_ERR_IO;
+    auto flash_err = vol->flash.erase( block );
+
+    if ( flash_err == AM::Status::ERR_OK )
     {
-      error = LFS_ERR_IO;
+      flash_err = vol->flash.pendEvent( AM::Event::MEM_ERASE_COMPLETE, props->blockEraseDelay );
+      if ( flash_err == AM::Status::ERR_OK )
+      {
+        lfs_err = LFS_ERR_OK;
+      }
     }
 
-    vol->flash.unlock();
-    return error;
+    LOG_TRACE_IF( flash_err != AM::Status::ERR_OK, "NOR erase error: %d\r\n", flash_err );
+    return lfs_err;
   }
 
 
   static int lfs_safe_sync( const struct lfs_config *c )
   {
-    RT_HARD_ASSERT( c->context );
+    /*-------------------------------------------------------------------------
+    Get some information from the context pointer
+    -------------------------------------------------------------------------*/
+    RT_DBG_ASSERT( c->context );
     Volume *vol = reinterpret_cast<Volume *>( c->context );
 
     /*-------------------------------------------------------------------------
     Invoke the device driver
     -------------------------------------------------------------------------*/
-    vol->flash.lock();
+    Chimera::Thread::LockGuard _lck( vol->flash );
 
-    auto error = LFS_ERR_OK;
-    if ( Aurora::Memory::Status::ERR_OK != vol->flash.flush() )
+    auto lfs_err = LFS_ERR_IO;
+    auto flash_err = vol->flash.flush();
+
+    if ( flash_err == AM::Status::ERR_OK )
     {
-      error = LFS_ERR_IO;
+      lfs_err = LFS_ERR_OK;
     }
 
-    vol->flash.unlock();
-    return error;
+    LOG_TRACE_IF( flash_err != AM::Status::ERR_OK, "NOR flush error: %d\r\n", flash_err );
+    return lfs_err;
   }
 
 #endif /* EMBEDDED */
@@ -348,7 +416,7 @@ namespace Aurora::FileSystem::LFS
     vol->_volumeID = drive;
 
     vol = get_volume( drive );
-    if( !vol )
+    if ( !vol )
     {
       return -1;
     }
@@ -358,13 +426,13 @@ namespace Aurora::FileSystem::LFS
     -------------------------------------------------------------------------*/
 #if defined( SIMULATOR )
     bool create = true;
-    auto props = Aurora::Flash::NOR::getProperties( vol->flash.deviceType() );
+    auto props  = Aurora::Flash::NOR::getProperties( vol->flash.deviceType() );
     assert( props );
 
-    if( std::filesystem::exists( vol->_dataFile ) )
+    if ( std::filesystem::exists( vol->_dataFile ) )
     {
       const size_t size = std::filesystem::file_size( vol->_dataFile );
-      if( props->endAddress != size )
+      if ( props->endAddress != size )
       {
         std::filesystem::remove( vol->_dataFile );
       }
@@ -374,7 +442,7 @@ namespace Aurora::FileSystem::LFS
       }
     }
 
-    if( create )
+    if ( create )
     {
       /*-----------------------------------------------------------------------
       Create the parent directories
@@ -398,12 +466,14 @@ namespace Aurora::FileSystem::LFS
 
       file.close();
     }
-#endif  /* SIMULATOR */
+#endif /* SIMULATOR */
 
     /*-------------------------------------------------------------------------
     Otherwise, attempt to mount the drive assuming it's already formatted.
     -------------------------------------------------------------------------*/
-    return lfs_mount( &( vol->fs ), &( vol->cfg ) );
+    auto lfs_err = lfs_mount( &( vol->fs ), &( vol->cfg ) );
+    LOG_TRACE_IF( lfs_err != LFS_ERR_OK, "Mount error: %s\r\n", get_error_str( lfs_err ).data() );
+    return lfs_err;
   }
 
 
@@ -415,7 +485,7 @@ namespace Aurora::FileSystem::LFS
     Only attempt an unmount if the volume actually exists
     -------------------------------------------------------------------------*/
     Volume *vol = get_volume( drive );
-    if( !vol )
+    if ( !vol )
     {
       return -1;
     }
@@ -424,7 +494,9 @@ namespace Aurora::FileSystem::LFS
     Perform the unmount, but don't destroy the volume registration. That is a
     separate (lower layer) task not related to mounting/unmounting.
     -------------------------------------------------------------------------*/
-    return lfs_unmount( &( vol->fs ) );
+    auto lfs_err = lfs_unmount( &( vol->fs ) );
+    LOG_TRACE_IF( lfs_err != LFS_ERR_OK, "Unmount error: %s\r\n", get_error_str( lfs_err ).data() );
+    return lfs_err;
   }
 
 
@@ -435,7 +507,7 @@ namespace Aurora::FileSystem::LFS
     /*-------------------------------------------------------------------------
     Input Protections
     -------------------------------------------------------------------------*/
-    if( s_files.full() )
+    if ( s_files.full() )
     {
       return -1;
     }
@@ -444,7 +516,7 @@ namespace Aurora::FileSystem::LFS
     Nothing to do if the file already exists in the registry
     -------------------------------------------------------------------------*/
     File *file = get_file( stream );
-    if( file )
+    if ( file )
     {
       return 0;
     }
@@ -459,7 +531,7 @@ namespace Aurora::FileSystem::LFS
     uint32_t access   = mode & O_ACCESS_MSK;
     uint32_t modifier = mode & O_MODIFY_MSK;
 
-    switch( access )
+    switch ( access )
     {
       case O_RDONLY:
         flags = LFS_O_RDONLY;
@@ -477,22 +549,22 @@ namespace Aurora::FileSystem::LFS
         return -1;
     }
 
-    if( modifier & O_APPEND )
+    if ( modifier & O_APPEND )
     {
       flags |= LFS_O_APPEND;
     }
 
-    if( modifier & O_CREAT )
+    if ( modifier & O_CREAT )
     {
       flags |= LFS_O_CREAT;
     }
 
-    if( modifier & O_EXCL )
+    if ( modifier & O_EXCL )
     {
       flags |= LFS_O_EXCL;
     }
 
-    if( modifier & O_TRUNC )
+    if ( modifier & O_TRUNC )
     {
       flags |= LFS_O_TRUNC;
     }
@@ -500,32 +572,34 @@ namespace Aurora::FileSystem::LFS
     /*-------------------------------------------------------------------------
     Allocate the file in the vector. LFS needs file control data to be static.
     -------------------------------------------------------------------------*/
+    /* Create the file on the stack with some basic information */
     File new_file;
     new_file.clear();
     new_file.fileDesc = stream;
     new_file.pVolume  = volume;
 
+    /* Re-find the file in it's new (static) memory location*/
     s_files.push_back( new_file );
     etl::shell_sort( s_files.begin(), s_files.end() );
-
     file = get_file( stream );
     RT_DBG_ASSERT( file );
 
-    /* Per documentation, this buffer needs at minimum "cache_size" bytes */
+    /* Point the cfg buffer to the new address. Validate size requirements. */
     file->lfsCfg.buffer = file->lfsCfgBuff;
     RT_HARD_ASSERT( sizeof( file->lfsCfgBuff ) >= volume->cfg.cache_size );
 
     /*-------------------------------------------------------------------------
-    Open the new file
+    Open the new file. On failure, deallocate the file structure.
     -------------------------------------------------------------------------*/
-    int err = lfs_file_opencfg( &( volume->fs ), &file->lfsFile, filename, flags, &file->lfsCfg );
-    if( err != LFS_ERR_OK )
+    int lfs_err = lfs_file_opencfg( &( volume->fs ), &file->lfsFile, filename, flags, &file->lfsCfg );
+    if ( lfs_err != LFS_ERR_OK )
     {
       s_files.erase( file );
       etl::shell_sort( s_files.begin(), s_files.end() );
     }
 
-    return err;
+    LOG_TRACE_IF( lfs_err != LFS_ERR_OK, "Open error: %s\r\n", get_error_str( lfs_err ).data() );
+    return lfs_err;
   }
 
 
@@ -537,7 +611,7 @@ namespace Aurora::FileSystem::LFS
     Look up the file in the registry
     -------------------------------------------------------------------------*/
     File *file = get_file( stream );
-    if( !file )
+    if ( !file )
     {
       return 0;
     }
@@ -545,10 +619,11 @@ namespace Aurora::FileSystem::LFS
     /*-------------------------------------------------------------------------
     Perform the LFS operation
     -------------------------------------------------------------------------*/
-    int err = lfs_file_close( &( file->pVolume->fs ), &( file->lfsFile ) );
-    if( err < 0 )
+    int lfs_err = lfs_file_close( &( file->pVolume->fs ), &( file->lfsFile ) );
+    if ( lfs_err < 0 )
     {
-      return err;
+      LOG_TRACE( "Close error: %s\r\n", get_error_str( lfs_err ).data() );
+      return lfs_err;
     }
 
     /*-------------------------------------------------------------------------
@@ -566,7 +641,7 @@ namespace Aurora::FileSystem::LFS
     Look up the file in the registry
     -------------------------------------------------------------------------*/
     File *file = get_file( stream );
-    if( !file )
+    if ( !file )
     {
       return 0;
     }
@@ -574,7 +649,9 @@ namespace Aurora::FileSystem::LFS
     /*-------------------------------------------------------------------------
     Perform the LFS operation
     -------------------------------------------------------------------------*/
-    return lfs_file_sync( &( file->pVolume->fs ), &( file->lfsFile ) );
+    auto lfs_err = lfs_file_sync( &( file->pVolume->fs ), &( file->lfsFile ) );
+    LOG_TRACE_IF( lfs_err != LFS_ERR_OK, "Sync error: %s\r\n", get_error_str( lfs_err ).data() );
+    return lfs_err;
   }
 
 
@@ -584,7 +661,7 @@ namespace Aurora::FileSystem::LFS
     Look up the file in the registry
     -------------------------------------------------------------------------*/
     File *file = get_file( stream );
-    if( !file )
+    if ( !file )
     {
       return 0;
     }
@@ -593,8 +670,9 @@ namespace Aurora::FileSystem::LFS
     Perform the LFS operation
     -------------------------------------------------------------------------*/
     int bytes_read = lfs_file_read( &( file->pVolume->fs ), &( file->lfsFile ), ptr, ( size * count ) );
-    if( bytes_read < 0 )
+    if ( bytes_read < 0 )
     {
+      LOG_TRACE( "Read error: %s\r\n", get_error_str( bytes_read ).data() );
       return 0;
     }
 
@@ -608,7 +686,7 @@ namespace Aurora::FileSystem::LFS
     Look up the file in the registry
     -------------------------------------------------------------------------*/
     File *file = get_file( stream );
-    if( !file )
+    if ( !file )
     {
       return 0;
     }
@@ -617,8 +695,9 @@ namespace Aurora::FileSystem::LFS
     Perform the LFS operation
     -------------------------------------------------------------------------*/
     int bytes_written = lfs_file_write( &( file->pVolume->fs ), &( file->lfsFile ), ptr, ( size * count ) );
-    if( bytes_written < 0 )
+    if ( bytes_written < 0 )
     {
+      LOG_TRACE( "Write error: %s\r\n", get_error_str( bytes_written ).data() );
       return 0;
     }
 
@@ -632,7 +711,7 @@ namespace Aurora::FileSystem::LFS
     Look up the file in the registry
     -------------------------------------------------------------------------*/
     File *file = get_file( stream );
-    if( !file )
+    if ( !file )
     {
       return 0;
     }
@@ -640,7 +719,9 @@ namespace Aurora::FileSystem::LFS
     /*-------------------------------------------------------------------------
     Perform the LFS operation
     -------------------------------------------------------------------------*/
-    return lfs_file_seek( &( file->pVolume->fs ), &( file->lfsFile ), offset, whence );
+    auto lfs_err = lfs_file_seek( &( file->pVolume->fs ), &( file->lfsFile ), offset, whence );
+    LOG_TRACE_IF( lfs_err != LFS_ERR_OK, "Seek error: %s\r\n", get_error_str( lfs_err ).data() );
+    return lfs_err;
   }
 
 
@@ -650,7 +731,7 @@ namespace Aurora::FileSystem::LFS
     Look up the file in the registry
     -------------------------------------------------------------------------*/
     File *file = get_file( stream );
-    if( !file )
+    if ( !file )
     {
       return 0;
     }
@@ -658,13 +739,14 @@ namespace Aurora::FileSystem::LFS
     /*-------------------------------------------------------------------------
     Perform the LFS operation
     -------------------------------------------------------------------------*/
-    int err = lfs_file_tell( &( file->pVolume->fs ), &( file->lfsFile ) );
-    if( err < 0 )
+    int lfs_err = lfs_file_tell( &( file->pVolume->fs ), &( file->lfsFile ) );
+    if ( lfs_err < 0 )
     {
+      LOG_TRACE_IF( lfs_err != LFS_ERR_OK, "Tell error: %s\r\n", get_error_str( lfs_err ).data() );
       return 0;
     }
 
-    return static_cast<size_t>( err );
+    return static_cast<size_t>( lfs_err );
   }
 
 
@@ -674,7 +756,7 @@ namespace Aurora::FileSystem::LFS
     Look up the file in the registry
     -------------------------------------------------------------------------*/
     File *file = get_file( stream );
-    if( !file )
+    if ( !file )
     {
       return;
     }
@@ -682,8 +764,8 @@ namespace Aurora::FileSystem::LFS
     /*-------------------------------------------------------------------------
     Perform the LFS operation
     -------------------------------------------------------------------------*/
-    int err = lfs_file_rewind( &( file->pVolume->fs ), &( file->lfsFile ) );
-    RT_DBG_ASSERT( err == LFS_ERR_OK );
+    int lfs_err = lfs_file_rewind( &( file->pVolume->fs ), &( file->lfsFile ) );
+    LOG_TRACE_IF( lfs_err != LFS_ERR_OK, "Rewind error: %s\r\n", get_error_str( lfs_err ).data() );
   }
 
 
@@ -713,11 +795,24 @@ namespace Aurora::FileSystem::LFS
   /*---------------------------------------------------------------------------
   Public Functions
   ---------------------------------------------------------------------------*/
-  Interface getInterface()
+  void initialize()
+  {
+    if ( s_init != Chimera::DRIVER_INITIALIZED_KEY )
+    {
+      s_lock.unlock();
+      s_volumes.clear();
+      s_files.clear();
+      s_init = Chimera::DRIVER_INITIALIZED_KEY;
+    }
+  }
+
+
+  Interface getInterface( Volume *const vol )
   {
     Interface intf;
     intf.clear();
 
+    intf.context    = reinterpret_cast<void *>( vol );
     intf.initialize = ::Aurora::FileSystem::LFS::fs_init;
     intf.mount      = ::Aurora::FileSystem::LFS::mount;
     intf.unmount    = ::Aurora::FileSystem::LFS::unmount;
@@ -735,18 +830,6 @@ namespace Aurora::FileSystem::LFS
   }
 
 
-  void initialize()
-  {
-    if ( s_init != Chimera::DRIVER_INITIALIZED_KEY )
-    {
-      s_lock.unlock();
-      s_volumes.clear();
-      s_files.clear();
-      s_init = Chimera::DRIVER_INITIALIZED_KEY;
-    }
-  }
-
-
   bool attachVolume( Volume *const vol )
   {
     /*-------------------------------------------------------------------------
@@ -760,7 +843,7 @@ namespace Aurora::FileSystem::LFS
     /*-------------------------------------------------------------------------
     Ensure we can store the new volume and it hasn't already been registered.
     -------------------------------------------------------------------------*/
-    if( s_volumes.full() || get_volume( vol->_volumeID ) )
+    if ( s_volumes.full() || get_volume( vol->_volumeID ) )
     {
       return false;
     }
@@ -768,10 +851,10 @@ namespace Aurora::FileSystem::LFS
     /*-------------------------------------------------------------------------
     Register the IO callbacks & context pointer
     -------------------------------------------------------------------------*/
-    vol->cfg.read  = lfs_safe_read;
-    vol->cfg.prog  = lfs_safe_prog;
-    vol->cfg.erase = lfs_safe_erase;
-    vol->cfg.sync  = lfs_safe_sync;
+    vol->cfg.read    = lfs_safe_read;
+    vol->cfg.prog    = lfs_safe_prog;
+    vol->cfg.erase   = lfs_safe_erase;
+    vol->cfg.sync    = lfs_safe_sync;
     vol->cfg.context = reinterpret_cast<void *>( vol );
 
     s_volumes.push_back( vol );
@@ -784,7 +867,7 @@ namespace Aurora::FileSystem::LFS
     /*-------------------------------------------------------------------------
     Input Protection
     -------------------------------------------------------------------------*/
-    if( !vol )
+    if ( !vol )
     {
       return false;
     }
@@ -792,6 +875,8 @@ namespace Aurora::FileSystem::LFS
     /*-------------------------------------------------------------------------
     Invoke the format command, assuming the configuration is OK
     -------------------------------------------------------------------------*/
-    return LFS_ERR_OK == lfs_format( &( vol->fs ), &( vol->cfg ) );
+    auto lfs_err = lfs_format( &( vol->fs ), &( vol->cfg ) );
+    LOG_TRACE_IF( lfs_err != LFS_ERR_OK, "Format error: %s\r\n", get_error_str( lfs_err ).data() );
+    return lfs_err == LFS_ERR_OK;
   }
 }  // namespace Aurora::FileSystem::LFS

@@ -425,6 +425,6 @@ namespace Aurora::FileSystem
       return 0 ;
     }
 
-    impl->fsize( stream );
+    return impl->fsize( stream );
   }
 }  // namespace Aurora::FileSystem

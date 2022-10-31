@@ -20,7 +20,7 @@ namespace Aurora::FileSystem
   /*-------------------------------------------------------------------------------
   Binary File
   -------------------------------------------------------------------------------*/
-  BinaryFile::BinaryFile() : mIsOpen( false ), mError( ERR_OK ), mFileId( -1 )
+  BinaryFile::BinaryFile() : mIsOpen( false ), mFileId( -1 ), mError( ERR_OK )
   {
   }
 

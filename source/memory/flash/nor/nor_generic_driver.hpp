@@ -145,7 +145,6 @@ namespace Aurora::Flash::NOR
   private:
     friend Chimera::Thread::Lockable<Driver>;
 
-
     Chip_t mChip;                                    /**< Memory chip in use */
     Chimera::SPI::Channel mSPIChannel;               /**< SPI driver channel */
     Chimera::SPI::Driver_rPtr mSPI;                  /**< SPI driver instance */
@@ -153,7 +152,6 @@ namespace Aurora::Flash::NOR
     std::array<uint8_t, CFI::MAX_CMD_LEN> cmdBuffer; /**< Buffer for holding a command sequence */
 
     void issueWriteEnable();
-    void setChipSelect( const Chimera::GPIO::State state );
   };
 }  // namespace Aurora::NOR
 

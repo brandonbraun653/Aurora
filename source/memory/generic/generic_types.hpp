@@ -5,7 +5,7 @@
  *  Description:
  *    Types associated with generic memory interfaces
  *
- *  2020 | Brandon Braun | brandonbraun653@gmail.com
+ *  2020-2022 | Brandon Braun | brandonbraun653@gmail.com
  *******************************************************************************/
 
 #pragma once
@@ -93,13 +93,13 @@ namespace Aurora::Memory
    *  really a standard for checking the status of an operation (that the author is
    *  aware of), so this function will serve as a redirect into that functionality.
    *
-   *  @param[in]  channel     Peripheral channel in use for the device (SPI, I2C, MMC, etc)
+   *  @param[in]  driver      Peripheral driver in use for the device (SPI, I2C, MMC, etc)
    *  @param[in]  device      Specific device identifier. This can influence the read protocol.
    *  @param[in]  event       Which event to look for
    *  @param[in]  timeout     How long in milliseconds to wait for the event to occur
    *  @return Status
    */
-  using EventPollFunc = Status ( * )( const uint8_t channel, const uint8_t device, const Event event, const size_t timeout );
+  using EventPollFunc = Status ( * )( void *driver, const uint8_t device, const Event event, const size_t timeout );
 
   /*-------------------------------------------------------------------------------
   Constants

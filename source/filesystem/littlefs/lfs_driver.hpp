@@ -52,15 +52,17 @@ namespace Aurora::FileSystem::LFS
   Public Functions
   ---------------------------------------------------------------------------*/
   /**
-   * @brief Get the implementation of the LittleFS filesystem
-   * @return Interface
-   */
-  Interface getInterface();
-
-  /**
    * @brief Initializes LFS specific driver data
    */
   void initialize();
+
+  /**
+   * @brief Get the implementation of the LittleFS filesystem
+   *
+   * @param vol     The volume associated with the interface
+   * @return Interface
+   */
+  Interface getInterface( Volume *const vol );
 
   /**
    * @brief Registers a volume for use with the filesystem

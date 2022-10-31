@@ -5,24 +5,22 @@
  *  Description:
  *    NOR flash generic driver implementation
  *
- *  2021 | Brandon Braun | brandonbraun653@gmail.com
+ *  2021-2022 | Brandon Braun | brandonbraun653@gmail.com
  *******************************************************************************/
 
-/* Aurora Includes */
+/*-----------------------------------------------------------------------------
+Includes
+-----------------------------------------------------------------------------*/
 #include <Aurora/logging>
+#include <Aurora/memory>
+#include <Aurora/source/memory/flash/jedec/jedec_cfi_cmds.hpp>
+#include <Aurora/source/memory/flash/nor/manufacturer/nor_adesto.hpp>
 #include <Aurora/utility>
-
-/* Chimera Includes */
 #include <Chimera/assert>
 #include <Chimera/common>
 #include <Chimera/event>
 #include <Chimera/spi>
 #include <Chimera/thread>
-
-/* Aurora Includes */
-#include <Aurora/memory>
-#include <Aurora/source/memory/flash/jedec/jedec_cfi_cmds.hpp>
-#include <Aurora/source/memory/flash/nor/manufacturer/nor_adesto.hpp>
 
 namespace Aurora::Flash::NOR
 {
@@ -324,21 +322,24 @@ namespace Aurora::Flash::NOR
     /*-------------------------------------------------
     Perform the SPI transaction
     -------------------------------------------------*/
-    // Acquire the SPI and enable the NOR chip
-    mSPI->lock();
-    this->setChipSelect( Chimera::GPIO::State::LOW );
+    Chimera::Thread::LockGuard _spilock( *mSPI );
+    auto result = Chimera::Status::OK;
+
+    // Enable the NOR chip
+    result |= mSPI->assignChipSelect( mCS );
+    result |= mSPI->setChipSelectControlMode( Chimera::SPI::CSMode::MANUAL );
+    result |= mSPI->setChipSelect( Chimera::GPIO::State::LOW );
 
     // Tell NOR controller which address to write into
-    mSPI->writeBytes( cmdBuffer.data(), CFI::PAGE_PROGRAM_OPS_LEN );
-    mSPI->await( Chimera::Event::Trigger::TRIGGER_TRANSFER_COMPLETE, TIMEOUT_BLOCK );
+    result |= mSPI->writeBytes( cmdBuffer.data(), CFI::PAGE_PROGRAM_OPS_LEN );
+    result |= mSPI->await( Chimera::Event::Trigger::TRIGGER_TRANSFER_COMPLETE, TIMEOUT_BLOCK );
 
     // Dump the data
-    mSPI->writeBytes( data, length );
-    mSPI->await( Chimera::Event::Trigger::TRIGGER_TRANSFER_COMPLETE, TIMEOUT_BLOCK );
+    result |= mSPI->writeBytes( data, length );
+    result |= mSPI->await( Chimera::Event::Trigger::TRIGGER_TRANSFER_COMPLETE, TIMEOUT_BLOCK );
 
     // Release the SPI and disable the NOR chip
-    this->setChipSelect( Chimera::GPIO::State::HIGH );
-    mSPI->unlock();
+    result |= mSPI->setChipSelect( Chimera::GPIO::State::HIGH );
 
     /*-------------------------------------------------
     Wait for NOR to finalize the write
@@ -348,7 +349,7 @@ namespace Aurora::Flash::NOR
     /*-------------------------------------------------
     Release access to this driver and exit
     -------------------------------------------------*/
-    return Aurora::Memory::Status::ERR_OK;
+    return ( result == Chimera::Status::OK ) ? Status::ERR_OK : Status::ERR_DRIVER_ERR;
   }
 
 
@@ -439,23 +440,27 @@ namespace Aurora::Flash::NOR
     /*-------------------------------------------------
     Perform the SPI transaction
     -------------------------------------------------*/
-    // Acquire the SPI and enable the NOR chip
-    mSPI->lock();
-    this->setChipSelect( Chimera::GPIO::State::LOW );
+    Chimera::Thread::LockGuard _spilock( *mSPI );
+    auto result = Chimera::Status::OK;
+
+    // Enable the NOR chip
+    result |= mSPI->assignChipSelect( mCS );
+    result |= mSPI->setChipSelectControlMode( Chimera::SPI::CSMode::MANUAL );
+    result |= mSPI->setChipSelect( Chimera::GPIO::State::LOW );
 
     // Tell the hardware which address to read from
-    mSPI->writeBytes( cmdBuffer.data(), CFI::READ_ARRAY_HS_OPS_LEN );
-    mSPI->await( Chimera::Event::Trigger::TRIGGER_TRANSFER_COMPLETE, Chimera::Thread::TIMEOUT_BLOCK );
+    result |= mSPI->writeBytes( cmdBuffer.data(), CFI::READ_ARRAY_HS_OPS_LEN );
+    result |= mSPI->await( Chimera::Event::Trigger::TRIGGER_TRANSFER_COMPLETE, Chimera::Thread::TIMEOUT_BLOCK );
 
     // Pull out all the data
-    mSPI->readBytes( data, length );
-    mSPI->await( Chimera::Event::Trigger::TRIGGER_TRANSFER_COMPLETE, Chimera::Thread::TIMEOUT_BLOCK );
+    result |= mSPI->readBytes( data, length );
+    result |= mSPI->await( Chimera::Event::Trigger::TRIGGER_TRANSFER_COMPLETE, Chimera::Thread::TIMEOUT_BLOCK );
 
     // Release the SPI and disable the NOR chip
-    this->setChipSelect( Chimera::GPIO::State::HIGH );
-    mSPI->unlock();
+    result |= mSPI->setChipSelect( Chimera::GPIO::State::HIGH );
+    result |= mSPI->assignChipSelect( nullptr );
 
-    return Aurora::Memory::Status::ERR_OK;
+    return ( result == Chimera::Status::OK ) ? Status::ERR_OK : Status::ERR_DRIVER_ERR;
   }
 
 
@@ -570,14 +575,14 @@ namespace Aurora::Flash::NOR
     /*-------------------------------------------------
     Perform the SPI transaction
     -------------------------------------------------*/
-    auto spiResult = Chimera::Status::OK;
+    Chimera::Thread::LockGuard _spilock( *mSPI );
+    auto result = Chimera::Status::OK;
 
-    mSPI->lock();
-    this->setChipSelect( Chimera::GPIO::State::LOW );
-    spiResult |= mSPI->readWriteBytes( cmdBuffer.data(), cmdBuffer.data(), eraseOpsLen );
-    spiResult |= mSPI->await( Chimera::Event::Trigger::TRIGGER_TRANSFER_COMPLETE, TIMEOUT_BLOCK );
-    this->setChipSelect( Chimera::GPIO::State::HIGH );
-    mSPI->unlock();
+    result |= mSPI->assignChipSelect( mCS );
+    result |= mSPI->setChipSelect( Chimera::GPIO::State::LOW );
+    result |= mSPI->readWriteBytes( cmdBuffer.data(), cmdBuffer.data(), eraseOpsLen );
+    result |= mSPI->await( Chimera::Event::Trigger::TRIGGER_TRANSFER_COMPLETE, TIMEOUT_BLOCK );
+    result |= mSPI->setChipSelect( Chimera::GPIO::State::HIGH );
 
     /*-------------------------------------------------
     Wait for the hardware to finish the operation
@@ -585,7 +590,7 @@ namespace Aurora::Flash::NOR
     pendEvent( Event::MEM_ERASE_COMPLETE, TIMEOUT_BLOCK );
     NOR_LOG( LOG_DEBUG( "Erase complete\r\n" ) );
 
-    return ( spiResult == Chimera::Status::OK ) ? Status::ERR_OK : Status::ERR_DRIVER_ERR;
+    return ( result == Chimera::Status::OK ) ? Status::ERR_OK : Status::ERR_DRIVER_ERR;
   }
 
 
@@ -615,14 +620,15 @@ namespace Aurora::Flash::NOR
     /*-------------------------------------------------
     Perform the SPI transaction
     -------------------------------------------------*/
-    auto spiResult = Chimera::Status::OK;
+    Chimera::Thread::LockGuard _spilock( *mSPI );
+    auto result = Chimera::Status::OK;
 
-    mSPI->lock();
-    this->setChipSelect( Chimera::GPIO::State::LOW );
-    spiResult |= mSPI->writeBytes( &CFI::CHIP_ERASE, CFI::CHIP_ERASE_OPS_LEN );
-    spiResult |= mSPI->await( Chimera::Event::Trigger::TRIGGER_TRANSFER_COMPLETE, Chimera::Thread::TIMEOUT_BLOCK );
-    this->setChipSelect( Chimera::GPIO::State::HIGH );
-    mSPI->unlock();
+    result |= mSPI->assignChipSelect( mCS );
+    result |= mSPI->setChipSelectControlMode( Chimera::SPI::CSMode::MANUAL );
+    result |= mSPI->setChipSelect( Chimera::GPIO::State::LOW );
+    result |= mSPI->writeBytes( &CFI::CHIP_ERASE, CFI::CHIP_ERASE_OPS_LEN );
+    result |= mSPI->await( Chimera::Event::Trigger::TRIGGER_TRANSFER_COMPLETE, Chimera::Thread::TIMEOUT_BLOCK );
+    result |= mSPI->setChipSelect( Chimera::GPIO::State::HIGH );
 
     /*-------------------------------------------------
     Wait for the hardware to finish the operation
@@ -630,7 +636,7 @@ namespace Aurora::Flash::NOR
     pendEvent( Event::MEM_ERASE_COMPLETE, TIMEOUT_BLOCK );
     NOR_LOG( LOG_DEBUG( "Erase complete\r\n" ) );
 
-    return ( spiResult == Chimera::Status::OK ) ? Status::ERR_OK : Status::ERR_DRIVER_ERR;
+    return ( result == Chimera::Status::OK ) ? Status::ERR_OK : Status::ERR_DRIVER_ERR;
   }
 
 
@@ -658,7 +664,7 @@ namespace Aurora::Flash::NOR
     /*-------------------------------------------------
     Invoke the driver's poll func
     -------------------------------------------------*/
-    return props->eventPoll( static_cast<uint8_t>( mSPIChannel ), static_cast<uint8_t>( mChip ), event, timeout );
+    return props->eventPoll( mSPI, static_cast<uint8_t>( mChip ), event, timeout );
   }
 
 
@@ -677,12 +683,19 @@ namespace Aurora::Flash::NOR
 
   void Driver::transfer( const void *const cmd, void *const output, const size_t size )
   {
-    mSPI->lock();
-    this->setChipSelect( Chimera::GPIO::State::LOW );
-    mSPI->readWriteBytes( cmd, output, size );
-    mSPI->await( Chimera::Event::Trigger::TRIGGER_TRANSFER_COMPLETE, Chimera::Thread::TIMEOUT_BLOCK );
-    this->setChipSelect( Chimera::GPIO::State::HIGH );
-    mSPI->unlock();
+    RT_DBG_ASSERT( mSPI );
+    Chimera::Thread::LockGuard _lck( *mSPI );
+    Chimera::Status_t result = Chimera::Status::OK;
+
+    result |= mSPI->assignChipSelect( mCS );
+    result |= mSPI->setChipSelectControlMode( Chimera::SPI::CSMode::MANUAL );
+    result |= mSPI->setChipSelect( Chimera::GPIO::State::LOW );
+    result |= mSPI->readWriteBytes( cmd, output, size );
+    result |= mSPI->await( Chimera::Event::Trigger::TRIGGER_TRANSFER_COMPLETE, Chimera::Thread::TIMEOUT_BLOCK );
+    result |= mSPI->setChipSelect( Chimera::GPIO::State::HIGH );
+    result |= mSPI->assignChipSelect( nullptr );
+
+    RT_DBG_ASSERT( result == Chimera::Status::OK );
   }
 
   bool Driver::assignChipSelect( const Chimera::GPIO::Port port, const Chimera::GPIO::Pin pin )
@@ -704,23 +717,12 @@ namespace Aurora::Flash::NOR
   void Driver::issueWriteEnable()
   {
     mSPI->lock();
-    this->setChipSelect( Chimera::GPIO::State::LOW );
+    mSPI->assignChipSelect( mCS );
+    mSPI->setChipSelect( Chimera::GPIO::State::LOW );
     mSPI->writeBytes( &CFI::WRITE_ENABLE, CFI::WRITE_ENABLE_OPS_LEN );
     mSPI->await( Chimera::Event::Trigger::TRIGGER_TRANSFER_COMPLETE, Chimera::Thread::TIMEOUT_BLOCK );
-    this->setChipSelect( Chimera::GPIO::State::HIGH );
+    mSPI->setChipSelect( Chimera::GPIO::State::HIGH );
     mSPI->unlock();
-  }
-
-  void Driver::setChipSelect( const Chimera::GPIO::State state )
-  {
-    if( mCS )
-    {
-      mCS->setState( state );
-    }
-    else
-    {
-      mSPI->setChipSelect( state );
-    }
   }
 
 }  // namespace Aurora::Flash::NOR
