@@ -22,6 +22,7 @@ export(TARGETS ctre_inc FILE "${PROJECT_BINARY_DIR}/Aurora/lib/ctre_inc.cmake")
 add_subdirectory("source/container")
 add_subdirectory("source/database")
 add_subdirectory("source/datastore")
+add_subdirectory("source/datastruct")
 add_subdirectory("source/filesystem")
 add_subdirectory("source/hmi")
 add_subdirectory("source/logging")
@@ -69,6 +70,7 @@ gen_intf_lib_variants(
   TARGET
     aurora_core
   LIBRARIES
+    aurora_datastruct
     aurora_math
     aurora_utility
   EXPORT_DIR

@@ -52,11 +52,11 @@ namespace Aurora::FileSystem::LFS
    */
   struct File
   {
-    FileId          fileDesc;         /**< Descriptor assigned to this file */
-    Volume         *pVolume;          /**< Parent volume file belongs to */
-    lfs_file_t      lfsFile;          /**< LFS file control block */
-    lfs_file_config lfsCfg;           /**< LFS config data due to not allowing malloc */
-    uint8_t         lfsCfgBuff[ 64 ]; /**< Static buffer for config structure */
+    FileId          fileDesc;          /**< Descriptor assigned to this file */
+    Volume         *pVolume;           /**< Parent volume file belongs to */
+    lfs_file_t      lfsFile;           /**< LFS file control block */
+    lfs_file_config lfsCfg;            /**< LFS config data due to not allowing malloc */
+    uint8_t         lfsCfgBuff[ 256 ]; /**< Static buffer for config structure */
 
     bool operator<( const File &rhs ) const
     {
@@ -343,8 +343,8 @@ namespace Aurora::FileSystem::LFS
     Get some information from the context pointer
     -------------------------------------------------------------------------*/
     RT_DBG_ASSERT( c->context );
-    Volume *vol = reinterpret_cast<Volume *>( c->context );
-    auto props = Aurora::Flash::NOR::getProperties( vol->flash.deviceType() );
+    Volume *vol   = reinterpret_cast<Volume *>( c->context );
+    auto    props = Aurora::Flash::NOR::getProperties( vol->flash.deviceType() );
 
     /*-------------------------------------------------------------------------
     Invoke the device driver
@@ -381,7 +381,7 @@ namespace Aurora::FileSystem::LFS
     -------------------------------------------------------------------------*/
     Chimera::Thread::LockGuard _lck( vol->flash );
 
-    auto lfs_err = LFS_ERR_IO;
+    auto lfs_err   = LFS_ERR_IO;
     auto flash_err = vol->flash.flush();
 
     if ( flash_err == AM::Status::ERR_OK )

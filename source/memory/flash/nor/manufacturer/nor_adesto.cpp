@@ -29,7 +29,7 @@ namespace Aurora::Flash::NOR::Adesto
     // AT25SF081
     { .writeChunk      = Aurora::Memory::Chunk::PAGE,
       .readChunk       = Aurora::Memory::Chunk::PAGE,
-      .eraseChunk      = Aurora::Memory::Chunk::SECTOR,
+      .eraseChunk      = Aurora::Memory::Chunk::BLOCK,
       .jedec           = JEDEC_CODE,
       .pageSize        = 256,
       .blockSize       = 4 * 1024,

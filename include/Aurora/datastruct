@@ -1,0 +1,17 @@
+/********************************************************************************
+ *  File Name:
+ *    datastruct
+ *
+ *  Description:
+ *    Aurora includes for datastruct implementations
+ *
+ *  2022 | Brandon Braun | brandonbraun653@gmail.com
+ ********************************************************************************/
+
+#pragma once
+#ifndef AURORA_DATA_STRUCTURE_INCLUDES
+#define AURORA_DATA_STRUCTURE_INCLUDES
+
+#include <Aurora/source/datastruct/intrusive_struct.hpp>
+
+#endif /* !AURORA_DATA_STRUCTURE_INCLUDES */
