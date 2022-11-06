@@ -48,8 +48,11 @@ namespace Aurora::DS
 
     bool isValid( SecureHeader16_t *const header, const size_t size )
     {
+      /*-----------------------------------------------------------------------
+      CRC must match and the tag complements should cancel out
+      -----------------------------------------------------------------------*/
       RT_DBG_ASSERT( header );
-      return calcCRC( header, size ) == header->crc16;
+      return ( calcCRC( header, size ) == header->crc16 ) && ( 0x00 == ( header->_magicTag0 & header->_magicTag1 ) );
     }
 
 
@@ -63,18 +66,27 @@ namespace Aurora::DS
 
     uint16_t calcCRC( SecureHeader16_t *const header, const size_t size )
     {
+      /*-----------------------------------------------------------------------
+      Input Protection
+      -----------------------------------------------------------------------*/
       RT_DBG_ASSERT( header );
-      RT_DBG_ASSERT( size >= sizeof( SecureHeader16_t::crc16 ) );
+      if( size < sizeof( SecureHeader16_t::crc16 ) )
+      {
+        return 0;
+      }
 
+      /*-----------------------------------------------------------------------
+      Calculate the CRC and return its value
+      -----------------------------------------------------------------------*/
       etl::crc16 crc_calculator;
-
-      uint8_t *data       = reinterpret_cast<uint8_t *>( header ) + sizeof( SecureHeader16_t::crc16 );
-      size_t   bytes_left = size - sizeof( SecureHeader16_t::crc16 );
+      uint8_t   *data       = reinterpret_cast<uint8_t *>( header ) + sizeof( SecureHeader16_t::crc16 );
+      size_t     bytes_left = size - sizeof( SecureHeader16_t::crc16 );
 
       while ( bytes_left )
       {
         crc_calculator.add( *data );
         data++;
+        bytes_left--;
       }
 
       return crc_calculator.value();

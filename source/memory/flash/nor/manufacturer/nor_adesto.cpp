@@ -142,21 +142,21 @@ namespace Aurora::Flash::NOR::Adesto
     uint16_t     statusRegister = readStatusRegister_AT25SF081( driver );
     const size_t startTime      = Chimera::millis();
 
-    while ( statusRegister & eventBitMask )
+    while ( ( statusRegister & eventBitMask ) == eventBitMask )
     {
       /*-------------------------------------------------
       Check for timeout, otherwise suspend this thread
       and allow others to do something.
       -------------------------------------------------*/
-      if ( ( Chimera::millis() - startTime ) > timeout )
-      {
-        return Aurora::Memory::Status::ERR_TIMEOUT;
-        break;
-      }
-      else
-      {
-        Chimera::delayMilliseconds( pollDelay );
-      }
+      // if ( ( Chimera::millis() - startTime ) > timeout )
+      // {
+      //   return Aurora::Memory::Status::ERR_TIMEOUT;
+      //   break;
+      // }
+      // else
+      // {
+      //   Chimera::delayMilliseconds( pollDelay );
+      // }
 
       /*-------------------------------------------------
       Poll the latest info

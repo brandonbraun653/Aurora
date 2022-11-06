@@ -356,7 +356,7 @@ namespace Aurora::FileSystem::LFS
 
     if ( flash_err == AM::Status::ERR_OK )
     {
-      flash_err = vol->flash.pendEvent( AM::Event::MEM_ERASE_COMPLETE, props->blockEraseDelay );
+      flash_err = vol->flash.pendEvent( AM::Event::MEM_ERASE_COMPLETE, Chimera::Thread::TIMEOUT_BLOCK );
       if ( flash_err == AM::Status::ERR_OK )
       {
         lfs_err = LFS_ERR_OK;

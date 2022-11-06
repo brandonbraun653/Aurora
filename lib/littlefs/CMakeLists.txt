@@ -27,9 +27,10 @@ gen_static_lib_variants(
 
   PRV_DEFINES
     LFS_NO_MALLOC
-    LFS_NO_DEBUG
-    LFS_NO_WARN
-    LFS_NO_ERROR
+    # LFS_YES_TRACE
+    # LFS_NO_DEBUG
+    # LFS_NO_WARN
+    # LFS_NO_ERROR
 
   PRV_LIBRARIES
     aurora_intf_inc
