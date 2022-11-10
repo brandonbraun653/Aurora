@@ -39,10 +39,12 @@ namespace Aurora::Flash::EEPROM
   Classes
   ---------------------------------------------------------------------------*/
   class Driver : public virtual Aurora::Memory::IGenericDevice,
-                 public virtual Chimera::Thread::AsyncIOInterface,
+                 public Chimera::Thread::AsyncIO<Driver>,
                  public Chimera::Thread::Lockable<Driver>
   {
   public:
+    using Chimera::Thread::AsyncIO<Driver>::AsyncIO;
+
     Driver();
     ~Driver();
 
@@ -62,13 +64,6 @@ namespace Aurora::Flash::EEPROM
     Aurora::Memory::Status erase() final override;
     Aurora::Memory::Status flush() final override;
     Aurora::Memory::Status pendEvent( const Aurora::Memory::Event event, const size_t timeout ) final override;
-
-    /*-------------------------------------------------------------------------
-    AsyncIO Interface
-    -------------------------------------------------------------------------*/
-    Chimera::Status_t await( const Chimera::Event::Trigger event, const size_t timeout ) final override;
-    Chimera::Status_t await( const Chimera::Event::Trigger event, Chimera::Thread::BinarySemaphore &notifier,
-                                     const size_t timeout ) final override;
 
     /*-------------------------------------------------------------------------
     EEPROM Driver Interface

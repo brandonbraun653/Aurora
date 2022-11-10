@@ -66,6 +66,7 @@ namespace Aurora::Flash::EEPROM
 
   Aurora::Memory::Status Driver::open()
   {
+    this->initAIO();
     return Aurora::Memory::Status::ERR_OK;
   }
 
@@ -277,19 +278,6 @@ namespace Aurora::Flash::EEPROM
   Aurora::Memory::Status Driver::pendEvent( const Aurora::Memory::Event event, const size_t timeout )
   {
     return Aurora::Memory::Status::ERR_UNSUPPORTED;
-  }
-
-
-  Chimera::Status_t Driver::await( const Chimera::Event::Trigger event, const size_t timeout )
-  {
-    return mDriver->await( event, timeout );
-  }
-
-
-  Chimera::Status_t Driver::await( const Chimera::Event::Trigger event, Chimera::Thread::BinarySemaphore &notifier,
-                                     const size_t timeout )
-  {
-    return mDriver->await( event, notifier, timeout );
   }
 
 

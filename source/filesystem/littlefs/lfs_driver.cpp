@@ -172,6 +172,7 @@ namespace Aurora::FileSystem::LFS
     size_t address = 0;
     if ( !Aurora::Flash::NOR::block2Address( vol->flash.deviceType(), block, &address ) )
     {
+      LOG_TRACE( "Bad flash address\r\n" );
       return LFS_ERR_INVAL;
     }
 
@@ -181,17 +182,17 @@ namespace Aurora::FileSystem::LFS
     Read from the file
     -------------------------------------------------------------------------*/
     FILE *file = ::fopen( vol->_dataFile.c_str(), "rb" );
-    assert( file );
+    RT_HARD_ASSERT( file );
 
     ::fseek( file, address, SEEK_SET );
-    assert( ::ftell( file ) == address );
+    RT_HARD_ASSERT( ::ftell( file ) == address );
 
     size_t bytes_read = ::fread( buffer, 1, size, file );
     ::fclose( file );
 
     if ( bytes_read != size )
     {
-      printf( "Error reading from file: %d", ::ferror( file ) );
+      LOG_TRACE( "Error reading from file: %d\r\n" );
       return LFS_ERR_IO;
     }
 
@@ -210,6 +211,7 @@ namespace Aurora::FileSystem::LFS
     size_t address = 0;
     if ( !Aurora::Flash::NOR::block2Address( vol->flash.deviceType(), block, &address ) )
     {
+      LOG_TRACE( "Bad flash address\r\n" );
       return LFS_ERR_INVAL;
     }
 
@@ -228,6 +230,7 @@ namespace Aurora::FileSystem::LFS
 
     if ( bytes_written != size )
     {
+      LOG_TRACE( "Error writing to file: %d\r\n" );
       return LFS_ERR_IO;
     }
 
@@ -246,6 +249,7 @@ namespace Aurora::FileSystem::LFS
     size_t address = 0;
     if ( !Aurora::Flash::NOR::block2Address( vol->flash.deviceType(), block, &address ) )
     {
+      LOG_TRACE( "Bad flash address\r\n" );
       return LFS_ERR_INVAL;
     }
 
@@ -267,6 +271,7 @@ namespace Aurora::FileSystem::LFS
 
     if ( bytes_written != c->block_size )
     {
+      LOG_TRACE( "Error erasing file: %d\r\n" );
       return LFS_ERR_IO;
     }
 
@@ -434,6 +439,8 @@ namespace Aurora::FileSystem::LFS
       const size_t size = std::filesystem::file_size( vol->_dataFile );
       if ( props->endAddress != size )
       {
+        LOG_ERROR( "File size didn't match [%d != %d]. Destroying %s\r\n",
+                   props->endAddress, size, vol->_dataFile.c_str() );
         std::filesystem::remove( vol->_dataFile );
       }
       else
@@ -456,7 +463,6 @@ namespace Aurora::FileSystem::LFS
       -----------------------------------------------------------------------*/
       std::ofstream file;
       file.open( vol->_dataFile, std::ios::app | std::ios::binary );
-
 
       uint8_t data = 0xff;
       for ( size_t idx = 0; idx < props->endAddress; idx++ )
