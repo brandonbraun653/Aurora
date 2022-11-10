@@ -111,6 +111,8 @@ namespace Aurora::Flash::EEPROM
     amount after each write. EEPROM aren't exactly known for performance...
     -------------------------------------------------------------------------*/
     Chimera::Status_t result = Chimera::Status::OK;
+
+#if defined( EMBEDDED )
     uint8_t write_size = 0;
     uint8_t write_data[ 3 ];
 
@@ -138,6 +140,10 @@ namespace Aurora::Flash::EEPROM
       result |= mDriver->write( mConfig.deviceAddress, write_data, write_size );
       Chimera::delayMilliseconds( attr->pagePgmDelay );
     }
+#else   /* SIMULATOR */
+    result |= mDriver->write( address, data, length );
+    result |= mDriver->await( Trigger::TRIGGER_TRANSFER_COMPLETE, ( length * TIMEOUT_10MS ) );
+#endif
 
     return ( result == Chimera::Status::OK ) ? Status::ERR_OK : Status::ERR_FAIL;
   }
@@ -178,6 +184,7 @@ namespace Aurora::Flash::EEPROM
     -------------------------------------------------------------------------*/
     Chimera::Status_t result = Chimera::Status::OK;
 
+#if defined( EMBEDDED )
     /* Setup the read address in-chip */
     if( attr->endAddress <= 256 )
     {
@@ -198,6 +205,11 @@ namespace Aurora::Flash::EEPROM
     /* Do the continuous read */
     result |= mDriver->read( mConfig.deviceAddress, data, length );
     result |= mDriver->await( Trigger::TRIGGER_TRANSFER_COMPLETE, ( length * TIMEOUT_10MS ) );
+
+#else   /* SIMULATOR */
+    result |= mDriver->read( address, data, length );
+    result |= mDriver->await( Trigger::TRIGGER_TRANSFER_COMPLETE, ( length * TIMEOUT_10MS ) );
+#endif
 
     return ( result == Chimera::Status::OK ) ? Status::ERR_OK : Status::ERR_FAIL;
   }

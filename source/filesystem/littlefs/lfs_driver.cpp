@@ -24,7 +24,6 @@ Includes
 #include <etl/vector.h>
 
 #if defined( SIMULATOR )
-#include <assert.h>
 #include <cstdio>
 #include <fstream>
 #include <iostream>
@@ -221,6 +220,7 @@ namespace Aurora::FileSystem::LFS
     Write the file
     -------------------------------------------------------------------------*/
     FILE *file = ::fopen( vol->_dataFile.c_str(), "rb+" );
+    RT_HARD_ASSERT( file );
     ::fseek( file, address, SEEK_SET );
 
     size_t bytes_written = ::fwrite( buffer, 1, size, file );
