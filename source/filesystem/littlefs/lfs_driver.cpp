@@ -349,7 +349,6 @@ namespace Aurora::FileSystem::LFS
     -------------------------------------------------------------------------*/
     RT_DBG_ASSERT( c->context );
     Volume *vol   = reinterpret_cast<Volume *>( c->context );
-    auto    props = Aurora::Flash::NOR::getProperties( vol->flash.deviceType() );
 
     /*-------------------------------------------------------------------------
     Invoke the device driver

@@ -5,22 +5,18 @@
  *  Description:
  *    Tools useful when interfacing with a device that has controllable memory
  *
- *  2019 | Brandon Braun | brandonbraun653@gmail.com
+ *  2019-2022 | Brandon Braun | brandonbraun653@gmail.com
  ********************************************************************************/
 
 #pragma once
 #ifndef AURORA_GENERIC_MEMORY_INTF_HPP
 #define AURORA_GENERIC_MEMORY_INTF_HPP
 
-/* C++ Includes */
-#include <limits>
-#include <vector>
-
-/* Aurora Includes */
+/*-----------------------------------------------------------------------------
+Includes
+-----------------------------------------------------------------------------*/
 #include <Aurora/source/memory/generic/generic_types.hpp>
-
-/* Chimera Includes */
-#include <Chimera/thread>
+#include <cstddef>
 
 namespace Aurora::Memory
 {
@@ -47,13 +43,13 @@ namespace Aurora::Memory
      *  Initializes the device for access
      *  @return Status
      */
-    virtual Status open() = 0;
+    virtual Aurora::Memory::Status open() = 0;
 
     /**
      *  Tears down the device so no one can access it further
      *  @return Status
      */
-    virtual Status close() = 0;
+    virtual Aurora::Memory::Status close() = 0;
 
     /**
      *  Writes data into the given chunk
@@ -64,7 +60,7 @@ namespace Aurora::Memory
      *  @param[in]  length        Number of bytes to be written
      *  @return Status
      */
-    virtual Status write( const size_t chunk, const size_t offset, const void *const data, const size_t length ) = 0;
+    virtual Aurora::Memory::Status write( const size_t chunk, const size_t offset, const void *const data, const size_t length ) = 0;
 
     /**
      * @brief Writes data at an absolute address
@@ -74,7 +70,7 @@ namespace Aurora::Memory
      * @param length        Number of bytes to be written
      * @return Status
      */
-    virtual Status write( const size_t address, const void *const data, const size_t length ) = 0;
+    virtual Aurora::Memory::Status write( const size_t address, const void *const data, const size_t length ) = 0;
 
     /**
      *  Reads a contiguous length of memory starting at the given chunk.
@@ -85,7 +81,7 @@ namespace Aurora::Memory
      *  @param[in]  length        How many bytes to read out
      *  @return Status
      */
-    virtual Status read( const size_t chunk, const size_t offset, void *const data, const size_t length ) = 0;
+    virtual Aurora::Memory::Status read( const size_t chunk, const size_t offset, void *const data, const size_t length ) = 0;
 
     /**
      * @brief Reads a contiguous length of memory from an absolute address
@@ -95,7 +91,7 @@ namespace Aurora::Memory
      * @param length      How many bytes to read out
      * @return Status
      */
-    virtual Status read( const size_t address, void *const data, const size_t length ) = 0;
+    virtual Aurora::Memory::Status read( const size_t address, void *const data, const size_t length ) = 0;
 
     /**
      *  Erase a block of memory that corresponds with the device's erase block size
@@ -103,7 +99,7 @@ namespace Aurora::Memory
      *  @param[in]  block         The block id to erase
      *  @return Status
      */
-    virtual Status erase( const size_t block ) = 0;
+    virtual Aurora::Memory::Status erase( const size_t block ) = 0;
 
     /**
      * @brief Erases a section of memory
@@ -112,7 +108,7 @@ namespace Aurora::Memory
      * @param length      Number of bytes to erase
      * @return Status
      */
-    virtual Status erase( const size_t address, const size_t length ) = 0;
+    virtual Aurora::Memory::Status erase( const size_t address, const size_t length ) = 0;
 
     /**
      *  Erases the entire chip. Typically this is a single command, so it saves on
@@ -120,14 +116,14 @@ namespace Aurora::Memory
      *
      *  @return Status
      */
-    virtual Status erase() = 0;
+    virtual Aurora::Memory::Status erase() = 0;
 
     /**
      *  Flushes any buffered memory to the device
      *
      *  @return Status
      */
-    virtual Status flush() = 0;
+    virtual Aurora::Memory::Status flush() = 0;
 
     /**
      *  Blocks the current thread of execution until a memory event has
@@ -138,7 +134,7 @@ namespace Aurora::Memory
      *  @param[in]  timeout       How long the caller is willing to wait
      *  @return Status
      */
-    virtual Status pendEvent( const Event event, const size_t timeout ) = 0;
+    virtual Aurora::Memory::Status pendEvent( const Aurora::Memory::Event event, const size_t timeout ) = 0;
   };
 
 }  // namespace Aurora::Memory

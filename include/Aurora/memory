@@ -12,6 +12,7 @@
 #ifndef AURORA_MEMORY_INCLUDES
 #define AURORA_MEMORY_INCLUDES
 
+#include <Aurora/source/memory/flash/device_test.hpp>
 #include <Aurora/source/memory/generic/generic_inc.hpp>
 #include <Aurora/source/memory/heap/heap.hpp>
 #include <Aurora/source/memory/shared_ptr.hpp>

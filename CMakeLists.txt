@@ -85,6 +85,7 @@ gen_intf_lib_variants(
     aurora_memory
   LIBRARIES
     aurora_memory_eeprom
+    aurora_memory_flash_device_test
     aurora_memory_generic
     aurora_memory_nor_flash
     aurora_memory_heap
