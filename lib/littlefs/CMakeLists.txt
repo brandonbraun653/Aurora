@@ -26,7 +26,7 @@ gen_static_lib_variants(
     lfs/bd/lfs_rambd.c
 
   PRV_DEFINES
-    LFS_NO_MALLOC
+    # LFS_NO_MALLOC
     # LFS_YES_TRACE
     # LFS_NO_DEBUG
     # LFS_NO_WARN

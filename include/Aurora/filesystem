@@ -22,6 +22,7 @@
 #include <Aurora/source/filesystem/file_types.hpp>
 #include <Aurora/source/filesystem/generic/generic_driver.hpp>
 #include <Aurora/source/filesystem/littlefs/lfs_driver.hpp>
+#include <Aurora/source/filesystem/littlefs/lfs_tests.hpp>
 #include <Aurora/source/filesystem/spiffs/spiffs_driver.hpp>
 
 #endif /* !AURORA_FILESYSTEM_INCLUDES */

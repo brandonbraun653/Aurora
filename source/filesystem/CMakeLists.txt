@@ -33,6 +33,7 @@ gen_static_lib_variants(
     aurora_filesystem_lfs_driver
   SOURCES
     littlefs/lfs_driver.cpp
+    littlefs/tests/test_alloc.cpp
   PRV_LIBRARIES
     aurora_intf_inc
     chimera_intf_inc

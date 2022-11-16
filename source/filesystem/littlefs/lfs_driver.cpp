@@ -75,6 +75,7 @@ namespace Aurora::FileSystem::LFS
   /*---------------------------------------------------------------------------
   Constants
   ---------------------------------------------------------------------------*/
+  static constexpr bool                                 DEBUG_MODULE      = true;
   static const etl::string_view                         s_lfs_unknown_err = "Unknown error";
   static const etl::flat_map<int, etl::string_view, 15> s_lfs_err_to_str  = {
     { LFS_ERR_OK, "No error" },                // No error
@@ -330,10 +331,21 @@ namespace Aurora::FileSystem::LFS
 
     if ( flash_err == AM::Status::ERR_OK )
     {
-      flash_err = vol->flash.pendEvent( AM::Event::MEM_WRITE_COMPLETE, props->pagePgmDelay );
+      flash_err = vol->flash.pendEvent( AM::Event::MEM_WRITE_COMPLETE, Chimera::Thread::TIMEOUT_BLOCK );
       if ( flash_err == AM::Status::ERR_OK )
       {
         lfs_err = LFS_ERR_OK;
+
+        if constexpr ( DEBUG_MODULE )
+        {
+          uint8_t read_buf[ 64 ];
+          memset( read_buf, 0, sizeof( read_buf ) );
+          RT_HARD_ASSERT( size <= sizeof( read_buf ) );
+
+          vol->flash.read( block, off, read_buf, size );
+
+          RT_HARD_ASSERT( 0 == memcmp( buffer, read_buf, size ) );
+        }
       }
     }
 
