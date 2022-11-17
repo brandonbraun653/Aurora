@@ -15,7 +15,7 @@
 /* STL Includes */
 #include <cstddef>
 
-namespace Aurora::Flash::NOR
+namespace Aurora::Memory::Flash::NOR
 {
   /*-------------------------------------------------------------------------------
   Aliases
@@ -85,6 +85,6 @@ namespace Aurora::Flash::NOR
   Structures
   -------------------------------------------------------------------------------*/
 
-}  // namespace Aurora::Flash::NOR
+}  // namespace Aurora::Memory::Flash::NOR
 
 #endif /* !NOR_FLASH_GENERIC_DRIVER_TYPES_HPP */

@@ -20,6 +20,22 @@ Includes
 
 namespace Aurora::Memory
 {
+  /*---------------------------------------------------------------------------
+  Structures
+  ---------------------------------------------------------------------------*/
+  /**
+   * @brief Specifies simple access attributes about the device
+   */
+  struct DeviceAttr
+  {
+    size_t readSize;  /**< Chunk size used to read */
+    size_t writeSize; /**< Chunk size used to write */
+    size_t eraseSize; /**< Chunk size used to erase */
+  };
+
+  /*---------------------------------------------------------------------------
+  Classes
+  ---------------------------------------------------------------------------*/
   /**
    *  1. Models a memory device in a generic way that does not require the
    *     user to know particular details about the device's internal structure.
@@ -43,7 +59,7 @@ namespace Aurora::Memory
      *  Initializes the device for access
      *  @return Status
      */
-    virtual Aurora::Memory::Status open() = 0;
+    virtual Aurora::Memory::Status open( const DeviceAttr *const attributes ) = 0;
 
     /**
      *  Tears down the device so no one can access it further
@@ -54,10 +70,10 @@ namespace Aurora::Memory
     /**
      *  Writes data into the given chunk
      *
-     *  @param[in]  chunk         The chunk id to write data into
-     *  @param[in]  offset        Byte offset into the chunk
-     *  @param[in]  data          The buffer of data that will be written
-     *  @param[in]  length        Number of bytes to be written
+     *  @param chunk         The chunk id to write data into
+     *  @param offset        Byte offset into the chunk
+     *  @param data          The buffer of data that will be written
+     *  @param length        Number of bytes to be written
      *  @return Status
      */
     virtual Aurora::Memory::Status write( const size_t chunk, const size_t offset, const void *const data, const size_t length ) = 0;
@@ -75,10 +91,10 @@ namespace Aurora::Memory
     /**
      *  Reads a contiguous length of memory starting at the given chunk.
      *
-     *  @param[in]  chunk         The chunk id to start the read from
-     *  @param[in]  offset        Byte offset into the chunk
-     *  @param[out] data          Buffer of data to read into
-     *  @param[in]  length        How many bytes to read out
+     *  @param chunk         The chunk id to start the read from
+     *  @param offset        Byte offset into the chunk
+     *  @param data          Buffer of data to read into
+     *  @param length        How many bytes to read out
      *  @return Status
      */
     virtual Aurora::Memory::Status read( const size_t chunk, const size_t offset, void *const data, const size_t length ) = 0;
@@ -96,7 +112,7 @@ namespace Aurora::Memory
     /**
      *  Erase a block of memory that corresponds with the device's erase block size
      *
-     *  @param[in]  block         The block id to erase
+     *  @param block         The block id to erase
      *  @return Status
      */
     virtual Aurora::Memory::Status erase( const size_t block ) = 0;
@@ -130,8 +146,8 @@ namespace Aurora::Memory
      *  happened. Typical implementations poll status registers of the
      *  device to see if an event has happened.
      *
-     *  @param[in]  event         The event to wait on
-     *  @param[in]  timeout       How long the caller is willing to wait
+     *  @param event         The event to wait on
+     *  @param timeout       How long the caller is willing to wait
      *  @return Status
      */
     virtual Aurora::Memory::Status pendEvent( const Aurora::Memory::Event event, const size_t timeout ) = 0;

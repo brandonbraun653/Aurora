@@ -16,7 +16,7 @@ Includes
 #include <Chimera/thread>
 #include <cstdint>
 
-namespace Aurora::Flash::NOR::Adesto
+namespace Aurora::Memory::Flash::NOR::Adesto
 {
   /*-------------------------------------------------------------------------------
   Public Data
@@ -203,4 +203,4 @@ namespace Aurora::Flash::NOR::Adesto
     };
   }
 
-}  // namespace Aurora::Flash::NOR::Adesto
+}  // namespace Aurora::Memory::Flash::NOR::Adesto

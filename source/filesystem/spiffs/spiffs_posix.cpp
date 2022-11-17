@@ -119,7 +119,7 @@ namespace Aurora::FileSystem::SPIFFS
     /*-------------------------------------------------
     Load in the device properties
     -------------------------------------------------*/
-    sNORProps = Aurora::Flash::NOR::getProperties( getNORDriver()->deviceType() );
+    sNORProps = Aurora::Memory::Flash::NOR::getProperties( getNORDriver()->deviceType() );
 
     /*-------------------------------------------------
     What is the device's erase size?

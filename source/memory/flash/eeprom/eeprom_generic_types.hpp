@@ -18,7 +18,7 @@ Includes
 #include <cstddef>
 #include <Chimera/i2c>
 
-namespace Aurora::Flash::EEPROM
+namespace Aurora::Memory::Flash::EEPROM
 {
   /*---------------------------------------------------------------------------
   Aliases
@@ -59,6 +59,6 @@ namespace Aurora::Flash::EEPROM
       i2cChannel    = Chimera::I2C::Channel::NOT_SUPPORTED;
     }
   };
-}  // namespace Aurora::Flash::EEPROM
+}  // namespace Aurora::Memory::Flash::EEPROM
 
 #endif /* !EEPROM_FLASH_GENERIC_DRIVER_TYPES_HPP */

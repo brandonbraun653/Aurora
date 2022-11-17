@@ -21,7 +21,7 @@ Includes
 #include <Chimera/thread>
 
 
-namespace Aurora::Flash::EEPROM
+namespace Aurora::Memory::Flash::EEPROM
 {
   /*---------------------------------------------------------------------------
   Public Functions
@@ -54,7 +54,7 @@ namespace Aurora::Flash::EEPROM
   /*---------------------------------------------------------------------------
   Classes
   ---------------------------------------------------------------------------*/
-  Driver::Driver()
+  Driver::Driver() : mConfig( {} ), mDriver( nullptr ), mProps( nullptr )
   {
   }
 
@@ -64,7 +64,7 @@ namespace Aurora::Flash::EEPROM
   }
 
 
-  Aurora::Memory::Status Driver::open()
+  Aurora::Memory::Status Driver::open( const DeviceAttr *const attributes )
   {
     this->initAIO();
     return Aurora::Memory::Status::ERR_OK;
@@ -95,13 +95,7 @@ namespace Aurora::Flash::EEPROM
     /*-------------------------------------------------------------------------
     Input Protection
     -------------------------------------------------------------------------*/
-    const Properties *attr = nullptr;
-    if ( attr = getProperties( mConfig.whichChip ); !attr  )
-    {
-      return Aurora::Memory::Status::ERR_UNSUPPORTED;
-    }
-
-    if( !data || !length || ( ( address + length ) > attr->endAddress ) )
+    if ( !data || !length || ( ( address + length ) > mProps->endAddress ) )
     {
       return Aurora::Memory::Status::ERR_BAD_ARG;
     }
@@ -118,13 +112,13 @@ namespace Aurora::Flash::EEPROM
 
     for ( size_t idx = 0; idx < length; idx++ )
     {
-      if( attr->endAddress <= 256 )
+      if ( mProps->endAddress <= 256 )
       {
         write_size      = 2;
         write_data[ 0 ] = address + idx;
         write_data[ 1 ] = static_cast<const uint8_t *const>( data )[ idx ];
       }
-      else if( attr->endAddress <= ( 65 * 1024 ) )
+      else if ( mProps->endAddress <= ( 65 * 1024 ) )
       {
         write_size      = 3;
         write_data[ 0 ] = ( ( ( address + idx ) >> 8 ) & 0xFF );  // High byte
@@ -138,9 +132,9 @@ namespace Aurora::Flash::EEPROM
       }
 
       result |= mDriver->write( mConfig.deviceAddress, write_data, write_size );
-      Chimera::delayMilliseconds( attr->pagePgmDelay );
+      Chimera::delayMilliseconds( mProps->pagePgmDelay );
     }
-#else   /* SIMULATOR */
+#else /* SIMULATOR */
     result |= mDriver->write( address, data, length );
     result |= mDriver->await( Trigger::TRIGGER_TRANSFER_COMPLETE, ( length * TIMEOUT_10MS ) );
 #endif
@@ -167,13 +161,7 @@ namespace Aurora::Flash::EEPROM
     /*-------------------------------------------------------------------------
     Input Protection
     -------------------------------------------------------------------------*/
-    const Properties *attr = nullptr;
-    if ( attr = getProperties( mConfig.whichChip ); !attr  )
-    {
-      return Aurora::Memory::Status::ERR_UNSUPPORTED;
-    }
-
-    if( !data || !length || ( ( address + length ) > attr->endAddress ) )
+    if ( !data || !length || ( ( address + length ) > mProps->endAddress ) )
     {
       return Aurora::Memory::Status::ERR_BAD_ARG;
     }
@@ -186,11 +174,11 @@ namespace Aurora::Flash::EEPROM
 
 #if defined( EMBEDDED )
     /* Setup the read address in-chip */
-    if( attr->endAddress <= 256 )
+    if ( mProps->endAddress <= 256 )
     {
       result |= mDriver->write( mConfig.deviceAddress, &address, 1 );
     }
-    else if( attr->endAddress <= ( 65 * 1024 ) )
+    else if ( mProps->endAddress <= ( 65 * 1024 ) )
     {
       result |= mDriver->write( mConfig.deviceAddress, &address, 2 );
     }
@@ -206,7 +194,7 @@ namespace Aurora::Flash::EEPROM
     result |= mDriver->read( mConfig.deviceAddress, data, length );
     result |= mDriver->await( Trigger::TRIGGER_TRANSFER_COMPLETE, ( length * TIMEOUT_10MS ) );
 
-#else   /* SIMULATOR */
+#else /* SIMULATOR */
     result |= mDriver->read( address, data, length );
     result |= mDriver->await( Trigger::TRIGGER_TRANSFER_COMPLETE, ( length * TIMEOUT_10MS ) );
 #endif
@@ -233,13 +221,7 @@ namespace Aurora::Flash::EEPROM
     /*-------------------------------------------------------------------------
     Input Protection
     -------------------------------------------------------------------------*/
-    const Properties *attr = nullptr;
-    if ( attr = getProperties( mConfig.whichChip ); !attr  )
-    {
-      return Aurora::Memory::Status::ERR_UNSUPPORTED;
-    }
-
-    if( !length || ( ( address + length ) > attr->endAddress ) )
+    if ( !length || ( ( address + length ) > mProps->endAddress ) )
     {
       return Aurora::Memory::Status::ERR_BAD_ARG;
     }
@@ -250,7 +232,7 @@ namespace Aurora::Flash::EEPROM
     Status  error     = Status::ERR_OK;
     uint8_t erase_val = 0xFF;
 
-    for( size_t idx = 0; idx < length; idx++ )
+    for ( size_t idx = 0; idx < length; idx++ )
     {
       error = error | this->write( address + idx, &erase_val, sizeof( erase_val ) );
     }
@@ -261,23 +243,10 @@ namespace Aurora::Flash::EEPROM
 
   Aurora::Memory::Status Driver::erase()
   {
-    using namespace Aurora::Memory;
-    using namespace Chimera::Event;
-    using namespace Chimera::Thread;
-
-    /*-------------------------------------------------------------------------
-    Input Protection
-    -------------------------------------------------------------------------*/
-    const Properties *attr = nullptr;
-    if ( attr = getProperties( mConfig.whichChip ); !attr  )
-    {
-      return Aurora::Memory::Status::ERR_UNSUPPORTED;
-    }
-
     /*-------------------------------------------------------------------------
     Erase the whole chip
     -------------------------------------------------------------------------*/
-    return this->erase( attr->startAddress, attr->endAddress );
+    return this->erase( mProps->startAddress, mProps->endAddress );
   }
 
 
@@ -297,8 +266,9 @@ namespace Aurora::Flash::EEPROM
   {
     mDriver = Chimera::I2C::getDriver( config.i2cChannel );
     mConfig = config;
+    mProps  = getProperties( config.whichChip );
 
-    return static_cast<bool>( mDriver );
+    return static_cast<bool>( mDriver && mProps );
   }
 
-}  // namespace Aurora::Flash::EEPROM
+}  // namespace Aurora::Memory::Flash::EEPROM

@@ -39,22 +39,22 @@ namespace Aurora::FileSystem::SPIFFS
   /*-------------------------------------------------------------------------------
   Static Data
   -------------------------------------------------------------------------------*/
-  static Aurora::Flash::NOR::Driver sNORFlash;                  /**< Flash memory driver supporting the file system */
-  static Aurora::Flash::NOR::Chip_t sDevice;
+  static Aurora::Memory::Flash::NOR::Driver sNORFlash;                  /**< Flash memory driver supporting the file system */
+  static Aurora::Memory::Flash::NOR::Chip_t sDevice;
   static Chimera::Thread::RecursiveMutex s_spiffs_lock;
 
 
   /*-------------------------------------------------------------------------------
   Driver Specific Implementation
   -------------------------------------------------------------------------------*/
-  bool attachDevice( const Aurora::Flash::NOR::Chip_t dev, const Chimera::SPI::Channel channel )
+  bool attachDevice( const Aurora::Memory::Flash::NOR::Chip_t dev, const Chimera::SPI::Channel channel )
   {
     sDevice = dev;
     return sNORFlash.configure( dev, channel );
   }
 
 
-  Aurora::Flash::NOR::Driver *getNORDriver()
+  Aurora::Memory::Flash::NOR::Driver *getNORDriver()
   {
     return &sNORFlash;
   }
@@ -100,7 +100,7 @@ namespace Aurora::FileSystem::SPIFFS
   int nor_read( unsigned int addr, unsigned int size, uint8_t *dst )
   {
     using namespace Aurora::Memory;
-    using namespace Aurora::Flash::NOR;
+    using namespace Aurora::Memory::Flash::NOR;
 
     return ( Status::ERR_OK == sNORFlash.read( addr, dst, size ) ) ? SPIFFS_OK : -1;
   }
@@ -109,7 +109,7 @@ namespace Aurora::FileSystem::SPIFFS
   int nor_write( unsigned int addr, unsigned int size, uint8_t *src )
   {
     using namespace Aurora::Memory;
-    using namespace Aurora::Flash::NOR;
+    using namespace Aurora::Memory::Flash::NOR;
 
     return ( Status::ERR_OK == sNORFlash.write( addr, src, size ) ) ? SPIFFS_OK : -1;
   }
@@ -118,7 +118,7 @@ namespace Aurora::FileSystem::SPIFFS
   int nor_erase( unsigned int addr, unsigned int size )
   {
     using namespace Aurora::Memory;
-    using namespace Aurora::Flash::NOR;
+    using namespace Aurora::Memory::Flash::NOR;
 
     return ( Status::ERR_OK == sNORFlash.erase( addr, size ) ) ? SPIFFS_OK : -1;
   }

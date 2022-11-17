@@ -75,7 +75,7 @@ namespace Aurora::FileSystem::LFS
   /*---------------------------------------------------------------------------
   Constants
   ---------------------------------------------------------------------------*/
-  static constexpr bool                                 DEBUG_MODULE      = true;
+  static constexpr bool                                 DEBUG_MODULE      = false;
   static const etl::string_view                         s_lfs_unknown_err = "Unknown error";
   static const etl::flat_map<int, etl::string_view, 15> s_lfs_err_to_str  = {
     { LFS_ERR_OK, "No error" },                // No error
@@ -170,7 +170,7 @@ namespace Aurora::FileSystem::LFS
     Calculate the absolute offset required to read from
     -------------------------------------------------------------------------*/
     size_t address = 0;
-    if ( !Aurora::Flash::NOR::block2Address( vol->flash.deviceType(), block, &address ) )
+    if ( !Aurora::Memory::Flash::NOR::block2Address( vol->flash.deviceType(), block, &address ) )
     {
       LOG_TRACE( "Bad flash address\r\n" );
       return LFS_ERR_INVAL;
@@ -209,7 +209,7 @@ namespace Aurora::FileSystem::LFS
     Calculate the absolute offset required to read from
     -------------------------------------------------------------------------*/
     size_t address = 0;
-    if ( !Aurora::Flash::NOR::block2Address( vol->flash.deviceType(), block, &address ) )
+    if ( !Aurora::Memory::Flash::NOR::block2Address( vol->flash.deviceType(), block, &address ) )
     {
       LOG_TRACE( "Bad flash address\r\n" );
       return LFS_ERR_INVAL;
@@ -248,7 +248,7 @@ namespace Aurora::FileSystem::LFS
     Calculate the absolute offset required to read from
     -------------------------------------------------------------------------*/
     size_t address = 0;
-    if ( !Aurora::Flash::NOR::block2Address( vol->flash.deviceType(), block, &address ) )
+    if ( !Aurora::Memory::Flash::NOR::block2Address( vol->flash.deviceType(), block, &address ) )
     {
       LOG_TRACE( "Bad flash address\r\n" );
       return LFS_ERR_INVAL;
@@ -298,6 +298,7 @@ namespace Aurora::FileSystem::LFS
     Invoke the flash read
     -------------------------------------------------------------------------*/
     Chimera::Thread::LockGuard _lck( vol->flash );
+    RT_DBG_ASSERT( vol->flash.getAttr().readSize == vol->cfg.block_size );
 
     auto lfs_err   = LFS_ERR_IO;
     auto flash_err = vol->flash.read( block, off, buffer, size );
@@ -318,13 +319,13 @@ namespace Aurora::FileSystem::LFS
     Get some information from the context pointer
     -------------------------------------------------------------------------*/
     RT_DBG_ASSERT( c->context );
-    Volume *vol   = reinterpret_cast<Volume *>( c->context );
-    auto    props = Aurora::Flash::NOR::getProperties( vol->flash.deviceType() );
+    Volume *vol = reinterpret_cast<Volume *>( c->context );
 
     /*-------------------------------------------------------------------------
     Invoke the device driver
     -------------------------------------------------------------------------*/
     Chimera::Thread::LockGuard _lck( vol->flash );
+    RT_DBG_ASSERT( vol->flash.getAttr().writeSize == vol->cfg.block_size );
 
     auto lfs_err   = LFS_ERR_IO;
     auto flash_err = vol->flash.write( block, off, buffer, size );
@@ -335,17 +336,6 @@ namespace Aurora::FileSystem::LFS
       if ( flash_err == AM::Status::ERR_OK )
       {
         lfs_err = LFS_ERR_OK;
-
-        if constexpr ( DEBUG_MODULE )
-        {
-          uint8_t read_buf[ 64 ];
-          memset( read_buf, 0, sizeof( read_buf ) );
-          RT_HARD_ASSERT( size <= sizeof( read_buf ) );
-
-          vol->flash.read( block, off, read_buf, size );
-
-          RT_HARD_ASSERT( 0 == memcmp( buffer, read_buf, size ) );
-        }
       }
     }
 
@@ -360,12 +350,13 @@ namespace Aurora::FileSystem::LFS
     Get some information from the context pointer
     -------------------------------------------------------------------------*/
     RT_DBG_ASSERT( c->context );
-    Volume *vol   = reinterpret_cast<Volume *>( c->context );
+    Volume *vol = reinterpret_cast<Volume *>( c->context );
 
     /*-------------------------------------------------------------------------
     Invoke the device driver
     -------------------------------------------------------------------------*/
     Chimera::Thread::LockGuard _lck( vol->flash );
+    RT_DBG_ASSERT( vol->flash.getAttr().eraseSize == vol->cfg.block_size );
 
     auto lfs_err   = LFS_ERR_IO;
     auto flash_err = vol->flash.erase( block );
@@ -442,7 +433,7 @@ namespace Aurora::FileSystem::LFS
     -------------------------------------------------------------------------*/
 #if defined( SIMULATOR )
     bool create = true;
-    auto props  = Aurora::Flash::NOR::getProperties( vol->flash.deviceType() );
+    auto props  = Aurora::Memory::Flash::NOR::getProperties( vol->flash.deviceType() );
     assert( props );
 
     if ( std::filesystem::exists( vol->_dataFile ) )
@@ -450,8 +441,7 @@ namespace Aurora::FileSystem::LFS
       const size_t size = std::filesystem::file_size( vol->_dataFile );
       if ( props->endAddress != size )
       {
-        LOG_ERROR( "File size didn't match [%d != %d]. Destroying %s\r\n",
-                   props->endAddress, size, vol->_dataFile.c_str() );
+        LOG_ERROR( "File size didn't match [%d != %d]. Destroying %s\r\n", props->endAddress, size, vol->_dataFile.c_str() );
         std::filesystem::remove( vol->_dataFile );
       }
       else

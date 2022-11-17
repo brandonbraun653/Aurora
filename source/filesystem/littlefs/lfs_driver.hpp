@@ -31,7 +31,7 @@ namespace Aurora::FileSystem::LFS
   {
     lfs_t                           fs;        /**< Core memory to manage a full filesystem */
     lfs_config                      cfg;       /**< Configuration of the filesystem interface */
-    Aurora::Flash::NOR::Driver      flash;     /**< Flash memory driver */
+    Aurora::Memory::Flash::NOR::Driver      flash;     /**< Flash memory driver */
     VolumeId                        _volumeID; /**< Mapped volume ID */
     Chimera::Thread::RecursiveMutex _lock;     /**< Multi-threaded access protection */
 

@@ -22,7 +22,7 @@ Includes
 #include <Aurora/source/memory/generic/generic_types.hpp>
 #include <Aurora/source/memory/flash/eeprom/eeprom_generic_types.hpp>
 
-namespace Aurora::Flash::EEPROM
+namespace Aurora::Memory::Flash::EEPROM
 {
   /*---------------------------------------------------------------------------
   Public Functions
@@ -51,7 +51,7 @@ namespace Aurora::Flash::EEPROM
     /*-------------------------------------------------------------------------
     Generic Memory Device Interface
     -------------------------------------------------------------------------*/
-    Aurora::Memory::Status open() final override;
+    Aurora::Memory::Status open( const DeviceAttr *const attributes ) final override;
     Aurora::Memory::Status close() final override;
     Aurora::Memory::Status write( const size_t chunk, const size_t offset, const void *const data,
                                   const size_t length ) final override;
@@ -80,9 +80,10 @@ namespace Aurora::Flash::EEPROM
   private:
     friend Chimera::Thread::Lockable<Driver>;
 
-    DeviceConfig              mConfig;  /**< Device configuration */
-    Chimera::I2C::Driver_rPtr mDriver;  /**< Hardware driver instance */
+    DeviceConfig              mConfig; /**< Device configuration */
+    Chimera::I2C::Driver_rPtr mDriver; /**< Hardware driver instance */
+    const Properties         *mProps;  /**< Device properties for timing and general info */
   };
-}  // namespace Aurora::Flash::EEPROM
+}  // namespace Aurora::Memory::Flash::EEPROM
 
 #endif /* !AURORA_MEMORY_EEPROM_GENERIC_DRIVER_HPP */

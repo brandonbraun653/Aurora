@@ -18,7 +18,7 @@ Includes
 #include <Aurora/source/memory/generic/generic_types.hpp>
 #include <Aurora/source/memory/flash/eeprom/eeprom_generic_types.hpp>
 
-namespace Aurora::Flash::EEPROM
+namespace Aurora::Memory::Flash::EEPROM
 {
   /*---------------------------------------------------------------------------
   Public Data
@@ -55,6 +55,6 @@ namespace Aurora::Flash::EEPROM
       .chipEraseDelay  = 0,
       .eventPoll       = nullptr },
   };
-}  // namespace Aurora::Flash::EEPROM
+}  // namespace Aurora::Memory::Flash::EEPROM
 
 #endif  /* !AURORA_EEPROM_DEVICE_DESCRIPTORS_HPP */

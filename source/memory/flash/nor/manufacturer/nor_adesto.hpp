@@ -19,7 +19,7 @@ Includes
 #include <Aurora/source/memory/generic/generic_types.hpp>
 #include <cstdint>
 
-namespace Aurora::Flash::NOR::Adesto
+namespace Aurora::Memory::Flash::NOR::Adesto
 {
   /*-------------------------------------------------------------------------------
   Public Data
@@ -72,6 +72,6 @@ namespace Aurora::Flash::NOR::Adesto
    */
   Aurora::Memory::Status pollEvent( void *driver, const uint8_t device, const Aurora::Memory::Event event, const size_t timeout );
 
-}  // namespace Aurora::Flash::NOR::Adesto
+}  // namespace Aurora::Memory::Flash::NOR::Adesto
 
 #endif /* !NOR_FLASH_ADESTO_HPP */
