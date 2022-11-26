@@ -22,3 +22,6 @@
 [submodule "lib/nanoprintf"]
 	path = lib/nanoprintf
 	url = https://github.com/charlesnicholson/nanoprintf.git
+[submodule "lib/nanopb/nanopb"]
+	path = lib/nanopb/nanopb
+	url = https://github.com/nanopb/nanopb.git

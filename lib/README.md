@@ -14,14 +14,22 @@ etl: https://github.com/ETLCPP/etl
   Embedded template library. Replaces a lot of the STL functionality with versions that focus on
   using statically allocated memory (no calls to new). This is very handy in embedded systems.
 
+littlefs: https://github.com/littlefs-project/littlefs
+  Embedded filesystem for NOR flash devices. Works rather well!
+
+nanoprintf: https://github.com/charlesnicholson/nanoprintf
+  A far more efficient (and restricted) printf implementation for embedded applications
+
+nanopb: https://github.com/nanopb/nanopb
+  ANSI C implementation of Protocol Buffers targeted for micro controllers
+
+segger: https://www.segger.com/downloads/systemview/
+  Target source code for SystemView instrumentation on a project. Handy when you need to trace what
+  your system is doing in real time without interrupting the CPU's execution.
+
+spiffs: https://github.com/pellepl/spiffs
+  Old filesystem. Deprecated. Honestly needs removal.
+
 type_safe: https://github.com/foonathan/type_safe
   C++ support for more strongly typed data, based on feature sets. Useful for preventing bugs due to
   unexpected or hidden type behavior.
-
-uLog: https://github.com/brandonbraun653/uLog
-  A very lightweight logger for embedded systems. Very lightweight. It's very minimalistic.
-
-yaffs: https://yaffs.net/get-yaffs
-  This one is cool. It's "Yet Another Flash File System" but one that's rated for space travel. Several
-  satellites and other star fairing vessels have this running on their systems. Should be good enough
-  for the general purpose embedded world too.

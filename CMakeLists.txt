@@ -5,6 +5,7 @@ include("${COMMON_TOOL_ROOT}/cmake/utility/embedded.cmake")
 # ====================================================
 add_subdirectory("lib/embedded_template_library")
 add_subdirectory("lib/littlefs")
+add_subdirectory("lib/nanopb")
 add_subdirectory("lib/segger")
 add_subdirectory("lib/spiffs")
 
