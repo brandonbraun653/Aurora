@@ -25,3 +25,6 @@
 [submodule "lib/nanopb/nanopb"]
 	path = lib/nanopb/nanopb
 	url = https://github.com/nanopb/nanopb.git
+[submodule "lib/liquid/liquid"]
+	path = lib/liquid/liquid
+	url = https://github.com/jgaeddert/liquid-dsp.git
