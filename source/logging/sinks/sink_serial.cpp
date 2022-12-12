@@ -87,14 +87,7 @@ namespace Aurora::Logging
 
   Result SerialSink::flush()
   {
-    Result sinkResult = Result::RESULT_SUCCESS;
-
-    if ( sink->flush( Chimera::Hardware::SubPeripheral::TXRX ) != Chimera::Status::OK )
-    {
-      sinkResult = Result::RESULT_FAIL;
-    }
-
-    return sinkResult;
+    return Result::RESULT_SUCCESS;
   }
 
 
