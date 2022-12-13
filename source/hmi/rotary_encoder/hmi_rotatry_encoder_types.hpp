@@ -1,4 +1,4 @@
-/********************************************************************************
+/******************************************************************************
  *  File Name:
  *    hmi_rotatry_encoder_types.hpp
  *
@@ -6,7 +6,7 @@
  *    Types associated with the HMI rotary encoder driver
  *
  *  2020-2021 | Brandon Braun | brandonbraun653@gmail.com
- *******************************************************************************/
+ *****************************************************************************/
 
 #pragma once
 #ifndef AURORA_HMI_ROTARY_ENCODER_TYPES_HPP
@@ -26,22 +26,22 @@
 
 namespace Aurora::HMI::Encoder
 {
-  /*-------------------------------------------------------------------------------
+  /*---------------------------------------------------------------------------
   Structures
-  -------------------------------------------------------------------------------*/
+  ---------------------------------------------------------------------------*/
   struct Config
   {
-    /*-------------------------------------------------
+    /*-------------------------------------------------------------------------
     Encoder Settings
-    -------------------------------------------------*/
+    -------------------------------------------------------------------------*/
     bool encIdleHigh;                 /**< If true, indicates the encoder idles at logic high */
     Button::ActiveEdge encActiveEdge; /**< Which edge to trigger the encoder processing on */
     Chimera::GPIO::PinInit encACfg;   /**< Encoder pin A gpio configuration */
     Chimera::GPIO::PinInit encBCfg;   /**< Encoder pin B gpio configuration */
 
-    /*-------------------------------------------------
+    /*-------------------------------------------------------------------------
     Center Button Settings
-    -------------------------------------------------*/
+    -------------------------------------------------------------------------*/
     Chimera::GPIO::PinInit btnCfg;    /**< Optional config if the encoder also has a center button */
     Button::ActiveEdge btnActiveEdge; /**< Which edge to trigger the center button on */
     size_t btnDebounceTime;           /**< Max sample time before GPIO is considered debounced (mS) */
@@ -72,9 +72,9 @@ namespace Aurora::HMI::Encoder
     }
   };
 
-  /*-------------------------------------------------------------------------------
+  /*---------------------------------------------------------------------------
   Aliases
-  -------------------------------------------------------------------------------*/
+  ---------------------------------------------------------------------------*/
   using RotationCallback = etl::delegate<void( State & )>;
 
 }  // namespace Aurora::HMI::Encoder

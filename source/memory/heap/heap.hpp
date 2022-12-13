@@ -1,4 +1,4 @@
-/********************************************************************************
+/******************************************************************************
  *  File Name:
  *    heap.hpp
  *
@@ -6,7 +6,7 @@
  *    Implements a dynamic memory allocation heap from a buffer
  *
  *  2019-2021 | Brandon Braun | brandonbraun653@gmail.com
- ********************************************************************************/
+ *****************************************************************************/
 
 #pragma once
 #ifndef AURORA_MEMORY_HEAP_HPP
@@ -25,18 +25,18 @@
 
 namespace Aurora::Memory
 {
-  /*-------------------------------------------------------------------------------
+  /*---------------------------------------------------------------------------
   Structures
-  -------------------------------------------------------------------------------*/
+  ---------------------------------------------------------------------------*/
   struct BlockLink_t
   {
     BlockLink_t *next;
     size_t size;
   };
 
-  /*-------------------------------------------------------------------------------
+  /*---------------------------------------------------------------------------
   Classes
-  -------------------------------------------------------------------------------*/
+  ---------------------------------------------------------------------------*/
   /**
    *  A heap implementation that is mostly just encapsulation of the FreeRTOS V10.0.0
    *  heap4.c allocation algorithm. The only addition is to allow the user to specify
@@ -49,9 +49,9 @@ namespace Aurora::Memory
     Heap( Heap &&other );
     ~Heap();
 
-    /*-------------------------------------------------
+    /*-------------------------------------------------------------------------
     IHeapAllocator Interface
-    -------------------------------------------------*/
+    -------------------------------------------------------------------------*/
     void assignMemoryPool( void *const buffer, const size_t size ) final override;
     void *malloc( const size_t size ) final override;
     void free( void *const pv ) final override;
@@ -60,10 +60,10 @@ namespace Aurora::Memory
     size_t freed() const final override;
 
   private:
-    /*------------------------------------------------
+    /*-------------------------------------------------------------------------
     FreeRTOS variables for managing the heap allocations. For descriptions
     of what each actually does, please look at the heap4.c source code.
-    ------------------------------------------------*/
+    -------------------------------------------------------------------------*/
     Chimera::Thread::Mutex* mLock;
 
     uint8_t *heapBuffer;
@@ -78,9 +78,9 @@ namespace Aurora::Memory
     size_t bytesAllocated;
     size_t bytesFreed;
 
-    /*------------------------------------------------
+    /*-------------------------------------------------------------------------
     Internal FreeRTOS functions to manage the heap
-    ------------------------------------------------*/
+    -------------------------------------------------------------------------*/
     void initHeap();
     void prvInsertBlockIntoFreeList( BlockLink_t *pxBlockToInsert );
     size_t xPortGetFreeHeapSize();

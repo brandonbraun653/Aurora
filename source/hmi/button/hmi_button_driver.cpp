@@ -1,4 +1,4 @@
-/********************************************************************************
+/******************************************************************************
  *  File Name:
  *    hmi_button_driver.cpp
  *
@@ -6,7 +6,7 @@
  *    Human machine interface driver for a GPIO based button
  *
  *  2020-2021 | Brandon Braun | brandonbraun653@gmail.com
- *******************************************************************************/
+ *****************************************************************************/
 
 /* Aurora Includes */
 #include <Aurora/hmi>
@@ -20,9 +20,9 @@
 
 namespace Aurora::HMI::Button
 {
-  /*-------------------------------------------------------------------------------
+  /*---------------------------------------------------------------------------
   EdgeTrigger Implementation
-  -------------------------------------------------------------------------------*/
+  ---------------------------------------------------------------------------*/
   EdgeTrigger::EdgeTrigger() :
       mEnabled( false ), mCallback( EdgeCallback() ), mConfig( {} ), mNumEvents( 0 ), mDebounced( 0 ), mDebounceMsk( 0 ),
       mMaxNumSamples( 0 ), mCurrentNumSamples( 0 ), mLastStableState( Chimera::GPIO::State::LOW )
@@ -40,9 +40,9 @@ namespace Aurora::HMI::Button
   -------------------------------------------------*/
   bool EdgeTrigger::initialize( const EdgeConfig &cfg )
   {
-    /*-------------------------------------------------
+    /*-------------------------------------------------------------------------
     Input protection
-    -------------------------------------------------*/
+    -------------------------------------------------------------------------*/
     /* clang-format off */
     if ( !cfg.gpioConfig.validity ||
          !cfg.stableSamples ||
@@ -58,14 +58,14 @@ namespace Aurora::HMI::Button
       mConfig = cfg;
     }
 
-    /*-------------------------------------------------
+    /*-------------------------------------------------------------------------
     Initialize the scheduler timer
-    -------------------------------------------------*/
+    -------------------------------------------------------------------------*/
     Chimera::Scheduler::LoRes::open();
 
-    /*-------------------------------------------------
+    /*-------------------------------------------------------------------------
     Convert the HMI edge type to the EXTI type
-    -------------------------------------------------*/
+    -------------------------------------------------------------------------*/
     Chimera::EXTI::EdgeTrigger edgeTrigger;
 
     switch ( mConfig.activeEdge )
@@ -87,9 +87,9 @@ namespace Aurora::HMI::Button
         break;
     };
 
-    /*-------------------------------------------------
+    /*-------------------------------------------------------------------------
     Configure the GPIO
-    -------------------------------------------------*/
+    -------------------------------------------------------------------------*/
     auto result = Chimera::Status::OK;
     auto cb     = Chimera::Function::vGeneric::create<EdgeTrigger, &EdgeTrigger::gpioEdgeTriggerCallback>( *this );
     auto driver = Chimera::GPIO::getDriver( mConfig.gpioConfig.port, mConfig.gpioConfig.pin );
@@ -107,22 +107,22 @@ namespace Aurora::HMI::Button
   {
     this->lock();
 
-    /*-------------------------------------------------
+    /*-------------------------------------------------------------------------
     Reset the trackers
-    -------------------------------------------------*/
+    -------------------------------------------------------------------------*/
     mNumEvents = 0;
     mDebounced = 0;
 
-    /*-------------------------------------------------
+    /*-------------------------------------------------------------------------
     Configure GPIO to have minimal system impact
-    -------------------------------------------------*/
+    -------------------------------------------------------------------------*/
     auto driver = Chimera::GPIO::getDriver( mConfig.gpioConfig.port, mConfig.gpioConfig.pin );
     driver->setMode( Chimera::GPIO::Drive::HIZ, Chimera::GPIO::Pull::NO_PULL );
     driver->detachInterrupt();
 
-    /*-------------------------------------------------
+    /*-------------------------------------------------------------------------
     Disable the GPIO's EXTI hooks
-    -------------------------------------------------*/
+    -------------------------------------------------------------------------*/
     Chimera::EXTI::disable( driver->getInterruptLine() );
     mEnabled = false;
 
@@ -189,40 +189,40 @@ namespace Aurora::HMI::Button
 
   void EdgeTrigger::gpioEdgeTriggerCallback( void *arg )
   {
-    /*-------------------------------------------------
+    /*-------------------------------------------------------------------------
     Don't do anything if not explicitly enabled
-    -------------------------------------------------*/
+    -------------------------------------------------------------------------*/
     if ( !mEnabled )
     {
       return;
     }
 
-    /*-------------------------------------------------
+    /*-------------------------------------------------------------------------
     Disable the interrupt as quickly as possible
-    -------------------------------------------------*/
+    -------------------------------------------------------------------------*/
     this->disableISR();
 
-    /*-------------------------------------------------
+    /*-------------------------------------------------------------------------
     Figure out the number of samples the polling
     function should be active for. Div zero protected
     by the initialization sequence.
-    -------------------------------------------------*/
+    -------------------------------------------------------------------------*/
     mCurrentNumSamples = 0;
     mMaxNumSamples     = mConfig.debounceTime / mConfig.sampleRate;
 
-    /*-------------------------------------------------
+    /*-------------------------------------------------------------------------
     Build the debounced mask
-    -------------------------------------------------*/
+    -------------------------------------------------------------------------*/
     mDebounceMsk = 0;
     for ( size_t x = 0; x < mConfig.stableSamples; x++ )
     {
       mDebounceMsk |= ( 1u << x );
     }
 
-    /*-------------------------------------------------
+    /*-------------------------------------------------------------------------
     Register a periodic function with the scheduler to
     poll the GPIO state for a bit.
-    -------------------------------------------------*/
+    -------------------------------------------------------------------------*/
     auto cb = Chimera::Function::Opaque::create<EdgeTrigger, &EdgeTrigger::gpioEdgeSamplerCallback>( *this );
     Chimera::Scheduler::LoRes::periodic( cb, mConfig.sampleRate, mMaxNumSamples );
   }
@@ -232,25 +232,25 @@ namespace Aurora::HMI::Button
   {
     using namespace Chimera::GPIO;
 
-    /*-------------------------------------------------
+    /*-------------------------------------------------------------------------
     Don't do anything if not explicitly enabled
-    -------------------------------------------------*/
+    -------------------------------------------------------------------------*/
     if ( !mEnabled )
     {
       return;
     }
 
-    /*-------------------------------------------------
+    /*-------------------------------------------------------------------------
     Read the current state of the GPIO pin
-    -------------------------------------------------*/
+    -------------------------------------------------------------------------*/
     State currentState;
     auto driver = Chimera::GPIO::getDriver( mConfig.gpioConfig.port, mConfig.gpioConfig.pin );
     driver->getState( currentState );
 
-    /*-------------------------------------------------
+    /*-------------------------------------------------------------------------
     Handle too many failed samples. Force another ISR
     event to re-register this sampler function.
-    -------------------------------------------------*/
+    -------------------------------------------------------------------------*/
     if ( mCurrentNumSamples >= mMaxNumSamples )
     {
       Chimera::Scheduler::LoRes::cancel_this();
@@ -262,11 +262,11 @@ namespace Aurora::HMI::Button
       mCurrentNumSamples++;
     }
 
-    /*-------------------------------------------------
+    /*-------------------------------------------------------------------------
     Update the filter to reflect how many samples the
     GPIO has held a state that differs from the last
     known stable logic level.
-    -------------------------------------------------*/
+    -------------------------------------------------------------------------*/
     if ( currentState == mLastStableState )
     {
       mDebounced = 0;
@@ -290,9 +290,9 @@ namespace Aurora::HMI::Button
       }
     }
 
-    /*-------------------------------------------------
+    /*-------------------------------------------------------------------------
     A stable edge transition has been observed
-    -------------------------------------------------*/
+    -------------------------------------------------------------------------*/
     ActiveEdge edgeType = ActiveEdge::UNKNOWN;
     if( ( currentState == State::HIGH ) && ( mLastStableState == State::LOW ) )
     {
@@ -309,18 +309,18 @@ namespace Aurora::HMI::Button
       RT_HARD_ASSERT( false );
     }
 
-    /*-------------------------------------------------
+    /*-------------------------------------------------------------------------
     Invoke the callback if registered
-    -------------------------------------------------*/
+    -------------------------------------------------------------------------*/
     if( mCallback )
     {
       mCallback( edgeType );
     }
 
-    /*-------------------------------------------------
+    /*-------------------------------------------------------------------------
     Reset the sampler such that another ISR event has
     to re-trigger things.
-    -------------------------------------------------*/
+    -------------------------------------------------------------------------*/
     Chimera::Scheduler::LoRes::cancel_this();
     this->disableISR();
     this->enableISR();

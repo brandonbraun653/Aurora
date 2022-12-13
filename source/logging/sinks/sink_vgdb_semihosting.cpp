@@ -1,4 +1,4 @@
-/********************************************************************************
+/******************************************************************************
  *  File Name:
  *    sink_cout.cpp
  *
@@ -11,7 +11,7 @@
  *    https://visualgdb.com/tutorials/arm/semihosting/
  *
  *  2019-2021 | Brandon Braun | brandonbraun653@gmail.com
- ********************************************************************************/
+ *****************************************************************************/
 
 /* uLog Includes */
 #include <Aurora/source/logging/sinks/sink_vgdb_semihosting.hpp>
@@ -61,17 +61,17 @@ namespace uLog
 
   Result VGDBSemihostingSink::log( const Level level, const void *const message, const size_t length )
   {
-    /*------------------------------------------------
+    /*-------------------------------------------------------------------------
     Check to see if we should even write
-    ------------------------------------------------*/
+    -------------------------------------------------------------------------*/
     if ( !isEnabled() || ( level < getLogLevel() ) || !message || !length )
     {
       return Result::RESULT_FAIL;
     }
 
-    /*------------------------------------------------
+    /*-------------------------------------------------------------------------
     Write the data!
-    ------------------------------------------------*/
+    -------------------------------------------------------------------------*/
     auto result      = Result::RESULT_SUCCESS;
     int bytesWritten = WriteToFastSemihostingChannel( DefaultChannel, message, length, DefaultWriteMode );
 
