@@ -56,6 +56,7 @@ gen_intf_lib(
   INTF_LIBRARIES
     etl_inc
     lfs_intf_inc
+    nanopb_intf_inc
     nanoprintf_inc
     sprout_intf_inc
     segger_sys_view_intf
