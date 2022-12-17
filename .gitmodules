@@ -28,3 +28,6 @@
 [submodule "lib/liquid/liquid"]
 	path = lib/liquid/liquid
 	url = https://github.com/jgaeddert/liquid-dsp.git
+[submodule "lib/cobs/cobs"]
+	path = lib/cobs/cobs
+	url = https://github.com/cmcqueen/cobs-c.git

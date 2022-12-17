@@ -3,6 +3,7 @@ include("${COMMON_TOOL_ROOT}/cmake/utility/embedded.cmake")
 # ====================================================
 # 3rd Party Libraries
 # ====================================================
+add_subdirectory("lib/cobs")
 add_subdirectory("lib/embedded_template_library")
 add_subdirectory("lib/littlefs")
 add_subdirectory("lib/nanopb")
@@ -43,7 +44,6 @@ set(AuroraExportDir "${PROJECT_BINARY_DIR}/Aurora")
 gen_intf_lib(TARGET sprout_intf_inc INTF_INCLUDES "lib/sprout" EXPORT_DIR ${AuroraExportDir})
 gen_intf_lib(TARGET nanoprintf_inc INTF_INCLUDES "lib/nanoprintf" EXPORT_DIR ${AuroraExportDir})
 
-
 # ====================================================
 # Interface Library
 # ====================================================
@@ -54,6 +54,7 @@ gen_intf_lib(
     "./../"
     "./include"
   INTF_LIBRARIES
+    cobs_intf_inc
     etl_inc
     lfs_intf_inc
     nanopb_intf_inc
