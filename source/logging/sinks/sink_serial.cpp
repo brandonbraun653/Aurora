@@ -20,20 +20,14 @@ Includes
 namespace Aurora::Logging
 {
   /*---------------------------------------------------------------------------
-  Static Data
-  ---------------------------------------------------------------------------*/
-  static Chimera::Serial::Driver_rPtr sink;
-
-
-  /*---------------------------------------------------------------------------
   Driver Implementation
   ---------------------------------------------------------------------------*/
-  SerialSink::SerialSink( Chimera::Serial::Channel channel ) : SinkInterface(), mSerialChannel( channel )
+  SerialSink::SerialSink( Chimera::Serial::Channel channel ) : SinkInterface(), mSerial( nullptr )
   {
   }
 
 
-  SerialSink::SerialSink() : mSerialChannel( Chimera::Serial::Channel::NOT_SUPPORTED )
+  SerialSink::SerialSink() : mSerial( nullptr )
   {
   }
 
@@ -45,25 +39,14 @@ namespace Aurora::Logging
 
   void SerialSink::assignChannel( Chimera::Serial::Channel channel )
   {
-    mSerialChannel = channel;
+    mSerial = Chimera::Serial::getDriver( channel );
+    RT_DBG_ASSERT( mSerial );
   }
 
 
   Result SerialSink::open()
   {
-    /*-------------------------------------------------------------------------
-    Grab a reference to the underlying serial driver
-    -------------------------------------------------------------------------*/
-    if ( !sink )
-    {
-      sink = Chimera::Serial::getDriver( mSerialChannel );
-    }
-
-    /*-------------------------------------------------------------------------
-    Mask the error code into a simple pass/fail. I don't think the sinks
-    in general should support complicated return codes.
-    -------------------------------------------------------------------------*/
-    if ( !sink )
+    if ( !mSerial )
     {
       return Result::RESULT_FAIL;
     }
@@ -74,14 +57,8 @@ namespace Aurora::Logging
 
   Result SerialSink::close()
   {
-    Result sinkResult = Result::RESULT_SUCCESS;
-
-    if ( sink->close() != Chimera::Status::OK )
-    {
-      sinkResult = Result::RESULT_FAIL;
-    }
-
-    return sinkResult;
+    mSerial = nullptr;
+    return Result::RESULT_SUCCESS;
   }
 
 
@@ -104,16 +81,20 @@ namespace Aurora::Logging
     /*-------------------------------------------------------------------------
     Make sure we can actually log the data
     -------------------------------------------------------------------------*/
+    if( mSerial == nullptr )
+    {
+      return Result::RESULT_FAIL_BAD_SINK;
+    }
+
     if ( level < logLevel )
     {
       return Result::RESULT_INVALID_LEVEL;
     }
 
     /*-------------------------------------------------------------------------
-    Write the data and block the current thread execution
-    until the transfer is complete.
+    Write the data and block the current thread execution until complete.
     -------------------------------------------------------------------------*/
-    if ( sink->write( message, length ) == Chimera::Status::OK )
+    if ( mSerial->write( message, length ) == Chimera::Status::OK )
     {
       return Result::RESULT_SUCCESS;
     }

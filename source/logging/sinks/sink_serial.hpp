@@ -5,25 +5,26 @@
  *  Description:
  *    Defines the interface to a serial based sink for the uLogger system.
  *
- *  2019-2021 | Brandon Braun | brandonbraun653@gmail.com
+ *  2019-2022 | Brandon Braun | brandonbraun653@gmail.com
  *****************************************************************************/
 
 #pragma once
 #ifndef AURORA_LOGGING_SERIAL_SINK_HPP
 #define AURORA_LOGGING_SERIAL_SINK_HPP
 
-/* C++ Includes */
-#include <cstdlib>
-
-/* Aurora Includes */
+/*-----------------------------------------------------------------------------
+Includes
+-----------------------------------------------------------------------------*/
 #include <Aurora/source/logging/logging_types.hpp>
 #include <Aurora/source/logging/sinks/sink_intf.hpp>
-
-/* Chimera Includes */
 #include <Chimera/serial>
+#include <cstdlib>
 
 namespace Aurora::Logging
 {
+  /*---------------------------------------------------------------------------
+  Classes
+  ---------------------------------------------------------------------------*/
   class SerialSink : public SinkInterface
   {
   public:
@@ -54,7 +55,7 @@ namespace Aurora::Logging
     Result log( const Level level, const void *const message, const size_t length ) final override;
 
   private:
-    Chimera::Serial::Channel mSerialChannel;
+    Chimera::Serial::Driver_rPtr mSerial;
   };
 }  // namespace Aurora::Logging
 
