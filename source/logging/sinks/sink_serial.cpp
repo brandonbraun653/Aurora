@@ -94,7 +94,7 @@ namespace Aurora::Logging
     /*-------------------------------------------------------------------------
     Write the data and block the current thread execution until complete.
     -------------------------------------------------------------------------*/
-    if ( mSerial->write( message, length ) == Chimera::Status::OK )
+    if ( mSerial->write( message, length, TIMEOUT_BLOCK ) == Chimera::Status::OK )
     {
       return Result::RESULT_SUCCESS;
     }
