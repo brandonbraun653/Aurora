@@ -5,7 +5,7 @@
  *  Description:
  *    File system types
  *
- *  2021-2022 | Brandon Braun | brandonbraun653@gmail.com
+ *  2021-2023 | Brandon Braun | brandonbraun653@gmail.com
  *****************************************************************************/
 
 #pragma once
@@ -17,16 +17,36 @@ Includes
 -----------------------------------------------------------------------------*/
 #include <cstddef>
 #include <Aurora/utility>
+#include <integration/Aurora/file_types_prj.hpp>
+
+/*-----------------------------------------------------------------------------
+Literal Constants
+-----------------------------------------------------------------------------*/
+#if !defined( AURORA_PRJ_FS_MAX_VOLUMES )
+#define AURORA_PRJ_FS_MAX_VOLUMES           ( 5 )
+#endif
+
+#if !defined( AURORA_PRJ_FS_MAX_OPEN_FILES )
+#define AURORA_PRJ_FS_MAX_OPEN_FILES        ( 5 )
+#endif
+
+#if !defined( AURORA_PRJ_FS_MAX_FILE_NAME_LEN )
+#define AURORA_PRJ_FS_MAX_FILE_NAME_LEN     ( 48 )
+#endif
+
+#if !defined( AURORA_PRJ_FS_MAX_DRIVE_PREFIX_LEN )
+#define AURORA_PRJ_FS_MAX_DRIVE_PREFIX_LEN  ( 32 )
+#endif
 
 namespace Aurora::FileSystem
 {
   /*---------------------------------------------------------------------------
   Constants
   ---------------------------------------------------------------------------*/
-  static constexpr size_t MAX_VOLUMES          = 5;
-  static constexpr size_t MAX_OPEN_FILES       = 5;
-  static constexpr size_t MAX_FILE_NAME_LEN    = 48;
-  static constexpr size_t MAX_DRIVE_PREFIX_LEN = 32;
+  static constexpr size_t MAX_VOLUMES          = AURORA_PRJ_FS_MAX_VOLUMES;
+  static constexpr size_t MAX_OPEN_FILES       = AURORA_PRJ_FS_MAX_OPEN_FILES;
+  static constexpr size_t MAX_FILE_NAME_LEN    = AURORA_PRJ_FS_MAX_FILE_NAME_LEN;
+  static constexpr size_t MAX_DRIVE_PREFIX_LEN = AURORA_PRJ_FS_MAX_DRIVE_PREFIX_LEN;
 
   /*---------------------------------------------------------------------------
   Aliases

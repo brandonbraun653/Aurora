@@ -5,7 +5,7 @@
  *  Description:
  *    Logging implementation
  *
- *  2019-2022 | Brandon Braun | brandonbraun653@gmail.com
+ *  2019-2023 | Brandon Braun | brandonbraun653@gmail.com
  *****************************************************************************/
 
 /*-----------------------------------------------------------------------------
@@ -17,6 +17,7 @@ Includes
 #include <cstdio>
 #include <limits>
 #include <string>
+#include <Chimera/system>
 #include <Chimera/thread>
 #include <Aurora/logging>
 
@@ -25,17 +26,18 @@ namespace Aurora::Logging
   /*---------------------------------------------------------------------------
   Constants
   ---------------------------------------------------------------------------*/
-  static constexpr size_t MSG_BUF_SIZE = 256;
   static constexpr size_t LOG_BUF_SIZE = 512;
 
   /*---------------------------------------------------------------------------
   Static Data
   ---------------------------------------------------------------------------*/
-  static bool uLogInitialized      = false;
-  static Level globalLogLevel      = Level::LVL_MIN;
-  static SinkHandle_rPtr globalRootSink = nullptr;
-  static size_t defaultLockTimeout = 100;
-  static Chimera::Thread::RecursiveTimedMutex threadLock;
+  static bool                                                     uLogInitialized    = false;
+  static Level                                                    globalLogLevel     = Level::LVL_MIN;
+  static SinkHandle_rPtr                                          globalRootSink     = nullptr;
+  static size_t                                                   defaultLockTimeout = 100;
+  static char                                                     s_log_buffer[ LOG_BUF_SIZE ];
+  static Chimera::Thread::RecursiveTimedMutex                     threadLock;
+  static Chimera::Thread::Mutex                                   s_format_lock;
   static std::array<SinkHandle_rPtr, ULOG_MAX_REGISTERABLE_SINKS> sinkRegistry;
 
 
@@ -80,10 +82,10 @@ namespace Aurora::Logging
     constexpr size_t invalidIndex = std::numeric_limits<size_t>::max();
 
     Chimera::Thread::TimedLockGuard x( threadLock );
-    size_t nullIndex      = invalidIndex;           /* First index that doesn't have a sink registered */
-    bool sinkIsRegistered = false;                  /* Indicates if the sink we are registering already exists */
-    bool registryIsFull   = true;                   /* Is the registry full of sinks? */
-    auto result           = Result::RESULT_SUCCESS; /* Function return code */
+    size_t                          nullIndex        = invalidIndex; /* First index that doesn't have a sink registered */
+    bool                            sinkIsRegistered = false; /* Indicates if the sink we are registering already exists */
+    bool                            registryIsFull   = true;  /* Is the registry full of sinks? */
+    auto                            result           = Result::RESULT_SUCCESS; /* Function return code */
 
     if ( x.try_lock_for( defaultLockTimeout ) )
     {
@@ -136,7 +138,7 @@ namespace Aurora::Logging
 
   Result removeSink( SinkHandle_rPtr &sink )
   {
-    Result result = Result::RESULT_LOCKED;
+    Result                          result = Result::RESULT_LOCKED;
     Chimera::Thread::TimedLockGuard x( threadLock );
 
     if ( x.try_lock_for( defaultLockTimeout ) )
@@ -169,7 +171,7 @@ namespace Aurora::Logging
 
   Result setRootSink( SinkHandle_rPtr &sink )
   {
-    Result result = Result::RESULT_LOCKED;
+    Result                          result = Result::RESULT_LOCKED;
     Chimera::Thread::TimedLockGuard x( threadLock );
 
     if ( x.try_lock_for( defaultLockTimeout ) )
@@ -198,7 +200,7 @@ namespace Aurora::Logging
     std::uintptr_t offsetAddress = reinterpret_cast<std::uintptr_t>( &sinkHandle );
     std::uintptr_t beginAddress  = reinterpret_cast<std::uintptr_t>( &sinkRegistry[ 0 ] );
     std::uintptr_t secondAddress = reinterpret_cast<std::uintptr_t>( &sinkRegistry[ 1 ] );
-    size_t elementSize           = secondAddress - beginAddress;
+    size_t         elementSize   = secondAddress - beginAddress;
 
     if ( ( sinkHandle == nullptr ) || ( beginAddress > offsetAddress ) || !elementSize )
     {
@@ -261,37 +263,10 @@ namespace Aurora::Logging
     }
 
     /*-------------------------------------------------------------------------
-    Allocate memory to work with
-    -------------------------------------------------------------------------*/
-    char *msg_buffer = new char[MSG_BUF_SIZE];
-    if ( !msg_buffer )
-    {
-      return Result::RESULT_NO_MEM;
-    }
-
-    char *log_buffer = new char[LOG_BUF_SIZE];
-    if( !log_buffer )
-    {
-      delete msg_buffer;
-      return Result::RESULT_NO_MEM;
-    }
-
-    memset( msg_buffer, 0, MSG_BUF_SIZE );
-    memset( log_buffer, 0, LOG_BUF_SIZE );
-
-    /*-------------------------------------------------------------------------
-    Format the log string into the message buffer
-    -------------------------------------------------------------------------*/
-    va_list argptr;
-    va_start( argptr, fmt );
-    npf_vsnprintf( msg_buffer, MSG_BUF_SIZE, fmt, argptr );
-    va_end( argptr );
-
-    /*-------------------------------------------------------------------------
     Create the logging level
     -------------------------------------------------------------------------*/
     std::string_view str_level = "";
-    switch( lvl )
+    switch ( lvl )
     {
       case Level::LVL_TRACE:
         str_level = "TRACE";
@@ -322,18 +297,29 @@ namespace Aurora::Logging
     };
 
     /*-------------------------------------------------------------------------
-    Format the full message
+    Format the message header
     -------------------------------------------------------------------------*/
-    npf_snprintf( log_buffer, LOG_BUF_SIZE, "[%ld][%s:%ld][%s] -- %s", static_cast<uint32_t>( Chimera::millis() ), file,
-                  static_cast<uint32_t>( line ), str_level.data(), msg_buffer );
+    RT_DBG_ASSERT( Chimera::System::inISR() == false );
+    Chimera::Thread::LockGuard _lock( s_format_lock );
+
+    memset( s_log_buffer, 0, LOG_BUF_SIZE );
+    npf_snprintf( s_log_buffer, LOG_BUF_SIZE, "[%ld][%s:%ld][%s] -- ", static_cast<uint32_t>( Chimera::millis() ), file,
+                  static_cast<uint32_t>( line ), str_level.data() );
+
+    /*-------------------------------------------------------------------------
+    Format the user message
+    -------------------------------------------------------------------------*/
+    const size_t offset = strlen( s_log_buffer );
+
+    va_list argptr;
+    va_start( argptr, fmt );
+    npf_vsnprintf( s_log_buffer + offset, LOG_BUF_SIZE - offset, fmt, argptr );
+    va_end( argptr );
 
     /*-------------------------------------------------------------------------
     Log through the standard method
     -------------------------------------------------------------------------*/
-    auto result = log( lvl, log_buffer, strlen( log_buffer ) );
-    delete[] msg_buffer;
-    delete[] log_buffer;
-    return result;
+    return log( lvl, s_log_buffer, strlen( s_log_buffer ) );
   }
 
 }  // namespace Aurora::Logging

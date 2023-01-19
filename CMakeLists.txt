@@ -61,6 +61,7 @@ gen_intf_lib(
     nanoprintf_inc
     sprout_intf_inc
     segger_sys_view_intf
+    project_intf_inc
 
   EXPORT_DIR
     ${AuroraExportDir}
