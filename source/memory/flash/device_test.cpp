@@ -160,6 +160,7 @@ namespace Aurora::Memory::Flash
 
   Aurora::Memory::Status DeviceTest::randomAccess( const size_t limit, const bool erase )
   {
+    return Aurora::Memory::Status::ERR_UNSUPPORTED;
   }
 
 

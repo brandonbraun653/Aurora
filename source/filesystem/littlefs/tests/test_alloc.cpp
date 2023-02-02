@@ -28,7 +28,7 @@ namespace Aurora::FileSystem::LFS::Test::Alloc
     lfs_file_t  files[ FILES ];
     char        path[ SIZE ];
     uint8_t     buffer[ 128 ];
-    size_t      size = 0;
+    lfs_ssize_t size = 0;
 
     lfs_file_t file;
 
@@ -38,12 +38,12 @@ namespace Aurora::FileSystem::LFS::Test::Alloc
     result |= lfs_unmount( &lfs );
 
     result |= lfs_mount( &lfs, &cfg );
-    for ( int n = 0; n < FILES; n++ )
+    for ( size_t n = 0; n < FILES; n++ )
     {
       sprintf( path, "breakfast/%s", names[ n ] );
       result |= lfs_file_open( &lfs, &files[ n ], path, LFS_O_WRONLY | LFS_O_CREAT | LFS_O_APPEND );
     }
-    for ( int n = 0; n < FILES; n++ )
+    for ( size_t n = 0; n < FILES; n++ )
     {
       size = strlen( names[ n ] );
       for ( lfs_size_t i = 0; i < SIZE; i += size )
@@ -51,14 +51,14 @@ namespace Aurora::FileSystem::LFS::Test::Alloc
         RT_HARD_ASSERT( size == lfs_file_write( &lfs, &files[ n ], names[ n ], size ) );
       }
     }
-    for ( int n = 0; n < FILES; n++ )
+    for ( size_t n = 0; n < FILES; n++ )
     {
       result |= lfs_file_close( &lfs, &files[ n ] );
     }
     result |= lfs_unmount( &lfs );
 
     result |= lfs_mount( &lfs, &cfg );
-    for ( int n = 0; n < FILES; n++ )
+    for ( size_t n = 0; n < FILES; n++ )
     {
       sprintf( path, "breakfast/%s", names[ n ] );
       result |= lfs_file_open( &lfs, &file, path, LFS_O_RDONLY );

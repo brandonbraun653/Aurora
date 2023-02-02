@@ -148,15 +148,15 @@ namespace Aurora::Memory::Flash::NOR::Adesto
       Check for timeout, otherwise suspend this thread
       and allow others to do something.
       -------------------------------------------------*/
-      // if ( ( Chimera::millis() - startTime ) > timeout )
-      // {
-      //   return Aurora::Memory::Status::ERR_TIMEOUT;
-      //   break;
-      // }
-      // else
-      // {
-      //   Chimera::delayMilliseconds( pollDelay );
-      // }
+      if ( ( Chimera::millis() - startTime ) > timeout )
+      {
+        return Aurora::Memory::Status::ERR_TIMEOUT;
+        break;
+      }
+      else
+      {
+        Chimera::delayMilliseconds( pollDelay );
+      }
 
       /*-------------------------------------------------
       Poll the latest info
