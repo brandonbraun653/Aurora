@@ -12,8 +12,11 @@
 #ifndef MICRO_LOGGER_TYPES_HPP
 #define MICRO_LOGGER_TYPES_HPP
 
-/* C++ Includes */
+/*-----------------------------------------------------------------------------
+Includes
+-----------------------------------------------------------------------------*/
 #include <cstdint>
+#include <array>
 #include <memory>
 
 namespace Aurora::Logging
