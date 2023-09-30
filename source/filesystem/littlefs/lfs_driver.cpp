@@ -724,11 +724,12 @@ namespace Aurora::FileSystem::LFS
     }
 
     /*-------------------------------------------------------------------------
-    Perform the LFS operation
+    Perform the LFS operation. This returns the new offset if successful, which
+    is a breaking change from the standard fseek. Override it.
     -------------------------------------------------------------------------*/
     auto lfs_err = lfs_file_seek( &( file->pVolume->fs ), &( file->lfsFile ), offset, whence );
-    LOG_TRACE_IF( lfs_err != LFS_ERR_OK, "Seek error: %s\r\n", get_error_str( lfs_err ).data() );
-    return lfs_err;
+    LOG_TRACE_IF( lfs_err < 0, "Seek error: %s\r\n", get_error_str( lfs_err ).data() );
+    return ( lfs_err < 0 ) ? lfs_err : 0;
   }
 
 
