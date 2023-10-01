@@ -27,6 +27,21 @@ gen_static_lib_variants(
     "${PROJECT_BINARY_DIR}/Aurora"
 )
 
+# FatFS Target
+gen_static_lib_variants(
+  TARGET
+    aurora_filesystem_fatfs_driver
+  SOURCES
+    fatfs/fatfs_driver.cpp
+  PRV_LIBRARIES
+    aurora_intf_inc
+    chimera_intf_inc
+    fatfs_intf_inc
+    aurora_filesystem_fatfs_core
+  EXPORT_DIR
+    "${PROJECT_BINARY_DIR}/Aurora"
+)
+
 # Little FS Target
 gen_static_lib_variants(
   TARGET
