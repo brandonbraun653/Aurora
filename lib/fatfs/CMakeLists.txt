@@ -13,7 +13,6 @@ gen_static_lib_variants(
   TARGET
     aurora_filesystem_fatfs_core
   SOURCES
-    v0.15/diskio.c
     v0.15/ff.c
     v0.15/ffsystem.c
     v0.15/ffunicode.c

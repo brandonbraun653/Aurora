@@ -12,7 +12,7 @@
  *      4. Don't expect fancy features like searching for files, resizing them,
  *         or inspecting the mount drive. Again, we're targeting small systems.
  *
- *  2021-2022 | Brandon Braun | brandonbraun653@gmail.com
+ *  2021-2023 | Brandon Braun | brandonbraun653@gmail.com
  *****************************************************************************/
 
 #pragma once
@@ -31,6 +31,7 @@ namespace Aurora::FileSystem
   /*---------------------------------------------------------------------------
   Public Functions
   ---------------------------------------------------------------------------*/
+
   /**
    * @brief Initialize system level module aspects of the filesystem manager
    *
@@ -52,6 +53,7 @@ namespace Aurora::FileSystem
    * @brief Unmounts a previously mounted volume
    *
    * @param volume    Which volume to unmount
+   * @return void
    */
   void unmount( const VolumeId volume );
 
@@ -137,6 +139,7 @@ namespace Aurora::FileSystem
    * @brief Sets the file position indicator back to SOF
    *
    * @param stream    Stream to act on
+   * @return void
    */
   void frewind( const FileId stream );
 

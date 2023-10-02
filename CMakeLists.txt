@@ -57,13 +57,13 @@ gen_intf_lib(
   INTF_LIBRARIES
     cobs_intf_inc
     etl_inc
+    fatfs_intf_inc
     lfs_intf_inc
     nanopb_intf_inc
     nanoprintf_inc
-    sprout_intf_inc
-    segger_sys_view_intf
     project_intf_inc
-
+    segger_sys_view_intf
+    sprout_intf_inc
   EXPORT_DIR
     ${AuroraExportDir}
 )
@@ -92,8 +92,9 @@ gen_intf_lib_variants(
     aurora_memory_eeprom
     aurora_memory_flash_device_test
     aurora_memory_generic
-    aurora_memory_nor_flash
     aurora_memory_heap
+    aurora_memory_nor_flash
+    aurora_memory_sd_flash
   EXPORT_DIR
     ${AuroraExportDir}
 )

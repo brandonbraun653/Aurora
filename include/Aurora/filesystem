@@ -5,7 +5,7 @@
  *  Description:
  *    Aurora includes for various file system implementations
  *
- *  2021-2022 | Brandon Braun | brandonbraun653@gmail.com
+ *  2021-2023 | Brandon Braun | brandonbraun653@gmail.com
  ********************************************************************************/
 
 #pragma once
@@ -16,6 +16,7 @@
 #include <filesystem>
 #endif
 
+#include <Aurora/source/filesystem/fatfs/fatfs_driver.hpp>
 #include <Aurora/source/filesystem/file_binary.hpp>
 #include <Aurora/source/filesystem/file_config.hpp>
 #include <Aurora/source/filesystem/file_intf.hpp>

@@ -5,14 +5,16 @@
  *  Description:
  *    Types associated with generic memory interfaces
  *
- *  2020-2022 | Brandon Braun | brandonbraun653@gmail.com
+ *  2020-2023 | Brandon Braun | brandonbraun653@gmail.com
  *****************************************************************************/
 
 #pragma once
 #ifndef AURORA_GENERIC_MEMORY_TYPES_HPP
 #define AURORA_GENERIC_MEMORY_TYPES_HPP
 
-/* STL Includes */
+/*-----------------------------------------------------------------------------
+Includes
+-----------------------------------------------------------------------------*/
 #include <cstddef>
 #include <cstdint>
 #include <cstring>

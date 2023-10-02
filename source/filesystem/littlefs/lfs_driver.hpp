@@ -29,11 +29,11 @@ namespace Aurora::FileSystem::LFS
   ---------------------------------------------------------------------------*/
   struct Volume
   {
-    lfs_t                           fs;        /**< Core memory to manage a full filesystem */
-    lfs_config                      cfg;       /**< Configuration of the filesystem interface */
-    Aurora::Memory::Flash::NOR::Driver      flash;     /**< Flash memory driver */
-    VolumeId                        _volumeID; /**< Mapped volume ID */
-    Chimera::Thread::RecursiveMutex _lock;     /**< Multi-threaded access protection */
+    lfs_t                              fs;        /**< Core memory to manage a full filesystem */
+    lfs_config                         cfg;       /**< Configuration of the filesystem interface */
+    Aurora::Memory::Flash::NOR::Driver flash;     /**< Flash memory driver */
+    VolumeId                           _volumeID; /**< Mapped volume ID */
+    Chimera::Thread::RecursiveMutex    _lock;     /**< Multi-threaded access protection */
 
 #if defined( SIMULATOR )
     std::filesystem::path _dataFile; /**< Backing file for a fake NOR chip */
@@ -80,6 +80,6 @@ namespace Aurora::FileSystem::LFS
    * @return bool
    */
   bool formatVolume( Volume *const vol );
-}
+}  // namespace Aurora::FileSystem::LFS
 
-#endif  /* !LFS_HOOKS_HPP */
+#endif /* !LFS_HOOKS_HPP */

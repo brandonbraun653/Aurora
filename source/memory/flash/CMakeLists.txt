@@ -5,6 +5,7 @@ include("${COMMON_TOOL_ROOT}/cmake/utility/embedded.cmake")
 # ====================================================
 add_subdirectory("eeprom")
 add_subdirectory("nor")
+add_subdirectory("sd")
 
 gen_static_lib_variants(
   TARGET
