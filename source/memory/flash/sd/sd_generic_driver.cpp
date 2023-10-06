@@ -18,7 +18,8 @@ namespace Aurora::Memory::Flash::SD
   /*---------------------------------------------------------------------------
   Driver Class Implementation
   ---------------------------------------------------------------------------*/
-  Driver::Driver()
+
+  Driver::Driver() : mSDIO( nullptr )
   {
   }
 
@@ -28,68 +29,107 @@ namespace Aurora::Memory::Flash::SD
   }
 
 
-  Aurora::Memory::Status Driver::open( const DeviceAttr *const attributes )
+  bool Driver::init( const Chimera::SDIO::HWConfig &cfg )
   {
-    return Aurora::Memory::Status::ERR_FAIL;
+    /*-------------------------------------------------------------------------
+    Grab a reference to the SDIO driver
+    -------------------------------------------------------------------------*/
+    mSDIO = Chimera::SDIO::getDriver( cfg.channel );
+    if ( !mSDIO )
+    {
+      return false;
+    }
+
+    /*-------------------------------------------------------------------------
+    Initialize the SDIO driver
+    -------------------------------------------------------------------------*/
+    if( mSDIO->open( cfg ) != Chimera::Status::OK )
+    {
+      return false;
+    }
+
+    return true;
   }
 
 
-  Aurora::Memory::Status Driver::close()
+  Status Driver::open( const DeviceAttr *const attributes )
   {
-    return Aurora::Memory::Status::ERR_FAIL;
+    ( void )attributes;
+    return ( mSDIO->connect() == Chimera::Status::OK ) ? Status::ERR_OK : Status::ERR_FAIL;
   }
 
 
-  Aurora::Memory::Status Driver::write( const size_t chunk, const size_t offset, const void *const data, const size_t length )
+  Status Driver::close()
   {
-    return Aurora::Memory::Status::ERR_FAIL;
+    mSDIO->close();
+    return Status::ERR_OK;
   }
 
 
-  Aurora::Memory::Status Driver::write( const size_t address, const void *const data, const size_t length )
+  Status Driver::write( const size_t chunk, const size_t offset, const void *const data, const size_t length )
   {
-    return Aurora::Memory::Status::ERR_FAIL;
+    // Offset should be zero. Can't write partial blocks.
+    // Length will need to be converted into the number of blocks to write
+    // Chunk should == block index
+    return Status::ERR_FAIL;
   }
 
 
-  Aurora::Memory::Status Driver::read( const size_t chunk, const size_t offset, void *const data, const size_t length )
+  Status Driver::write( const size_t address, const void *const data, const size_t length )
   {
-    return Aurora::Memory::Status::ERR_FAIL;
+    // Address should be the block index, not the phsyical byte address
+    // Length will need to be converted into the number of blocks to write
+    return Status::ERR_FAIL;
   }
 
 
-  Aurora::Memory::Status Driver::read( const size_t address, void *const data, const size_t length )
+  Status Driver::read( const size_t chunk, const size_t offset, void *const data, const size_t length )
   {
-    return Aurora::Memory::Status::ERR_FAIL;
+    // Same notes as write
+    return Status::ERR_FAIL;
   }
 
 
-  Aurora::Memory::Status Driver::erase( const size_t chunk )
+  Status Driver::read( const size_t address, void *const data, const size_t length )
   {
-    return Aurora::Memory::Status::ERR_FAIL;
+    // Same notes as write
+    return Status::ERR_FAIL;
   }
 
 
-  Aurora::Memory::Status Driver::erase( const size_t address, const size_t length )
+  Status Driver::erase( const size_t chunk )
   {
-    return Aurora::Memory::Status::ERR_FAIL;
+    return ( mSDIO->eraseBlock( chunk, 1 ) == Chimera::Status::OK ) ? Status::ERR_OK : Status::ERR_FAIL;
   }
 
 
-  Aurora::Memory::Status Driver::erase()
+  Status Driver::erase( const size_t address, const size_t length )
   {
-    return Aurora::Memory::Status::ERR_FAIL;
+    // Must be aligned to a block boundary. Length must be a multiple of the block size.
+    return Status::ERR_FAIL;
   }
 
 
-  Aurora::Memory::Status Driver::flush()
+  Status Driver::erase()
   {
-    return Aurora::Memory::Status::ERR_FAIL;
+    /*-------------------------------------------------------------------------
+    SDIO driver doesn't support mass erase
+    -------------------------------------------------------------------------*/
+    return Status::ERR_UNSUPPORTED;
   }
 
 
-  Aurora::Memory::Status Driver::pendEvent( const Aurora::Memory::Event event, const size_t timeout )
+  Status Driver::flush()
   {
-    return Aurora::Memory::Status::ERR_FAIL;
+    /*-------------------------------------------------------------------------
+    SDIO driver doesn't cache anything, so this is a no-op
+    -------------------------------------------------------------------------*/
+    return Status::ERR_OK;
+  }
+
+
+  Status Driver::pendEvent( const Aurora::Memory::Event event, const size_t timeout )
+  {
+    return Status::ERR_UNSUPPORTED;
   }
 }  // namespace Aurora::Memory::Flash::SD

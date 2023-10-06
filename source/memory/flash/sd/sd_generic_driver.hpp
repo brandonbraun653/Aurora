@@ -36,6 +36,18 @@ namespace Aurora::Memory::Flash::SD
     ~Driver();
 
     /*-------------------------------------------------------------------------
+    SD Card Specific Interface
+    -------------------------------------------------------------------------*/
+
+    /**
+     * @brief Initializes the SDIO driver
+     *
+     * @param cfg   Configuration parameters for the SDIO driver
+     * @return bool
+     */
+    bool init( const Chimera::SDIO::HWConfig &cfg );
+
+    /*-------------------------------------------------------------------------
     Generic Memory Device Interface
     -------------------------------------------------------------------------*/
     Aurora::Memory::Status open( const DeviceAttr *const attributes ) final override;

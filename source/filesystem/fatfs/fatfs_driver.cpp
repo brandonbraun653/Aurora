@@ -55,7 +55,6 @@ namespace Aurora::FileSystem::FatFs
 
   static int fs_init()
   {
-    FatFs::initialize();
     return 0;
   }
 
