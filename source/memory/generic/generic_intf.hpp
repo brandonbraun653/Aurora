@@ -31,6 +31,7 @@ namespace Aurora::Memory
     size_t readSize;  /**< Chunk size used to read */
     size_t writeSize; /**< Chunk size used to write */
     size_t eraseSize; /**< Chunk size used to erase */
+    size_t blockCount; /**< Total number of blocks on the device */
   };
 
   /*---------------------------------------------------------------------------
@@ -56,10 +57,25 @@ namespace Aurora::Memory
     virtual ~IGenericDevice() = default;
 
     /**
-     *  Initializes the device for access
-     *  @return Status
+     * @brief Initializes the device for access.
+     *
+     * Assigning attributes is used for devices that have configurable access
+     * parameters. This may not be the case for all devices.
+     *
+     * @param attributes    Device specific attributes. Pass nullptr if not used.
+     * @return Status
      */
     virtual Aurora::Memory::Status open( const DeviceAttr *const attributes ) = 0;
+
+    /**
+     * @brief Get the current device attributes.
+     *
+     * This is useful for devices that let software know what the correct
+     * access parameters are, such as SD cards.
+     *
+     * @return DeviceAttr
+     */
+    virtual DeviceAttr getAttributes() = 0;
 
     /**
      *  Tears down the device so no one can access it further

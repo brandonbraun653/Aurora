@@ -28,8 +28,7 @@ namespace Aurora::Memory::Flash::SD
   /*---------------------------------------------------------------------------
   Classes
   ---------------------------------------------------------------------------*/
-  class Driver : public virtual Aurora::Memory::IGenericDevice,
-                 public Chimera::Thread::Lockable<Driver>
+  class Driver : public virtual Aurora::Memory::IGenericDevice, public Chimera::Thread::Lockable<Driver>
   {
   public:
     Driver();
@@ -50,19 +49,18 @@ namespace Aurora::Memory::Flash::SD
     /*-------------------------------------------------------------------------
     Generic Memory Device Interface
     -------------------------------------------------------------------------*/
-    Aurora::Memory::Status open( const DeviceAttr *const attributes ) final override;
-    Aurora::Memory::Status close() final override;
-    Aurora::Memory::Status write( const size_t chunk, const size_t offset, const void *const data,
-                                  const size_t length ) final override;
-    Aurora::Memory::Status write( const size_t address, const void *const data, const size_t length ) final override;
-    Aurora::Memory::Status read( const size_t chunk, const size_t offset, void *const data,
-                                 const size_t length ) final override;
-    Aurora::Memory::Status read( const size_t address, void *const data, const size_t length ) final override;
-    Aurora::Memory::Status erase( const size_t chunk ) final override;
-    Aurora::Memory::Status erase( const size_t address, const size_t length ) final override;
-    Aurora::Memory::Status erase() final override;
-    Aurora::Memory::Status flush() final override;
-    Aurora::Memory::Status pendEvent( const Aurora::Memory::Event event, const size_t timeout ) final override;
+    Status     open( const DeviceAttr *const attributes ) final override;
+    DeviceAttr getAttributes() final override;
+    Status     close() final override;
+    Status     write( const size_t chunk, const size_t offset, const void *const data, const size_t length ) final override;
+    Status     write( const size_t address, const void *const data, const size_t length ) final override;
+    Status     read( const size_t chunk, const size_t offset, void *const data, const size_t length ) final override;
+    Status     read( const size_t address, void *const data, const size_t length ) final override;
+    Status     erase( const size_t chunk ) final override;
+    Status     erase( const size_t address, const size_t length ) final override;
+    Status     erase() final override;
+    Status     flush() final override;
+    Status     pendEvent( const Aurora::Memory::Event event, const size_t timeout ) final override;
 
   private:
     friend Chimera::Thread::Lockable<Driver>;
@@ -71,4 +69,4 @@ namespace Aurora::Memory::Flash::SD
   };
 }  // namespace Aurora::Memory::Flash::SD
 
-#endif  /* !AURORA_MEMORY_SD_GENERIC_DRIVER_HPP */
+#endif /* !AURORA_MEMORY_SD_GENERIC_DRIVER_HPP */

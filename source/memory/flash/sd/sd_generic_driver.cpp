@@ -43,7 +43,7 @@ namespace Aurora::Memory::Flash::SD
     /*-------------------------------------------------------------------------
     Initialize the SDIO driver
     -------------------------------------------------------------------------*/
-    if( mSDIO->open( cfg ) != Chimera::Status::OK )
+    if ( mSDIO->open( cfg ) != Chimera::Status::OK )
     {
       return false;
     }
@@ -51,6 +51,19 @@ namespace Aurora::Memory::Flash::SD
     return true;
   }
 
+  DeviceAttr Driver::getAttributes()
+  {
+    Chimera::SDIO::CardInfo info;
+    mSDIO->getCardInfo( info );
+
+    DeviceAttr attr;
+    attr.readSize   = info.BlockSize;
+    attr.writeSize  = info.BlockSize;
+    attr.eraseSize  = info.BlockSize;
+    attr.blockCount = info.BlockNbr;
+
+    return attr;
+  }
 
   Status Driver::open( const DeviceAttr *const attributes )
   {
@@ -68,32 +81,93 @@ namespace Aurora::Memory::Flash::SD
 
   Status Driver::write( const size_t chunk, const size_t offset, const void *const data, const size_t length )
   {
-    // Offset should be zero. Can't write partial blocks.
-    // Length will need to be converted into the number of blocks to write
-    // Chunk should == block index
-    return Status::ERR_FAIL;
+    /*-------------------------------------------------------------------------
+    Input Protection
+    -------------------------------------------------------------------------*/
+    if ( ( offset != 0 ) || ( data == nullptr ) || ( length == 0 ) )
+    {
+      return Status::ERR_BAD_ARG;
+    }
+
+    /*-------------------------------------------------------------------------
+    Compute the block count
+    -------------------------------------------------------------------------*/
+    const DeviceAttr attr = getAttributes();
+
+    if ( ( length % attr.writeSize ) != 0 )
+    {
+      return Status::ERR_BAD_ARG;
+    }
+
+    const size_t blockCount = length / attr.writeSize;
+
+    /*-------------------------------------------------------------------------
+    Write the data
+    -------------------------------------------------------------------------*/
+    const auto result = mSDIO->writeBlock( chunk, blockCount, data );
+    return ( result == Chimera::Status::OK ) ? Status::ERR_OK : Status::ERR_FAIL;
   }
 
 
   Status Driver::write( const size_t address, const void *const data, const size_t length )
   {
-    // Address should be the block index, not the phsyical byte address
-    // Length will need to be converted into the number of blocks to write
-    return Status::ERR_FAIL;
+    /*-------------------------------------------------------------------------
+    Compute the block index
+    -------------------------------------------------------------------------*/
+    const DeviceAttr attr = getAttributes();
+    RT_DBG_ASSERT( attr.writeSize != 0 );
+    const size_t block = address / attr.writeSize;
+
+    /*-------------------------------------------------------------------------
+    Write the data
+    -------------------------------------------------------------------------*/
+    return write( block, 0, data, length );
   }
 
 
   Status Driver::read( const size_t chunk, const size_t offset, void *const data, const size_t length )
   {
-    // Same notes as write
-    return Status::ERR_FAIL;
+    /*-------------------------------------------------------------------------
+    Input Protection
+    -------------------------------------------------------------------------*/
+    if ( ( offset != 0 ) || ( data == nullptr ) || ( length == 0 ) )
+    {
+      return Status::ERR_BAD_ARG;
+    }
+
+    /*-------------------------------------------------------------------------
+    Compute the block count
+    -------------------------------------------------------------------------*/
+    const DeviceAttr attr = getAttributes();
+
+    if ( ( length % attr.readSize ) != 0 )
+    {
+      return Status::ERR_BAD_ARG;
+    }
+
+    const size_t blockCount = length / attr.readSize;
+
+    /*-------------------------------------------------------------------------
+    Read the data
+    -------------------------------------------------------------------------*/
+    const auto result = mSDIO->readBlock( chunk, blockCount, data );
+    return ( result == Chimera::Status::OK ) ? Status::ERR_OK : Status::ERR_FAIL;
   }
 
 
   Status Driver::read( const size_t address, void *const data, const size_t length )
   {
-    // Same notes as write
-    return Status::ERR_FAIL;
+    /*-------------------------------------------------------------------------
+    Compute the block index
+    -------------------------------------------------------------------------*/
+    const DeviceAttr attr = getAttributes();
+    RT_DBG_ASSERT( attr.readSize != 0 );
+    const size_t block = address / attr.readSize;
+
+    /*-------------------------------------------------------------------------
+    Read the data
+    -------------------------------------------------------------------------*/
+    return read( block, 0, data, length );
   }
 
 
@@ -105,8 +179,27 @@ namespace Aurora::Memory::Flash::SD
 
   Status Driver::erase( const size_t address, const size_t length )
   {
-    // Must be aligned to a block boundary. Length must be a multiple of the block size.
-    return Status::ERR_FAIL;
+    /*-------------------------------------------------------------------------
+    Compute the block index
+    -------------------------------------------------------------------------*/
+    const DeviceAttr attr = getAttributes();
+    RT_DBG_ASSERT( attr.eraseSize != 0 );
+    const size_t block = address / attr.eraseSize;
+
+    /*-------------------------------------------------------------------------
+    Compute the block count
+    -------------------------------------------------------------------------*/
+    if ( ( length % attr.eraseSize ) != 0 )
+    {
+      return Status::ERR_BAD_ARG;
+    }
+
+    const size_t blockCount = length / attr.eraseSize;
+
+    /*-------------------------------------------------------------------------
+    Erase the data
+    -------------------------------------------------------------------------*/
+    return ( mSDIO->eraseBlock( block, blockCount ) == Chimera::Status::OK ) ? Status::ERR_OK : Status::ERR_FAIL;
   }
 
 

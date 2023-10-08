@@ -64,29 +64,40 @@ namespace Aurora::Memory::Flash::EEPROM
   }
 
 
-  Aurora::Memory::Status Driver::open( const DeviceAttr *const attributes )
+  Status Driver::open( const DeviceAttr *const attributes )
   {
     this->initAIO();
-    return Aurora::Memory::Status::ERR_OK;
+    return Status::ERR_OK;
   }
 
 
-  Aurora::Memory::Status Driver::close()
+  DeviceAttr Driver::getAttributes()
   {
-    return Aurora::Memory::Status::ERR_OK;
+    DeviceAttr attr;
+    attr.readSize  = 1;
+    attr.writeSize = 1;
+    attr.eraseSize = 1;
+
+    return attr;
   }
 
 
-  Aurora::Memory::Status Driver::write( const size_t chunk, const size_t offset, const void *const data, const size_t length )
+  Status Driver::close()
+  {
+    return Status::ERR_OK;
+  }
+
+
+  Status Driver::write( const size_t chunk, const size_t offset, const void *const data, const size_t length )
   {
     /*-------------------------------------------------------------------------
     EEPROM have no concept of a chunk. Byte level access.
     -------------------------------------------------------------------------*/
-    return Aurora::Memory::Status::ERR_UNSUPPORTED;
+    return Status::ERR_UNSUPPORTED;
   }
 
 
-  Aurora::Memory::Status Driver::write( const size_t address, const void *const data, const size_t length )
+  Status Driver::write( const size_t address, const void *const data, const size_t length )
   {
     using namespace Aurora::Memory;
     using namespace Chimera::Event;
@@ -97,7 +108,7 @@ namespace Aurora::Memory::Flash::EEPROM
     -------------------------------------------------------------------------*/
     if ( !data || !length || ( ( address + length ) > mProps->endAddress ) )
     {
-      return Aurora::Memory::Status::ERR_BAD_ARG;
+      return Status::ERR_BAD_ARG;
     }
 
     /*-------------------------------------------------------------------------
@@ -143,16 +154,16 @@ namespace Aurora::Memory::Flash::EEPROM
   }
 
 
-  Aurora::Memory::Status Driver::read( const size_t chunk, const size_t offset, void *const data, const size_t length )
+  Status Driver::read( const size_t chunk, const size_t offset, void *const data, const size_t length )
   {
     /*-------------------------------------------------------------------------
     EEPROM have no concept of a chunk. Byte level access.
     -------------------------------------------------------------------------*/
-    return Aurora::Memory::Status::ERR_UNSUPPORTED;
+    return Status::ERR_UNSUPPORTED;
   }
 
 
-  Aurora::Memory::Status Driver::read( const size_t address, void *const data, const size_t length )
+  Status Driver::read( const size_t address, void *const data, const size_t length )
   {
     using namespace Aurora::Memory;
     using namespace Chimera::Event;
@@ -163,7 +174,7 @@ namespace Aurora::Memory::Flash::EEPROM
     -------------------------------------------------------------------------*/
     if ( !data || !length || ( ( address + length ) > mProps->endAddress ) )
     {
-      return Aurora::Memory::Status::ERR_BAD_ARG;
+      return Status::ERR_BAD_ARG;
     }
 
     /*-------------------------------------------------------------------------
@@ -203,16 +214,16 @@ namespace Aurora::Memory::Flash::EEPROM
   }
 
 
-  Aurora::Memory::Status Driver::erase( const size_t chunk )
+  Status Driver::erase( const size_t chunk )
   {
     /*-------------------------------------------------------------------------
     EEPROM have no concept of a chunk. Byte level access.
     -------------------------------------------------------------------------*/
-    return Aurora::Memory::Status::ERR_UNSUPPORTED;
+    return Status::ERR_UNSUPPORTED;
   }
 
 
-  Aurora::Memory::Status Driver::erase( const size_t address, const size_t length )
+  Status Driver::erase( const size_t address, const size_t length )
   {
     using namespace Aurora::Memory;
     using namespace Chimera::Event;
@@ -223,7 +234,7 @@ namespace Aurora::Memory::Flash::EEPROM
     -------------------------------------------------------------------------*/
     if ( !length || ( ( address + length ) > mProps->endAddress ) )
     {
-      return Aurora::Memory::Status::ERR_BAD_ARG;
+      return Status::ERR_BAD_ARG;
     }
 
     /*-------------------------------------------------------------------------
@@ -241,7 +252,7 @@ namespace Aurora::Memory::Flash::EEPROM
   }
 
 
-  Aurora::Memory::Status Driver::erase()
+  Status Driver::erase()
   {
     /*-------------------------------------------------------------------------
     Erase the whole chip
@@ -250,15 +261,15 @@ namespace Aurora::Memory::Flash::EEPROM
   }
 
 
-  Aurora::Memory::Status Driver::flush()
+  Status Driver::flush()
   {
-    return Aurora::Memory::Status::ERR_OK;
+    return Status::ERR_OK;
   }
 
 
-  Aurora::Memory::Status Driver::pendEvent( const Aurora::Memory::Event event, const size_t timeout )
+  Status Driver::pendEvent( const Aurora::Memory::Event event, const size_t timeout )
   {
-    return Aurora::Memory::Status::ERR_UNSUPPORTED;
+    return Status::ERR_UNSUPPORTED;
   }
 
 

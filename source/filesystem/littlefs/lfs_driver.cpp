@@ -494,7 +494,7 @@ namespace Aurora::FileSystem::LFS
     Volume *vol = get_volume( drive );
     if ( !vol )
     {
-      return -1;
+      return 0;
     }
 
     /*-------------------------------------------------------------------------
