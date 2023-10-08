@@ -29,27 +29,12 @@ namespace Aurora::Memory::Flash::SD
   }
 
 
-  bool Driver::init( const Chimera::SDIO::HWConfig &cfg )
+  bool Driver::init( const Chimera::SDIO::Channel channel )
   {
-    /*-------------------------------------------------------------------------
-    Grab a reference to the SDIO driver
-    -------------------------------------------------------------------------*/
-    mSDIO = Chimera::SDIO::getDriver( cfg.channel );
-    if ( !mSDIO )
-    {
-      return false;
-    }
-
-    /*-------------------------------------------------------------------------
-    Initialize the SDIO driver
-    -------------------------------------------------------------------------*/
-    if ( mSDIO->open( cfg ) != Chimera::Status::OK )
-    {
-      return false;
-    }
-
-    return true;
+    mSDIO = Chimera::SDIO::getDriver( channel );
+    return mSDIO != nullptr;
   }
+
 
   DeviceAttr Driver::getAttributes()
   {
@@ -64,6 +49,7 @@ namespace Aurora::Memory::Flash::SD
 
     return attr;
   }
+
 
   Status Driver::open( const DeviceAttr *const attributes )
   {

@@ -39,12 +39,15 @@ namespace Aurora::Memory::Flash::SD
     -------------------------------------------------------------------------*/
 
     /**
-     * @brief Initializes the SDIO driver
+     * @brief Initializes the memory driver.
      *
-     * @param cfg   Configuration parameters for the SDIO driver
+     * Assumes that another component of the system has already initialized the
+     * physical SDIO peripheral. This class just consumes it.
+     *
+     * @param channel   Which SDIO channel to use
      * @return bool
      */
-    bool init( const Chimera::SDIO::HWConfig &cfg );
+    bool init( const Chimera::SDIO::Channel channel );
 
     /*-------------------------------------------------------------------------
     Generic Memory Device Interface
