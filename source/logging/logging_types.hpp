@@ -5,7 +5,7 @@
  *  Description:
  *    Logger types
  *
- *  2019-2022 | Brandon Braun | brandonbraun653@gmail.com
+ *  2019-2023 | Brandon Braun | brandonbraun653@gmail.com
  *****************************************************************************/
 
 #pragma once
@@ -30,7 +30,7 @@ namespace Aurora::Logging
   /*---------------------------------------------------------------------------
   Aliases
   ---------------------------------------------------------------------------*/
-  using SinkHandle_rPtr = SinkInterface*;
+  using SinkHandle_rPtr = SinkInterface *;
 
 
   /*---------------------------------------------------------------------------
@@ -51,6 +51,7 @@ namespace Aurora::Logging
     RESULT_FAIL,
     RESULT_FAIL_MSG_TOO_LONG,
     RESULT_FAIL_BAD_SINK,
+    RESULT_FAIL_BAD_ARG,
     RESULT_NO_MEM,
     RESULT_LOCKED,
     RESULT_FULL,
