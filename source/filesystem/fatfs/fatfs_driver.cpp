@@ -52,11 +52,39 @@ namespace Aurora::FileSystem::FatFs
     "Given parameter is invalid"
   };
 
+
+  /*---------------------------------------------------------------------------
+  Structures
+  ---------------------------------------------------------------------------*/
+
+  /**
+   * @brief Internal representation of an FatFs file.
+   */
+  struct File
+  {
+    FileId  fileDesc; /**< Descriptor assigned to this file */
+    Volume *pVolume;  /**< Parent volume file belongs to */
+    FIL     fatfs_file_cb;     /**< FatFs file control block */
+
+    bool operator<( const File &rhs ) const
+    {
+      return fileDesc < rhs.fileDesc;
+    }
+
+    inline void clear()
+    {
+      fileDesc = -1;
+      pVolume  = nullptr;
+      memset( &fatfs_file_cb, 0, sizeof( fatfs_file_cb ) );
+    }
+  };
+
   /*---------------------------------------------------------------------------
   Static Data
   ---------------------------------------------------------------------------*/
   static Chimera::Thread::RecursiveMutex    s_lock;    /**< Module lock */
   static etl::vector<Volume *, MAX_VOLUMES> s_volumes; /**< Registered volumes */
+  static etl::vector<File, MAX_OPEN_FILES>  s_files;   /**< Currently open files */
 
 
   /*---------------------------------------------------------------------------
@@ -64,7 +92,7 @@ namespace Aurora::FileSystem::FatFs
   ---------------------------------------------------------------------------*/
 
   /**
-   * @brief Finds the LFS volume structure from an ID
+   * @brief Finds the volume structure from an ID
    *
    * @param id    Which ID is associated with the volume
    * @return Volume*
@@ -76,6 +104,25 @@ namespace Aurora::FileSystem::FatFs
       if ( iter->volumeID == id )
       {
         return iter;
+      }
+    }
+
+    return nullptr;
+  }
+
+  /**
+   * @brief Finds the file structure from an ID
+   *
+   * @param id    Which ID is associated with the file
+   * @return File*
+   */
+  static File *get_file( FileId stream )
+  {
+    for ( File &f : s_files )
+    {
+      if ( f.fileDesc == stream )
+      {
+        return &f;
       }
     }
 
@@ -165,56 +212,98 @@ namespace Aurora::FileSystem::FatFs
   {
     Chimera::Thread::LockGuard _lck( s_lock );
 
+    /*-------------------------------------------------------------------------
+    Input Protections
+    -------------------------------------------------------------------------*/
+    if ( s_files.full() )
+    {
+      return -1;
+    }
+
+    /*-------------------------------------------------------------------------
+    Nothing to do if the file already exists in the registry
+    -------------------------------------------------------------------------*/
+    File *file = get_file( stream );
+    if ( file )
+    {
+      return 0;
+    }
+
     Volume *volume = get_volume( vol );
     RT_DBG_ASSERT( volume );
 
     /*-------------------------------------------------------------------------
-    Translate the mode flags to the LFS flags
+    Translate the mode flags to the FatFs flags
     -------------------------------------------------------------------------*/
-    // int      flags    = 0;
-    // uint32_t access   = mode & O_ACCESS_MSK;
-    // uint32_t modifier = mode & O_MODIFY_MSK;
+    BYTE     flags    = 0;
+    uint32_t access   = mode & O_ACCESS_MSK;
+    uint32_t modifier = mode & O_MODIFY_MSK;
 
-    // switch ( access )
-    // {
-    //   case O_RDONLY:
-    //     flags = LFS_O_RDONLY;
-    //     break;
+    switch ( access )
+    {
+      case O_RDONLY:
+        flags = FA_READ;
+        break;
 
-    //   case O_WRONLY:
-    //     flags = LFS_O_WRONLY;
-    //     break;
+      case O_WRONLY:
+        flags = FA_WRITE;
+        break;
 
-    //   case O_RDWR:
-    //     flags = LFS_O_RDWR;
-    //     break;
+      case O_RDWR:
+        flags = FA_READ | FA_WRITE;
+        break;
 
-    //   default:
-    //     return -1;
-    // }
+      default:
+        return -1;
+    }
 
-    // if ( modifier & O_APPEND )
-    // {
-    //   flags |= LFS_O_APPEND;
-    // }
+    if ( modifier & O_APPEND )
+    {
+      flags |= FA_OPEN_APPEND;
+    }
 
-    // if ( modifier & O_CREAT )
-    // {
-    //   flags |= LFS_O_CREAT;
-    // }
+    if ( modifier & O_CREAT )
+    {
+      flags |= FA_CREATE_NEW;
+    }
 
-    // if ( modifier & O_EXCL )
-    // {
-    //   flags |= LFS_O_EXCL;
-    // }
+    if ( modifier & O_EXCL )
+    {
+      flags |= FA_OPEN_EXISTING;
+    }
 
-    // if ( modifier & O_TRUNC )
-    // {
-    //   flags |= LFS_O_TRUNC;
-    // }
+    if ( modifier & O_TRUNC )
+    {
+      flags |= FA_CREATE_ALWAYS;
+    }
 
+    /*-------------------------------------------------------------------------
+    Allocate a file in the local vector
+    -------------------------------------------------------------------------*/
+    /* Create the file on the stack with some basic information */
+    File new_file;
+    new_file.clear();
+    new_file.fileDesc = stream;
+    new_file.pVolume  = volume;
 
-    return -1;
+    /* Re-find the file in it's new (static) memory location*/
+    s_files.push_back( new_file );
+    etl::shell_sort( s_files.begin(), s_files.end() );
+    file = get_file( stream );
+    RT_DBG_ASSERT( file );
+
+    /*-------------------------------------------------------------------------
+    Open the new file. On failure, deallocate the file structure.
+    -------------------------------------------------------------------------*/
+    const FRESULT error = f_open( &file->fatfs_file_cb, filename, flags );
+    if ( error != FR_OK )
+    {
+      s_files.erase( file );
+      etl::shell_sort( s_files.begin(), s_files.end() );
+    }
+
+    LOG_TRACE_IF( error != FR_OK, "Open error: %s", get_error_str( error ).data() );
+    return ( error == FR_OK ) ? 0 : -1;
   }
 
 
@@ -222,47 +311,198 @@ namespace Aurora::FileSystem::FatFs
   {
     Chimera::Thread::LockGuard _lck( s_lock );
 
-    return -1;
+    /*-------------------------------------------------------------------------
+    Look up the file in the registry
+    -------------------------------------------------------------------------*/
+    File *file = get_file( stream );
+    if ( !file )
+    {
+      return 0;
+    }
+
+    /*-------------------------------------------------------------------------
+    Perform the FatFs operation
+    -------------------------------------------------------------------------*/
+    const FRESULT error = f_close( &file->fatfs_file_cb );
+    if ( error != FR_OK )
+    {
+      LOG_TRACE( "Close error: %s", get_error_str( error ).data() );
+      return -1;
+    }
+
+    /*-------------------------------------------------------------------------
+    Remove the file from the registry
+    -------------------------------------------------------------------------*/
+    s_files.erase( file );
+    etl::shell_sort( s_files.begin(), s_files.end() );
+    return 0;
   }
 
 
   static int fflush( FileId stream )
   {
+    /*-------------------------------------------------------------------------
+    Look up the file in the registry
+    -------------------------------------------------------------------------*/
+    File *file = get_file( stream );
+    if ( !file )
+    {
+      return 0;
+    }
+
+    /*-------------------------------------------------------------------------
+    Perform the FatFs operation
+    -------------------------------------------------------------------------*/
+    const FRESULT error = f_sync( &file->fatfs_file_cb );
+    LOG_TRACE_IF( error != FR_OK, "Sync error: %s", get_error_str( error ).data() );
     return -1;
   }
 
 
   static size_t fread( void *ptr, size_t size, size_t count, FileId stream )
   {
-    return -1;
+    /*-------------------------------------------------------------------------
+    Look up the file in the registry
+    -------------------------------------------------------------------------*/
+    File *file = get_file( stream );
+    if ( !file )
+    {
+      return 0;
+    }
+
+    /*-------------------------------------------------------------------------
+    Perform the FatFs operation
+    -------------------------------------------------------------------------*/
+    UINT          bytes_read = 0;
+    const FRESULT error      = f_read( &file->fatfs_file_cb, ptr, ( size * count ), &bytes_read );
+    if ( error != FR_OK )
+    {
+      LOG_TRACE( "Read error: %s", get_error_str( error ).data() );
+      return 0;
+    }
+
+    return static_cast<size_t>( bytes_read );
   }
 
 
   static size_t fwrite( const void *ptr, size_t size, size_t count, FileId stream )
   {
-    return -1;
+    /*-------------------------------------------------------------------------
+    Look up the file in the registry
+    -------------------------------------------------------------------------*/
+    File *file = get_file( stream );
+    if ( !file )
+    {
+      return 0;
+    }
+
+    /*-------------------------------------------------------------------------
+    Perform the FatFs operation
+    -------------------------------------------------------------------------*/
+    UINT          bytes_written = 0;
+    const FRESULT error         = f_write( &file->fatfs_file_cb, ptr, ( size * count ), &bytes_written );
+    if ( error != FR_OK )
+    {
+      LOG_TRACE( "Write error: %s", get_error_str( error ).data() );
+      return 0;
+    }
+
+    return static_cast<size_t>( bytes_written );
   }
 
 
   static int fseek( const FileId stream, const size_t offset, const WhenceFlags whence )
   {
-    return -1;
+    /*-------------------------------------------------------------------------
+    Gate the whence flags. FatFs only supports SEEK_SET.
+    -------------------------------------------------------------------------*/
+    if( whence != WhenceFlags::F_SEEK_SET )
+    {
+      return -1;
+    }
+
+    /*-------------------------------------------------------------------------
+    Look up the file in the registry
+    -------------------------------------------------------------------------*/
+    File *file = get_file( stream );
+    if ( !file )
+    {
+      return -1;
+    }
+
+    /*-------------------------------------------------------------------------
+    Perform the FatFs operation. This returns the new offset if successful, which
+    is a breaking change from the standard fseek. Override it.
+    -------------------------------------------------------------------------*/
+    FRESULT error = f_lseek( &file->fatfs_file_cb, offset );
+    LOG_TRACE_IF( error < 0, "Seek error: %s", get_error_str( error ).data() );
+    return ( error < 0 ) ? -1 : 0;
   }
 
 
   static size_t ftell( FileId stream )
   {
-    return -1;
+    /*-------------------------------------------------------------------------
+    Look up the file in the registry
+    -------------------------------------------------------------------------*/
+    File *file = get_file( stream );
+    if ( !file )
+    {
+      return 0;
+    }
+
+    /*-------------------------------------------------------------------------
+    Perform the FatFs operation
+    -------------------------------------------------------------------------*/
+    const FSIZE_t size = f_tell( &file->fatfs_file_cb );
+    if ( size >= 0 )
+    {
+      return static_cast<size_t>( size );
+    }
+
+    return 0;
   }
 
 
   static void frewind( FileId stream )
   {
+    /*-------------------------------------------------------------------------
+    Look up the file in the registry
+    -------------------------------------------------------------------------*/
+    File *file = get_file( stream );
+    if ( !file )
+    {
+      return;
+    }
+
+    /*-------------------------------------------------------------------------
+    Perform the FatFs operation
+    -------------------------------------------------------------------------*/
+    const FRESULT error = f_rewind( &file->fatfs_file_cb );
+    LOG_TRACE_IF( error != FR_OK, "Rewind error: %s", get_error_str( error ).data() );
   }
 
 
   static size_t fsize( const FileId stream )
   {
+    /*-------------------------------------------------------------------------
+    Look up the file in the registry
+    -------------------------------------------------------------------------*/
+    File *file = get_file( stream );
+    if ( !file )
+    {
+      return 0;
+    }
+
+    /*-------------------------------------------------------------------------
+    Perform the FatFs operation
+    -------------------------------------------------------------------------*/
+    FSIZE_t size = f_size( &file->fatfs_file_cb );
+    if ( size >= 0 )
+    {
+      return static_cast<size_t>( size );
+    }
+
     return 0;
   }
 
@@ -275,6 +515,7 @@ namespace Aurora::FileSystem::FatFs
   {
     s_lock.unlock();
     s_volumes.clear();
+    s_files.clear();
   }
 
 
@@ -513,12 +754,9 @@ extern "C" DRESULT disk_ioctl( BYTE pdrv, BYTE cmd, void *buff )
 {
   /*---------------------------------------------------------------------------
   Input Protection
+  Notes:
+    - buff can be null for some commands
   ---------------------------------------------------------------------------*/
-  if ( !buff )
-  {
-    return RES_PARERR;
-  }
-
   Volume *vol = get_volume( pdrv );
   if ( !vol )
   {
@@ -534,18 +772,24 @@ extern "C" DRESULT disk_ioctl( BYTE pdrv, BYTE cmd, void *buff )
       return RES_OK;
 
     case GET_SECTOR_COUNT: {
+      RT_DBG_ASSERT( buff );
+
       const DeviceAttr attr              = vol->device->getAttributes();
       *reinterpret_cast<LBA_t *>( buff ) = attr.blockCount;
       return RES_OK;
     }
 
     case GET_SECTOR_SIZE: {
+      RT_DBG_ASSERT( buff );
+
       const DeviceAttr attr             = vol->device->getAttributes();
       *reinterpret_cast<WORD *>( buff ) = attr.readSize;
       return RES_OK;
     }
 
     case GET_BLOCK_SIZE: {
+      RT_DBG_ASSERT( buff );
+
       const DeviceAttr attr              = vol->device->getAttributes();
       *reinterpret_cast<DWORD *>( buff ) = attr.eraseSize;
       return RES_OK;
