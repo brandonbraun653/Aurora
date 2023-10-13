@@ -581,6 +581,13 @@ namespace Aurora::FileSystem::FatFs
     }
 
     /*-------------------------------------------------------------------------
+    Configure the filesystem
+    -------------------------------------------------------------------------*/
+    // TODO: Need to set these parameters from the card attributes
+    // MKFS_PARM opt;
+    // memset( &opt, 0, sizeof( opt ) );
+
+    /*-------------------------------------------------------------------------
     Make the filesystem using defaults
     -------------------------------------------------------------------------*/
     uint8_t work[ FF_MAX_SS ];
