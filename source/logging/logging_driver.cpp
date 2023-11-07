@@ -303,7 +303,7 @@ namespace Aurora::Logging
     Chimera::Thread::LockGuard _lock( s_format_lock );
 
     memset( s_log_buffer, 0, LOG_BUF_SIZE );
-    npf_snprintf( s_log_buffer, LOG_BUF_SIZE, "[%lu][%s:%lu][%s] -- ",
+    npf_snprintf( s_log_buffer, LOG_BUF_SIZE, "%u | %s:%u | %s | ",
                   Chimera::millis(), file, line, str_level.data() );
 
     /*-------------------------------------------------------------------------
@@ -315,6 +315,38 @@ namespace Aurora::Logging
     va_start( argptr, fmt );
     npf_vsnprintf( s_log_buffer + offset, LOG_BUF_SIZE - offset, fmt, argptr );
     va_end( argptr );
+
+    /*-------------------------------------------------------------------------
+    Ensure the message terminates with a carriage return and newline
+    -------------------------------------------------------------------------*/
+    const size_t msg_len = strlen( s_log_buffer );
+
+    bool ends_with_crlf = false;
+    if( ( msg_len >= 2 ) && ( msg_len < LOG_BUF_SIZE ) )
+    {
+      if( s_log_buffer[ msg_len - 2 ] == '\r' && s_log_buffer[ msg_len - 1 ] == '\n' )
+      {
+        ends_with_crlf = true;
+      }
+      else if( s_log_buffer[ msg_len - 2 ] == '\n' && s_log_buffer[ msg_len - 1 ] == '\r' )
+      {
+        ends_with_crlf = true;
+      }
+    }
+
+    if( !ends_with_crlf )
+    {
+      if ( msg_len < LOG_BUF_SIZE - 2 )
+      {
+        s_log_buffer[ msg_len ]     = '\r';
+        s_log_buffer[ msg_len + 1 ] = '\n';
+      }
+      else
+      {
+        s_log_buffer[ LOG_BUF_SIZE - 2 ] = '\r';
+        s_log_buffer[ LOG_BUF_SIZE - 1 ] = '\n';
+      }
+    }
 
     /*-------------------------------------------------------------------------
     Log through the standard method
