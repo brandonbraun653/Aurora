@@ -288,7 +288,7 @@ namespace Aurora::FileSystem::FatFs
 
     /* Re-find the file in it's new (static) memory location*/
     s_files.push_back( new_file );
-    etl::shell_sort( s_files.begin(), s_files.end() );
+    etl::shell_sort( s_files.begin(), s_files.end(), etl::less<>() );
     file = get_file( stream );
     RT_DBG_ASSERT( file );
 
@@ -299,7 +299,7 @@ namespace Aurora::FileSystem::FatFs
     if ( error != FR_OK )
     {
       s_files.erase( file );
-      etl::shell_sort( s_files.begin(), s_files.end() );
+      etl::shell_sort( s_files.begin(), s_files.end(), etl::less<>() );
     }
 
     LOG_TRACE_IF( error != FR_OK, "Open error: %s", get_error_str( error ).data() );
@@ -334,7 +334,7 @@ namespace Aurora::FileSystem::FatFs
     Remove the file from the registry
     -------------------------------------------------------------------------*/
     s_files.erase( file );
-    etl::shell_sort( s_files.begin(), s_files.end() );
+    etl::shell_sort( s_files.begin(), s_files.end(), etl::less<>() );
     return 0;
   }
 
