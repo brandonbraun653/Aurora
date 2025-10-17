@@ -19,6 +19,9 @@ add_library(ctre_inc INTERFACE)
 target_include_directories(ctre_inc INTERFACE "lib/ctre/single-header")
 export(TARGETS ctre_inc FILE "${PROJECT_BINARY_DIR}/Aurora/lib/ctre_inc.cmake")
 
+add_library(project_intf_inc INTERFACE)
+export(TARGETS project_intf_inc FILE "${PROJECT_BINARY_DIR}/Aurora/lib/project_intf_inc.cmake")
+
 # ====================================================
 # Subproject Imports
 # ====================================================
