@@ -82,7 +82,7 @@ namespace Aurora::Logging
     /*-------------------------------------------------------------------------
     Make sure we can actually log the data
     -------------------------------------------------------------------------*/
-    if( mSerial == nullptr )
+    if ( mSerial == nullptr )
     {
       return Result::RESULT_FAIL_BAD_SINK;
     }
@@ -95,7 +95,7 @@ namespace Aurora::Logging
     /*-------------------------------------------------------------------------
     Write the data and block the current thread execution until complete.
     -------------------------------------------------------------------------*/
-    if ( mSerial->write( message, length, TIMEOUT_BLOCK ) == Chimera::Status::OK )
+    if ( mSerial->write( message, length, TIMEOUT_BLOCK ) >= 0 )
     {
       return Result::RESULT_SUCCESS;
     }
