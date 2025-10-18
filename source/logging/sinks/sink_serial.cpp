@@ -24,6 +24,7 @@ namespace Aurora::Logging
   ---------------------------------------------------------------------------*/
   SerialSink::SerialSink( Chimera::Serial::Channel channel ) : SinkInterface(), mSerial( nullptr )
   {
+    (void)channel;
   }
 
 

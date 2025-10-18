@@ -19,21 +19,26 @@
 Create the __SHORT_FILE__ macro, which returns just the file name instead of the
 whole path from __FILE__ https://blog.galowicz.de/2016/02/20/short_file_macro/
 -------------------------------------------------------------------------------*/
-using cstr = const char *const;
-static constexpr cstr past_last_slash( cstr str, cstr last_slash )
+namespace Aurora::Logging::detail
 {
-  return *str == '\0' ? last_slash : *str == '/' ? past_last_slash( str + 1, str + 1 ) : past_last_slash( str + 1, last_slash );
-}
+  using cstr = const char *;
 
-static constexpr cstr past_last_slash( cstr str )
-{
-  return past_last_slash( str, str );
-}
-#define __SHORT_FILE__                                  \
-  ( {                                                   \
-    constexpr cstr sf__{ past_last_slash( __FILE__ ) }; \
-    sf__;                                               \
-  } )
+  constexpr cstr short_file_name( cstr path ) noexcept
+  {
+    cstr filename = path;
+    for ( cstr current = path; *current != '\0'; ++current )
+    {
+      if ( ( *current == '/' ) || ( *current == '\\' ) )
+      {
+        filename = current + 1;
+      }
+    }
+
+    return filename;
+  }
+}  // namespace Aurora::Logging::detail
+
+#define __SHORT_FILE__ ::Aurora::Logging::detail::short_file_name( __FILE__ )
 
 /*-------------------------------------------------------------------------------
 Logging helper macros

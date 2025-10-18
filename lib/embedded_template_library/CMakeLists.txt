@@ -12,4 +12,4 @@ set(LINK_LIBS
 set(LIB etl_inc)
 add_library(${LIB} INTERFACE)
 target_include_directories(${LIB} INTERFACE "./etl/include")
-export(TARGETS ${LIB} FILE "${PROJECT_BINARY_DIR}/EmbeddedTemplateLibrary/etl-inc.cmake")
+export(TARGETS ${LIB} FILE "${PROJECT_BINARY_DIR}/EmbeddedTemplateLibrary/etl-inc.cmake") 

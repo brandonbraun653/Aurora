@@ -16,7 +16,6 @@ Includes
 #include <cstdint>
 #include <cstdio>
 #include <limits>
-#include <string>
 #include <Chimera/system>
 #include <Chimera/thread>
 #include <Aurora/logging>
@@ -79,6 +78,7 @@ namespace Aurora::Logging
 
   Result registerSink( SinkHandle_rPtr &sink, const Config options )
   {
+    (void)options;
     constexpr size_t invalidIndex = std::numeric_limits<size_t>::max();
 
     Chimera::Thread::TimedLockGuard x( threadLock );
@@ -303,8 +303,11 @@ namespace Aurora::Logging
     Chimera::Thread::LockGuard _lock( s_format_lock );
 
     memset( s_log_buffer, 0, LOG_BUF_SIZE );
-    npf_snprintf( s_log_buffer, LOG_BUF_SIZE, "%u | %s:%u | %s | ",
-                  Chimera::millis(), file, line, str_level.data() );
+    npf_snprintf( s_log_buffer, LOG_BUF_SIZE, "%lu | %s:%zu | %s | ",
+                  static_cast<unsigned long>( Chimera::millis() ),
+                  file,
+                  static_cast<size_t>( line ),
+                  str_level.data() );
 
     /*-------------------------------------------------------------------------
     Format the user message

@@ -71,7 +71,7 @@ namespace Aurora::Logging
     Simply assign the data as a string, then write it.
     -------------------------------------------------------------------------*/
     std::string coutBuffer;
-    coutBuffer.assign( reinterpret_cast<const char *const>( message ), length );
+    coutBuffer.assign( reinterpret_cast<const char *>( message ), length );
     std::cout << coutBuffer << std::flush;
 
     return Result::RESULT_SUCCESS;

@@ -34,7 +34,7 @@ namespace Aurora::Logging
 
   void FileSink::setFile( const std::string_view &file )
   {
-
+    (void)file;
   }
 
 
