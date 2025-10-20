@@ -5,6 +5,8 @@ gen_intf_lib(
     fatfs_intf_inc
   INTF_INCLUDES
     "./v0.15"
+  INTF_LIBRARIES
+    project_intf_inc
   EXPORT_DIR
     "${PROJECT_BINARY_DIR}/Aurora/FatFS"
 )
@@ -20,6 +22,7 @@ gen_static_lib_variants(
     aurora_intf_inc
     chimera_intf_inc
     fatfs_intf_inc
+    project_intf_inc
   EXPORT_DIR
     "${PROJECT_BINARY_DIR}/Aurora/FatFS"
 )
