@@ -59,7 +59,7 @@ namespace Aurora::Logging
   {
     Chimera::Thread::LockGuard x( threadLock );
 
-    if ( !uLogInitialized )
+    if( !uLogInitialized )
     {
       sinkRegistry.fill( nullptr );
       uLogInitialized = true;
@@ -78,7 +78,7 @@ namespace Aurora::Logging
 
   Result registerSink( SinkHandle_rPtr &sink, const Config options )
   {
-    (void)options;
+    ( void )options;
     constexpr size_t invalidIndex = std::numeric_limits<size_t>::max();
 
     Chimera::Thread::TimedLockGuard x( threadLock );
@@ -87,23 +87,23 @@ namespace Aurora::Logging
     bool                            registryIsFull   = true;  /* Is the registry full of sinks? */
     auto                            result           = Result::RESULT_SUCCESS; /* Function return code */
 
-    if ( x.try_lock_for( defaultLockTimeout ) )
+    if( x.try_lock_for( defaultLockTimeout ) )
     {
       /*-----------------------------------------------------------------------
       Check if the sink already is registered as well as
       an empty slot to insert the new sink.
       -----------------------------------------------------------------------*/
-      for ( size_t i = 0; i < sinkRegistry.size(); i++ )
+      for( size_t i = 0; i < sinkRegistry.size(); i++ )
       {
         /* Did we find the first location that is free? */
-        if ( ( nullIndex == invalidIndex ) && ( sinkRegistry[ i ] == nullptr ) )
+        if( ( nullIndex == invalidIndex ) && ( sinkRegistry[ i ] == nullptr ) )
         {
           nullIndex      = i;
           registryIsFull = false;
         }
 
         /* Does the sink already exist in the registry? */
-        if ( sinkRegistry[ i ] == sink )
+        if( sinkRegistry[ i ] == sink )
         {
           sinkIsRegistered = true;
           registryIsFull   = false;
@@ -115,13 +115,13 @@ namespace Aurora::Logging
       /*-----------------------------------------------------------------------
       Perform the registration
       -----------------------------------------------------------------------*/
-      if ( !sinkIsRegistered )
+      if( !sinkIsRegistered )
       {
-        if ( registryIsFull )
+        if( registryIsFull )
         {
           result = Result::RESULT_FULL;
         }
-        else if ( sink->open() != Result::RESULT_SUCCESS )
+        else if( sink->open() != Result::RESULT_SUCCESS )
         {
           result = Result::RESULT_FAIL;
         }
@@ -141,20 +141,20 @@ namespace Aurora::Logging
     Result                          result = Result::RESULT_LOCKED;
     Chimera::Thread::TimedLockGuard x( threadLock );
 
-    if ( x.try_lock_for( defaultLockTimeout ) )
+    if( x.try_lock_for( defaultLockTimeout ) )
     {
       auto index = getSinkOffsetIndex( sink );
-      if ( index < sinkRegistry.size() )
+      if( index < sinkRegistry.size() )
       {
         sinkRegistry[ index ]->close();
         sinkRegistry[ index ] = nullptr;
         result                = Result::RESULT_SUCCESS;
       }
-      else if ( sink == nullptr )
+      else if( sink == nullptr )
       {
-        for ( size_t i = 0; i < sinkRegistry.size(); i++ )
+        for( size_t i = 0; i < sinkRegistry.size(); i++ )
         {
-          if ( sinkRegistry[ i ] )
+          if( sinkRegistry[ i ] )
           {
             sinkRegistry[ i ]->close();
             sinkRegistry[ i ] = nullptr;
@@ -174,7 +174,7 @@ namespace Aurora::Logging
     Result                          result = Result::RESULT_LOCKED;
     Chimera::Thread::TimedLockGuard x( threadLock );
 
-    if ( x.try_lock_for( defaultLockTimeout ) )
+    if( x.try_lock_for( defaultLockTimeout ) )
     {
       globalRootSink = sink;
       result         = Result::RESULT_SUCCESS;
@@ -202,7 +202,7 @@ namespace Aurora::Logging
     std::uintptr_t secondAddress = reinterpret_cast<std::uintptr_t>( &sinkRegistry[ 1 ] );
     size_t         elementSize   = secondAddress - beginAddress;
 
-    if ( ( sinkHandle == nullptr ) || ( beginAddress > offsetAddress ) || !elementSize )
+    if( ( sinkHandle == nullptr ) || ( beginAddress > offsetAddress ) || !elementSize )
     {
       return std::numeric_limits<size_t>::max();
     }
@@ -212,7 +212,7 @@ namespace Aurora::Logging
     -------------------------------------------------------------------------*/
     size_t index = ( offsetAddress - beginAddress ) / elementSize;
 
-    if ( index > sinkRegistry.size() )
+    if( index > sinkRegistry.size() )
     {
       index = std::numeric_limits<size_t>::max();
     }
@@ -227,22 +227,22 @@ namespace Aurora::Logging
     Input boundary checking
     -------------------------------------------------------------------------*/
     Chimera::Thread::TimedLockGuard x( threadLock );
-    if ( !x.try_lock_for( defaultLockTimeout ) )
+    if( !x.try_lock_for( defaultLockTimeout ) )
     {
       return Result::RESULT_LOCKED;
     }
-    else if ( ( level < globalLogLevel ) || !message || !length )
+    else if( ( level < globalLogLevel ) || !message || !length )
     {
       return Result::RESULT_FAIL;
     }
 
     /*-------------------------------------------------------------------------
-    Process the message through each sink. At the moment
-    we won't concern ourselves if a sink failed to log.
+    Process the message through each sink. At the moment we won't concern
+    ourselves if a sink failed to log.
     -------------------------------------------------------------------------*/
-    for ( size_t i = 0; i < sinkRegistry.size(); i++ )
+    for( size_t i = 0; i < sinkRegistry.size(); i++ )
     {
-      if ( sinkRegistry[ i ] && ( sinkRegistry[ i ]->logLevel >= globalLogLevel ) )
+      if( sinkRegistry[ i ] && ( level >= sinkRegistry[ i ]->logLevel ) )
       {
         sinkRegistry[ i ]->log( level, message, length );
       }
@@ -257,7 +257,7 @@ namespace Aurora::Logging
     /*-------------------------------------------------------------------------
     Input boundary checking
     -------------------------------------------------------------------------*/
-    if ( ( lvl < globalLogLevel ) || !file || !fmt )
+    if( ( lvl < globalLogLevel ) || !file || !fmt )
     {
       return Result::RESULT_FAIL;
     }
@@ -266,7 +266,7 @@ namespace Aurora::Logging
     Create the logging level
     -------------------------------------------------------------------------*/
     std::string_view str_level = "";
-    switch ( lvl )
+    switch( lvl )
     {
       case Level::LVL_TRACE:
         str_level = "TRACE";
@@ -303,11 +303,8 @@ namespace Aurora::Logging
     Chimera::Thread::LockGuard _lock( s_format_lock );
 
     memset( s_log_buffer, 0, LOG_BUF_SIZE );
-    npf_snprintf( s_log_buffer, LOG_BUF_SIZE, "%lu | %s:%zu | %s | ",
-                  static_cast<unsigned long>( Chimera::millis() ),
-                  file,
-                  static_cast<size_t>( line ),
-                  str_level.data() );
+    npf_snprintf( s_log_buffer, LOG_BUF_SIZE, "%lu | %s:%zu | %s | ", static_cast<unsigned long>( Chimera::millis() ), file,
+                  static_cast<size_t>( line ), str_level.data() );
 
     /*-------------------------------------------------------------------------
     Format the user message
@@ -339,7 +336,7 @@ namespace Aurora::Logging
 
     if( !ends_with_crlf )
     {
-      if ( msg_len < LOG_BUF_SIZE - 2 )
+      if( msg_len < LOG_BUF_SIZE - 2 )
       {
         s_log_buffer[ msg_len ]     = '\r';
         s_log_buffer[ msg_len + 1 ] = '\n';
